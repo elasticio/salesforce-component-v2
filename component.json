@@ -1,0 +1,465 @@
+{
+  "title": "Salesforce v2",
+  "description": "Customer relationship management (CRM) software & cloud computing from the leader in CRM solutions for businesses large & small.",
+  "docsUrl": "https://github.com/elasticio/salesforce-component-v2",
+  "url": "http://www.salesforce.com/",
+  "buildType": "docker",
+  "authClientTypes": ["oauth2"],
+  "envVars": {
+    "SALESFORCE_API_VERSION": {
+      "required": true,
+      "description": "Salesforce API version. Default 46.0"
+    },
+    "HASH_LIMIT_TIME": {
+      "required": false,
+      "description": "Hash expiration time in millis"
+    },
+    "HASH_LIMIT_ELEMENTS": {
+      "required": false,
+      "description": "Hash size number limit"
+    }
+  },
+  "credentials": {
+    "fields": {
+      "oauth": {
+        "label": "Authentication",
+        "viewClass": "OAuthFieldView",
+        "required": true
+      }
+    }
+  },
+  "triggers": {
+    "entry": {
+      "title": "Get New and Updated Objects Polling",
+      "main": "./lib/entry.js",
+      "order": 99,
+      "help" : {
+        "description": "Will poll for existing and updated objects where you can select any custom or build-in object for your Salesforce instance",
+        "link": "/components/salesforce/triggers#get-new-and-updated-objects-polling-trigger"
+      },
+      "type": "polling",
+      "dynamicMetadata": true,
+      "fields": {
+        "object": {
+          "viewClass": "SelectView",
+          "label": "Object",
+          "required": true,
+          "model": "objectTypes",
+          "prompt": "Please select a Salesforce Object"
+        },
+        "startTime": {
+          "viewClass": "TextFieldView",
+          "label": "Start Time",
+          "required": false,
+          "placeholder": "1970-01-01T00:00:00.000Z",
+          "note": "Indicates the beginning time to start polling from, default 1970-01-01T00:00:00.000Z"
+        },
+        "endTime": {
+          "viewClass": "TextFieldView",
+          "label": "End Time",
+          "required": false,
+          "placeholder": "3000-01-01T00:00:00.000Z",
+          "note": "If provided, do not fetch records modified after this time (defaults to never)"
+        },
+        "sizeOfPollingPage": {
+          "label": "Size of Polling Page",
+          "viewClass": "TextFieldView",
+          "required": false,
+          "placeholder": "1000",
+          "note": "Please set the size of pages to be fetched (defaults to 1000). Please enter positive integer only, max 10000 objects"
+        },
+        "singlePagePerInterval": {
+          "label": "Process single page per execution",
+          "viewClass": "SelectView",
+          "required": false,
+          "model": {
+            "yes": "yes",
+            "no": "no"
+          },
+          "prompt": "Process single page per execution:"
+        },
+        "linkedObjects": {
+          "label": "Include linked objects",
+          "viewClass": "MultiSelectView",
+          "required": false,
+          "model": "linkedObjectTypes",
+          "prompt": "Please select any linked objects that should be included in the query"
+        },
+        "outputMethod": {
+          "viewClass": "SelectView",
+          "label": "Output method",
+          "required": false,
+          "model": {
+            "emitAll": "Emit all",
+            "emitIndividually": "Emit individually"
+          },
+          "prompt": "Please select an output method. Defaults to: Emit individually"
+        },
+        "maxFetch": {
+          "label": "Max Fetch Count",
+          "required": false,
+          "viewClass": "TextFieldView",
+          "placeholder": "1000",
+          "note": "Limit for a number of messages that can be fetched, 1,000 by default"
+        }
+      }
+    },
+    "queryTrigger": {
+      "title": "Query",
+      "main": "./lib/triggers/query.js",
+      "type": "polling",
+      "order": 98,
+      "help" : {
+        "description": "Will continuously run the same SOQL Query and emit results",
+        "link": "/components/salesforce/triggers#query-trigger"
+      },
+      "metadata": {
+        "out": {}
+      },
+      "fields": {
+        "query": {
+          "label": "SOQL Query",
+          "required": true,
+          "viewClass": "TextAreaView"
+        },
+        "outputMethod": {
+          "viewClass": "SelectView",
+          "label": "Output method",
+          "required": false,
+          "model": {
+            "emitAll": "Emit all",
+            "emitIndividually": "Emit individually"
+          },
+          "prompt": "Please select an output method. Defaults to: Emit individually"
+        }
+      }
+    },
+    "streamPlatformEvents": {
+      "title": "Subscribe to platform events (REALTIME FLOWS ONLY)",
+      "order": 97,
+      "help" : {
+        "description": "Can be used for subscription to the specified in the configuration Platform Event object. Can be used only for Realtime flows",
+        "link": "/components/salesforce/triggers#subscribe-to-platform-events-trigger"
+      },
+      "main": "./lib/triggers/streamPlatformEvents.js",
+      "type": "polling",
+      "fields": {
+        "object": {
+          "viewClass": "SelectView",
+          "label": "Event object name",
+          "required": true,
+          "model": "objectTypes",
+          "prompt": "Please select a Event object"
+        }
+      }
+    }
+  },
+  "actions": {
+    "bulk_cud": {
+      "title": "Bulk Create/Update/Delete/Upsert",
+      "main": "./lib/actions/bulk_cud.js",
+      "order": 99,
+      "help" : {
+        "description": "Bulk operations on objects in CSV file",
+        "link": "/components/salesforce/actions#bulk-createupdatedeleteupsert-action"
+      },
+      "fields": {
+        "operation": {
+          "viewClass": "SelectView",
+          "label": "Operation",
+          "required": true,
+          "model":  {
+            "insert": "Create",
+            "update": "Update",
+            "delete": "Delete",
+            "upsert": "Upsert"
+          },
+          "prompt": "Please select an operation"
+        },
+        "sobject": {
+          "viewClass": "SelectView",
+          "label": "Object",
+          "required": true,
+          "require": ["operation"],
+          "model": "objectTypes",
+          "prompt": "Please select a Salesforce Object"
+        },
+        "timeout": {
+          "viewClass": "TextFieldView",
+          "label": "Timeout for operation (sec)",
+          "required": true,
+          "note": "A positive integer specifying timeout in seconds. Maximum Salesforce's server timeout for the bulk operations is 10 min (600 sec).",
+          "placeholder": "600"
+        }
+      },
+      "dynamicMetadata": true
+    },
+    "bulk_q": {
+      "title": "Bulk Query",
+      "main": "./lib/actions/bulk_q.js",
+      "order": 98,
+      "help" : {
+        "description": "Bulk query with the results in CSV file",
+        "link": "/components/salesforce/actions#bulk-query-action"
+      },
+      "metadata": {
+        "in": "./lib/schemas/bulk_q.in.json",
+        "out": "./lib/schemas/bulk_q.out.json"
+      }
+    },
+    "create": {
+      "title": "Create Object",
+      "main": "./lib/actions/createObject.js",
+      "order": 97,
+      "help" : {
+        "description": "Creates new Selected Object",
+        "link": "/components/salesforce/actions#create-object-action"
+      },
+      "dynamicMetadata": true,
+      "fields": {
+        "sobject": {
+          "viewClass": "SelectView",
+          "label": "Object",
+          "required": true,
+          "model": "objectTypes",
+          "prompt": "Please select a Salesforce Object"
+        },
+        "utilizeAttachment": {
+          "viewClass": "CheckBoxView",
+          "label": "Utilize data attachment from previous step (for objects with a binary field)"
+        }
+      }
+    },
+    "delete": {
+      "title": "Delete Object (at most 1)",
+      "main": "./lib/actions/deleteObject.js",
+      "order": 96,
+      "help" : {
+        "description": "Delete Selected Object",
+        "link": "/components/salesforce/actions#delete-object-action-at-most-1"
+      },
+      "dynamicMetadata": true,
+      "fields": {
+        "sobject": {
+          "viewClass": "SelectView",
+          "label": "Object",
+          "required": true,
+          "model": "objectTypes",
+          "prompt": "Please select a Salesforce Object"
+        },
+        "typeOfSearch": {
+          "viewClass": "SelectView",
+          "label": "Type Of Search",
+          "required": false,
+          "model": {
+            "uniqueFields": "Unique Fields",
+            "allFields": "All Fields"
+          },
+          "prompt": "Please select a type of search. By default - All Fields"
+        },
+        "lookupField": {
+          "viewClass": "SelectView",
+          "label": "Lookup by field",
+          "required": false,
+          "model": "getLookupFieldsModel",
+          "prompt": "Please select the field which you want to use for lookup. By default - Object ID"
+        }
+      }
+    },
+    "lookupObject": {
+      "title": "Lookup Object (at most 1)",
+      "main": "./lib/actions/lookupObject.js",
+      "order": 95,
+      "help" : {
+        "description": "Lookup object (at most 1) by selected field",
+        "link": "/components/salesforce/actions#lookup-object-action-at-most-1"
+      },
+      "dynamicMetadata": true,
+      "fields": {
+        "sobject": {
+          "viewClass": "SelectView",
+          "label": "Object",
+          "required": true,
+          "model": "objectTypes",
+          "prompt": "Please select a Salesforce Object",
+          "order": 8
+        },
+        "typeOfSearch": {
+          "viewClass": "SelectView",
+          "label": "Type Of Search",
+          "required": true,
+          "model": {
+            "uniqueFields": "Unique Fields",
+            "allFields": "All Fields"
+          },
+          "prompt": "Please select a type of search",
+          "order": 7
+        },
+        "lookupField": {
+          "viewClass": "SelectView",
+          "label": "Lookup by field",
+          "required": true,
+          "model": "getLookupFieldsModel",
+          "prompt": "Please select the field which you want to use for lookup",
+          "order": 6
+        },
+        "linkedObjects": {
+          "viewClass": "MultiSelectView",
+          "label": "Include referenced objects",
+          "model": "getLinkedObjectsModel",
+          "order": 5,
+          "prompt": "Please select the related objects you want included in your lookup"
+        },
+        "allowCriteriaToBeOmitted": {
+          "viewClass": "CheckBoxView",
+          "label": "Allow criteria to be omitted",
+          "order": 4
+        },
+        "allowZeroResults": {
+          "viewClass": "CheckBoxView",
+          "label": "Allow zero results",
+          "order": 3
+        },
+        "passBinaryData": {
+          "viewClass": "CheckBoxView",
+          "label": "Pass binary data to the next component (if found object has it)",
+          "order": 2
+        },
+        "enableCacheUsage": {
+          "viewClass": "CheckBoxView",
+          "label": "Enable Cache Usage",
+          "order": 1
+        }
+      }
+    },
+    "lookupObjects": {
+      "title": "Lookup Objects",
+      "main": "./lib/actions/lookupObjects.js",
+      "order": 94,
+      "help" : {
+        "description": "Look for objects satisfying specified criteria",
+        "link": "/components/salesforce/actions#lookup-objects-action"
+      },
+      "dynamicMetadata": true,
+      "fields": {
+        "sobject": {
+          "viewClass": "SelectView",
+          "label": "Object",
+          "required": true,
+          "model": "objectTypes",
+          "prompt": "Please select a Salesforce Object"
+        },
+        "includeDeleted": {
+          "viewClass": "CheckBoxView",
+          "label": "Include deleted"
+        },
+        "outputMethod": {
+          "viewClass": "SelectView",
+          "label": "Output method",
+          "required": true,
+          "model": {
+            "emitAll": "Emit all",
+            "emitPage": "Emit page",
+            "emitIndividually": "Emit individually"
+          },
+          "prompt": "Please select an output method"
+        },
+        "termNumber": {
+          "viewClass": "TextFieldView",
+          "label": "Number of search terms",
+          "required": true,
+          "placeholder": "Please specify a number of search terms",
+          "note": "Enter a positive integer number [1-99] or 0 to lookup all entities of chosen type"
+        },
+        "enableCacheUsage": {
+          "viewClass": "CheckBoxView",
+          "label": "Enable Cache Usage"
+        },
+        "maxFetch": {
+          "label": "Max Fetch Count",
+          "required": false,
+          "viewClass": "TextFieldView",
+          "placeholder": "1000",
+          "note": "Limit for a number of messages that can be fetched, 1,000 by default"
+        }
+      }
+    },
+    "queryAction": {
+      "title": "Query",
+      "main": "./lib/actions/query.js",
+      "order": 93,
+      "help" : {
+        "description": "Executing an SOQL Query that may return many objects. Each resulting object is emitted one-by-one",
+        "link": "/components/salesforce/actions#query-action"
+      },
+      "fields": {
+        "batchSize": {
+          "viewClass": "TextFieldView",
+          "label": "Optional batch size",
+          "required": false,
+          "note": "A positive integer specifying batch size. If no batch size is specified then results of the query will be emitted one-by-one, otherwise query results will be emitted in array of maximum batch size.",
+          "placeholder": "0"
+        },
+        "allowResultAsSet": {
+          "label": "Allow all results to be returned in a set (overwrites 'Optional batch size feature')",
+          "viewClass": "CheckBoxView"
+        },
+        "includeDeleted": {
+          "viewClass": "CheckBoxView",
+          "label": "Include deleted"
+        },
+        "maxFetch": {
+          "label": "Max Fetch Count",
+          "required": false,
+          "viewClass": "TextFieldView",
+          "placeholder": "1000",
+          "note": "Limit for a number of messages that can be fetched, 1,000 by default, up to 2000"
+        }
+      },
+      "metadata": {
+        "in": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "maxLength": 20000,
+              "title": "SOQL Query",
+              "type": "string",
+              "required": true
+            }
+          }
+        },
+        "out": {}
+      }
+    },
+    "upsert": {
+      "title": "Upsert Object",
+      "main": "./lib/actions/upsert.js",
+      "order": 92,
+      "help" : {
+        "description": "Create or Update Selected Object",
+        "link": "/components/salesforce/actions#upsert-object-action"
+      },
+      "dynamicMetadata": true,
+      "fields": {
+        "sobject": {
+          "viewClass": "SelectView",
+          "label": "Object",
+          "required": true,
+          "model": "objectTypes",
+          "prompt": "Please select a Salesforce Object"
+        },
+        "extIdField": {
+          "viewClass": "TextFieldView",
+          "label": "Optional Upsert field",
+          "required": false,
+          "note": "Please make sure selected SObject has this field and it is marked as 'External ID'",
+          "placeholder": "extID__c"
+        },
+        "utilizeAttachment": {
+          "viewClass": "CheckBoxView",
+          "label": "Utilize data attachment from previous step (for objects with a binary field)"
+        }
+      }
+    }
+  }
+}
