@@ -11,7 +11,7 @@ const metaModelDocumentReply = require('../testData/sfDocumentMetadata.json');
 
 const configuration = {
   secretId: testCommon.secretId,
-  object: 'Document',
+  sobject: 'Document',
 };
 const message = {
   body: {},
@@ -70,5 +70,16 @@ describe('Polling trigger test', () => {
     expect(emitter.emit.withArgs('data').callCount).to.be.equal(0);
     expect(emitter.emit.withArgs('snapshot').callCount).to.be.equal(0);
     scope.done();
+  });
+
+  it('should success generate metadata', async () => {
+    const result = await polling.getMetaModel.call(emitter, configuration);
+    expect(result.in.properties).to.deep.equal({});
+    expect(result.out.properties.Id).to.deep.equal({
+      default: null,
+      required: false,
+      title: 'Document ID',
+      type: 'string',
+    });
   });
 });
