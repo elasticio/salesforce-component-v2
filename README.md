@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/elasticio/salesforce-component.svg)](https://circleci.com/gh/elasticio/salesforce-component)
+[![CircleCI](https://circleci.com/gh/elasticio/salesforce-component-v2.svg?style=svg&circle-token=4407ac16eb7e472a4533a176ca180c2c89d41777)](https://circleci.com/gh/elasticio/salesforce-component)
 # Salesforce Component
 ## Table of Contents
 
