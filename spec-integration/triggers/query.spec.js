@@ -57,10 +57,7 @@ describe('queryTrigger', () => {
       ...configuration,
       query,
     };
-    await expect(queryTrigger.process.call(emitter, message, cfg, snapshot)).be.rejectedWith('\n'
-      + 'SELECT Id FROM Contact123\n'
-      + '               ^\n'
-      + 'ERROR at Row:1:Column:16\n'
+    await expect(queryTrigger.process.call(emitter, message, cfg, snapshot)).be.rejectedWith('^ ERROR at Row:1:Column:16 '
       + 'sObject type \'Contact123\' is not supported. '
       + 'If you are attempting to use a custom object, be sure to append the \'__c\' after the entity name. '
       + 'Please reference your WSDL or the describe call for the appropriate names.');
