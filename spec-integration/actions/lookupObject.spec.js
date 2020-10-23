@@ -29,13 +29,13 @@ describe('lookupObject', () => {
     configuration = {
       apiVersion: '45.0',
       oauth: {
-        instance_url: 'https://na38.salesforce.com',
+        undefined_params: {
+          instance_url: process.env.INSTANCE_URL,
+        },
         refresh_token: process.env.REFRESH_TOKEN,
         access_token: process.env.ACCESS_TOKEN,
       },
-      prodEnv: 'login',
       sobject: 'Contact',
-      _account: '5be195b7c99b61001068e1d0',
       lookupField: 'Id',
       typeOfSearch: 'uniqueFields',
     };
