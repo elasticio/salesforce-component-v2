@@ -301,7 +301,7 @@
           "viewClass": "SelectView",
           "label": "Lookup by field",
           "required": true,
-          "require": ["sobject"],
+          "require": ["sobject", "typeOfSearch"],
           "model": "getLookupFieldsModel",
           "prompt": "Please select the field which you want to use for lookup",
           "order": 6
