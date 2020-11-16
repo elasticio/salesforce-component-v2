@@ -47,6 +47,14 @@
           "model": "objectTypes",
           "prompt": "Please select a Salesforce Object"
         },
+        "linkedObjects": {
+          "label": "Include linked objects",
+          "viewClass": "MultiSelectView",
+          "required": false,
+          "require": ["sobject"],
+          "model": "linkedObjectTypes",
+          "prompt": "Please select any linked objects that should be included in the query"
+        },
         "startTime": {
           "viewClass": "TextFieldView",
           "label": "Start Time",
@@ -77,14 +85,6 @@
             "no": "no"
           },
           "prompt": "Process single page per execution:"
-        },
-        "linkedObjects": {
-          "label": "Include linked objects",
-          "viewClass": "MultiSelectView",
-          "required": false,
-          "require": ["sobject"],
-          "model": "linkedObjectTypes",
-          "prompt": "Please select any linked objects that should be included in the query"
         },
         "outputMethod": {
           "viewClass": "SelectView",
