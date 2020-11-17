@@ -47,6 +47,14 @@
           "model": "objectTypes",
           "prompt": "Please select a Salesforce Object"
         },
+        "linkedObjects": {
+          "label": "Include linked objects",
+          "viewClass": "MultiSelectView",
+          "required": false,
+          "require": ["sobject"],
+          "model": "linkedObjectTypes",
+          "prompt": "Please select any linked objects that should be included in the query"
+        },
         "startTime": {
           "viewClass": "TextFieldView",
           "label": "Start Time",
@@ -77,14 +85,6 @@
             "no": "no"
           },
           "prompt": "Process single page per execution:"
-        },
-        "linkedObjects": {
-          "label": "Include linked objects",
-          "viewClass": "MultiSelectView",
-          "required": false,
-          "require": ["sobject"],
-          "model": "linkedObjectTypes",
-          "prompt": "Please select any linked objects that should be included in the query"
         },
         "outputMethod": {
           "viewClass": "SelectView",
@@ -262,6 +262,7 @@
           "viewClass": "SelectView",
           "label": "Lookup by field",
           "required": false,
+          "require": ["sobject"],
           "model": "getLookupFieldsModel",
           "prompt": "Please select the field which you want to use for lookup. By default - Object ID"
         }
@@ -300,12 +301,14 @@
           "viewClass": "SelectView",
           "label": "Lookup by field",
           "required": true,
+          "require": ["sobject", "typeOfSearch"],
           "model": "getLookupFieldsModel",
           "prompt": "Please select the field which you want to use for lookup",
           "order": 6
         },
         "linkedObjects": {
           "viewClass": "MultiSelectView",
+          "require": ["sobject"],
           "label": "Include referenced objects",
           "model": "getLinkedObjectsModel",
           "order": 5,

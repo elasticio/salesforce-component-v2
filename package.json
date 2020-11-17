@@ -1,6 +1,6 @@
 {
   "name": "salesforce-component-v2",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "elastic.io component that connects to Salesforce API (node.js) v2",
   "main": "index.js",
   "scripts": {
