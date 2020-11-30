@@ -51,7 +51,6 @@
           "label": "Include linked objects",
           "viewClass": "MultiSelectView",
           "required": false,
-          "require": ["sobject"],
           "model": "linkedObjectTypes",
           "prompt": "Please select any linked objects that should be included in the query"
         },
