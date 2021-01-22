@@ -326,7 +326,7 @@
         },
         "passBinaryData": {
           "viewClass": "CheckBoxView",
-          "label": "Pass binary data to the next component (if found object has it)",
+          "label": "Pass binary data to the next step (if found object has it)",
           "order": 2
         },
         "enableCacheUsage": {
