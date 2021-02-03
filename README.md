@@ -38,7 +38,6 @@ The component uses Salesforce - API Version 46.0 by defaults but can be overwrit
 ### Environment variables
 Name|Mandatory|Description|Values|
 |----|---------|-----------|------|
-|LOG_LEVEL| false | Controls logger level | `trace`, `debug`, `info`, `warn`, `error` |
 |SALESFORCE_API_VERSION| false | Determines API version of Salesforce to use | Default: `46.0` |
 |REFRESH_TOKEN_RETRIES| false | Determines how many retries to refresh token should be done before throwing an error | Default: `10` |
 |HASH_LIMIT_TIME| false | Hash expiration time in ms  | Default: `600000` |
@@ -220,9 +219,11 @@ Metadata contains one field whose name, type and mandatoriness are generated acc
 Output metadata is the same as input metadata, so you may expect all fields that you mapped as input to be returned as output.
 
 #### Limitations
-When a binary field (primitive type `base64`, e.g. Documents, Attachments, etc) is selected on **Include linked objects**, an error will be thrown: 'MALFORMED_QUERY: Binary fields cannot be selected in join queries. Instead of querying objects with binary fields as linked objects (such as children Attachments), try querying them directly.' There is also a limit to the number of linked objects that you can query at once - beyond two or three, depending on the number of fields in the linked objects, Salesforce could potentially return a Status Code 431 or 414 error, meaning the query is too long. Finally, due to a bug with multiselect dropdowns, it is recommended to deselect all of the elements in this field before you change your selection in the *Object* dropdown list.
+1. When a binary field (primitive type `base64`, e.g. Documents, Attachments, etc) is selected on **Include linked objects**, an error will be thrown: `MALFORMED_QUERY: Binary fields cannot be selected in join queries. Instead of querying objects with binary fields as linked objects (such as children Attachments), try querying them directly.` 
+There is also a limit to the number of linked objects that you can query at once - beyond two or three, depending on the number of fields in the linked objects, Salesforce could potentially return a Status Code 431 or 414 error, meaning the query is too long. Finally, due to a bug with multiselect dropdowns, it is recommended to deselect all of the elements in this field before you change your selection in the *Object* dropdown list.
 
-When **Pass binary data to the next component (if found object has it)** is checked and this action is used with Local Agent, an error will be thrown: 'getaddrinfo ENOTFOUND steward-service.platform.svc.cluster.local steward-service.platform.svc.cluster.local:8200'
+2. Not supported object lookup when selected field value is `null`  
+3. When **Pass binary data to the next component (if found object has it)** is checked and this action is used with Local Agent, an error will be thrown: 'getaddrinfo ENOTFOUND steward-service.platform.svc.cluster.local steward-service.platform.svc.cluster.local:8200'
 
 #### Note
 Action has caching mechanism. By default action stores last 10 request-response pairs for 10 min duration.
