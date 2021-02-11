@@ -1,6 +1,6 @@
 {
   "name": "salesforce-component-v2",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "description": "elastic.io component that connects to Salesforce API (node.js) v2",
   "main": "index.js",
   "scripts": {
@@ -24,13 +24,13 @@
   },
   "homepage": "https://github.com/elasticio/salesforce-component#readme",
   "engines": {
-    "node": "12.18.2"
+    "node": ">=12.18.2"
   },
   "dependencies": {
     "axios": "0.20.0",
     "elasticio-node": "0.0.9",
     "elasticio-rest-node": "1.2.6",
-    "elasticio-sailor-nodejs": "2.6.18",
+    "elasticio-sailor-nodejs": "2.6.24",
     "jsforce": "1.10.0",
     "mime-types": "2.1.27",
     "request": "2.88.2",

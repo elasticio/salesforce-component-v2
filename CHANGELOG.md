@@ -1,3 +1,7 @@
+## 2.0.4 (February 12, 2021)
+
+* Update sailor version to 2.6.24
+
 ## 2.0.3 (November 18, 2020)
 
 * Fix fields dependencies from sobject field in component.json, [issue 5](https://github.com/elasticio/salesforce-component-v2/issues/5)
