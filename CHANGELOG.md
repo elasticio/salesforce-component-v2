@@ -1,3 +1,7 @@
+## 2.0.5 (June 25, 2021)
+
+* Delete restriction ```maxFetch should be maximum 10000 objects``` for `Get New and Updated Objects Polling` 
+
 ## 2.0.4 (February 12, 2021)
 
 * Update sailor version to 2.6.24
