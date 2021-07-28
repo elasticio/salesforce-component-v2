@@ -1,4 +1,3 @@
-const _ = require('lodash');
 const chai = require('chai');
 const nock = require('nock');
 
@@ -14,7 +13,7 @@ describe('Delete Object (at most 1) action', () => {
   before(() => {
     nock(process.env.ELASTICIO_API_URI)
       .get(`/v2/workspaces/${process.env.ELASTICIO_WORKSPACE_ID}/secrets/${testCommon.secretId}`)
-      .times(10)
+      .times(12)
       .reply(200, testCommon.secret);
   });
   describe('Delete Object (at most 1) module: getMetaModel', () => {
@@ -133,64 +132,138 @@ describe('Delete Object (at most 1) action', () => {
   });
 
   describe('Delete Object (at most 1) module: process', () => {
-    it('Deletes a document object without an attachment', async () => {
-      testCommon.configuration.sobject = 'Document';
-      testCommon.configuration.lookupField = 'Id';
+    describe('valid input', () => {
+      it('Deletes a document object without an attachment', async () => {
+        testCommon.configuration.sobject = 'Document';
+        testCommon.configuration.lookupField = 'Id';
 
-      const message = {
-        body: {
-          Id: 'testObjId',
-          FolderId: 'xxxyyyzzz',
-          Name: 'NotVeryImportantDoc',
-          IsPublic: false,
-          Body: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Everest_kalapatthar.jpg/800px-Everest_kalapatthar.jpg',
-          ContentType: 'image/jpeg',
-        },
-      };
+        const message = {
+          body: {
+            Id: 'testObjId',
+            FolderId: 'xxxyyyzzz',
+            Name: 'NotVeryImportantDoc',
+            IsPublic: false,
+            Body: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Everest_kalapatthar.jpg/800px-Everest_kalapatthar.jpg',
+            ContentType: 'image/jpeg',
+          },
+        };
 
-      const scope = nock(testCommon.instanceUrl, { encodedQueryParams: true })
-        .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
-        .reply(200, metaModelDocumentReply)
-        .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/query?q=${testCommon.buildSOQL(metaModelDocumentReply,
-          { Id: message.body.Id })}`)
-        .reply(200, { done: true, totalSize: 1, records: [message.body] })
-        .delete(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/testObjId`)
-        .reply(200, { id: 'deletedId' });
+        const scope = nock(testCommon.instanceUrl, { encodedQueryParams: true })
+          .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
+          .reply(200, metaModelDocumentReply)
+          .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/query?q=${testCommon.buildSOQL(metaModelDocumentReply,
+            { Id: message.body.Id })}`)
+          .reply(200, { done: true, totalSize: 1, records: [message.body] })
+          .delete(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/testObjId`)
+          .reply(200, { id: 'deletedId' });
 
-      const result = await deleteObjectAction.process.call(testCommon, _.cloneDeep(message), testCommon.configuration);
-      expect(result.body).to.deep.equal({ response: { id: 'deletedId' } });
-      scope.done();
+        const result = await deleteObjectAction.process.call(testCommon, message, testCommon.configuration);
+        expect(result.body).to.deep.equal({ response: { id: 'deletedId' } });
+        scope.done();
+      });
+      it('Deletes a document object with an attachment', async () => {
+        testCommon.configuration.sobject = 'Document';
+        testCommon.configuration.lookupField = 'Id';
+
+        const message = {
+          body: {
+            Id: 'testObjId',
+            FolderId: 'xxxyyyzzz',
+            Name: 'NotVeryImportantDoc',
+            IsPublic: false,
+            Body: '/upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Everest_kalapatthar.jpg/800px-Everest_kalapatthar.jpg',
+            ContentType: 'image/jpeg',
+          },
+        };
+
+        const scope = nock(testCommon.instanceUrl, { encodedQueryParams: true })
+          .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
+          .reply(200, metaModelDocumentReply)
+          .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/query?q=${testCommon.buildSOQL(metaModelDocumentReply,
+            { Id: message.body.Id })}`)
+          .reply(200, { done: true, totalSize: 1, records: [message.body] })
+          .delete(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/testObjId`)
+          .reply(200, { id: 'deletedId' });
+
+        nock(testCommon.EXT_FILE_STORAGE).put('/', JSON.stringify(message)).reply(200);
+
+        const result = await deleteObjectAction.process.call(testCommon, message, testCommon.configuration);
+        expect(result.body).to.deep.equal({ response: { id: 'deletedId' } });
+        scope.done();
+      });
+      it('Should delete object by id', async () => {
+        testCommon.configuration.sobject = 'Document';
+        testCommon.configuration.lookupField = undefined;
+
+        const message = {
+          body: {
+            id: 'testObjId',
+          },
+        };
+
+        const scope = nock(testCommon.instanceUrl, { encodedQueryParams: true })
+          .delete(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/testObjId`)
+          .reply(200, { id: 'deletedId' });
+
+        const result = await deleteObjectAction.process.call(testCommon, message, testCommon.configuration);
+        expect(result.body).to.deep.equal({ response: { id: 'deletedId' } });
+        scope.done();
+      });
+      it('Should emit empty message (no objects found by criteria)', async () => {
+        testCommon.configuration.sobject = 'Document';
+        testCommon.configuration.lookupField = 'Id';
+
+        const message = {
+          body: {
+            Id: 'testObjId',
+          },
+        };
+
+        const scope = nock(testCommon.instanceUrl, { encodedQueryParams: true })
+          .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
+          .reply(200, metaModelDocumentReply)
+          .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/query?q=${testCommon.buildSOQL(metaModelDocumentReply,
+            { Id: message.body.Id })}`)
+          .reply(200, { done: true, totalSize: 0, records: [] });
+
+        const result = await deleteObjectAction.process.call(testCommon, message, testCommon.configuration);
+        expect(result.body).to.deep.equal({});
+        scope.done();
+      });
+      it('Should throw an error (more then 1 object can`t be deleted)', async () => {
+        testCommon.configuration.sobject = 'Document';
+        testCommon.configuration.lookupField = 'Id';
+
+        const message = {
+          body: {
+            Id: 'testObjId',
+          },
+        };
+
+        const scope = nock(testCommon.instanceUrl, { encodedQueryParams: true })
+          .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
+          .reply(200, metaModelDocumentReply)
+          .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/query?q=${testCommon.buildSOQL(metaModelDocumentReply,
+            { Id: message.body.Id })}`)
+          .reply(200, { done: true, totalSize: 0, records: [message.body, message.body] });
+
+        try {
+          await deleteObjectAction.process.call(testCommon, message, testCommon.configuration);
+        } catch (error) {
+          expect(error.message).to.be.equal('More than one object found, can only delete 1');
+        }
+        scope.done();
+      });
     });
+    describe('invalid input', () => {
+      it('Should emit empty message', async () => {
+        testCommon.configuration.lookupField = undefined;
 
-    it('Deletes a document object with an attachment', async () => {
-      testCommon.configuration.sobject = 'Document';
-      testCommon.configuration.lookupField = 'Id';
+        const message = { body: {} };
 
-      const message = {
-        body: {
-          Id: 'testObjId',
-          FolderId: 'xxxyyyzzz',
-          Name: 'NotVeryImportantDoc',
-          IsPublic: false,
-          Body: '/upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Everest_kalapatthar.jpg/800px-Everest_kalapatthar.jpg',
-          ContentType: 'image/jpeg',
-        },
-      };
-
-      const scope = nock(testCommon.instanceUrl, { encodedQueryParams: true })
-        .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
-        .reply(200, metaModelDocumentReply)
-        .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/query?q=${testCommon.buildSOQL(metaModelDocumentReply,
-          { Id: message.body.Id })}`)
-        .reply(200, { done: true, totalSize: 1, records: [message.body] })
-        .delete(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/testObjId`)
-        .reply(200, { id: 'deletedId' });
-
-      nock(testCommon.EXT_FILE_STORAGE).put('/', JSON.stringify(message)).reply(200);
-
-      const result = await deleteObjectAction.process.call(testCommon, _.cloneDeep(message), testCommon.configuration);
-      expect(result.body).to.deep.equal({ response: { id: 'deletedId' } });
-      scope.done();
+        const result = await deleteObjectAction.process.call(testCommon, message, testCommon.configuration);
+        expect(result.body).to.deep.equal({});
+      });
     });
   });
 
