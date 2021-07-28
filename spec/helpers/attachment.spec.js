@@ -36,7 +36,7 @@ describe('attachment helper', () => {
   };
 
   describe('prepareBinaryData test', () => {
-    it('should upload attachment utilizeAttachment:true', async () => {
+    xit('should upload attachment utilizeAttachment:true', async () => {
       const msg = {
         body: {
           Name: 'Attachment',
