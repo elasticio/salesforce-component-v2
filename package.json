@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "pretest": "eslint lib spec spec-integration verifyCredentials.js --fix",
-    "test": "mocha spec NODE_ENV=test --recursive --timeout 50000",
+    "test": "nyc mocha spec NODE_ENV=test --recursive --timeout 50000",
     "integration-test": "mocha spec-integration --recursive --timeout 50000"
   },
   "repository": {
@@ -33,6 +33,7 @@
     "elasticio-sailor-nodejs": "2.6.24",
     "jsforce": "1.10.0",
     "mime-types": "2.1.27",
+    "nyc": "15.1.0",
     "request": "2.88.2",
     "request-promise": "4.2.6"
   },
