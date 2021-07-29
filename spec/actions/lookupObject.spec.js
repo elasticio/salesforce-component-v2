@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 const chai = require('chai');
 const nock = require('nock');
 const _ = require('lodash');
@@ -173,41 +174,40 @@ describe('Lookup Object (at most 1) test', () => {
       sobject: 'Document',
       lookupField: 'Id',
       allowCriteriaToBeOmitted: true,
-    },
-    metaModelDocumentReply));
+    }, metaModelDocumentReply));
 
     it('Retrieves metadata for Account object', testMetaData.bind(null, {
       ...testCommon.configuration,
       sobject: 'Account',
       lookupField: 'Id',
       allowCriteriaToBeOmitted: true,
-    },
-    metaModelAccountReply));
+    }, metaModelAccountReply));
   });
 
   describe('Lookup Object module: processAction', () => {
+    const configuration = {
+      sobject: 'Document',
+      lookupField: 'Id',
+      allowCriteriaToBeOmitted: false,
+      allowZeroResults: false,
+      passBinaryData: false,
+    };
+
+    const message = {
+      body: {
+        Id: 'testObjId',
+        FolderId: 'xxxyyyzzz',
+        Name: 'NotVeryImportantDoc',
+        IsPublic: false,
+        Body: '/Everest_kalapatthar.jpg',
+        ContentType: 'image/jpeg',
+      },
+    };
+
     it('Gets a Document object without its attachment', async () => {
-      testCommon.configuration.sobject = 'Document';
-      testCommon.configuration.lookupField = 'Id';
-      testCommon.configuration.allowCriteriaToBeOmitted = false;
-      testCommon.configuration.allowZeroResults = false;
-      testCommon.configuration.passBinaryData = false;
-
-      const message = {
-        body: {
-          Id: 'testObjIdd',
-          FolderId: 'xxxyyyzzz',
-          Name: 'NotVeryImportantDoc',
-          IsPublic: false,
-          Body: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Everest_kalapatthar.jpg/800px-Everest_kalapatthar.jpg',
-          ContentType: 'image/jpeg',
-        },
-      };
-
       const scope = nock(testCommon.instanceUrl, { encodedQueryParams: true })
         .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
         .reply(200, metaModelDocumentReply)
-      // eslint-disable-next-line max-len
         .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/query?q=${testCommon.buildSOQL(metaModelDocumentReply, { Id: message.body.Id })}%20ORDER%20BY%20LastModifiedDate%20ASC`)
         .reply(200, { done: true, totalSize: 1, records: [message.body] });
 
@@ -216,8 +216,8 @@ describe('Lookup Object (at most 1) test', () => {
           if (what === 'data') resolve(msg);
         };
       });
-
-      await lookupObject.process.call(testCommon, _.cloneDeep(message), testCommon.configuration);
+      testCommon.configuration = { ...testCommon.configuration, ...configuration };
+      await lookupObject.process.call(testCommon, message, testCommon.configuration);
       const result = await getResult;
 
       chai.expect(result.body).to.deep.equal(message.body);
@@ -226,29 +226,14 @@ describe('Lookup Object (at most 1) test', () => {
     });
 
     it('Gets a Document object with its attachment', async () => {
-      testCommon.configuration.sobject = 'Document';
-      testCommon.configuration.lookupField = 'Id';
-      testCommon.configuration.allowCriteriaToBeOmitted = false;
-      testCommon.configuration.allowZeroResults = false;
       testCommon.configuration.passBinaryData = true;
 
-      const message = {
-        body: {
-          Id: 'testObjId',
-          FolderId: 'xxxyyyzzz',
-          Name: 'NotVeryImportantDoc',
-          IsPublic: false,
-          Body: '/upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Everest_kalapatthar.jpg/800px-Everest_kalapatthar.jpg',
-          ContentType: 'image/jpeg',
-        },
-      };
       const scope = nock(testCommon.instanceUrl, { encodedQueryParams: true })
         .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
         .times(2)
         .reply(200, metaModelDocumentReply)
         .get(message.body.Body)
         .reply(200, JSON.stringify(message))
-      // eslint-disable-next-line max-len
         .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/query?q=${testCommon.buildSOQL(metaModelDocumentReply, { Id: message.body.Id })}%20ORDER%20BY%20LastModifiedDate%20ASC`)
         .reply(200, { done: true, totalSize: 1, records: [message.body] });
 
@@ -260,7 +245,7 @@ describe('Lookup Object (at most 1) test', () => {
         };
       });
 
-      await lookupObject.process.call(testCommon, _.cloneDeep(message), testCommon.configuration);
+      await lookupObject.process.call(testCommon, message, testCommon.configuration);
       const result = await getResult;
 
       chai.expect(result.body).to.deep.equal(message.body);
@@ -272,6 +257,184 @@ describe('Lookup Object (at most 1) test', () => {
       });
 
       scope.done();
+    });
+
+    it('Omitted criteria', async () => {
+      testCommon.configuration.lookupField = 'Ids';
+      testCommon.configuration.allowCriteriaToBeOmitted = true;
+
+      const getResult = new Promise((resolve) => {
+        testCommon.emitCallback = (what, msg) => {
+          if (what === 'data') resolve(msg);
+        };
+      });
+
+      await lookupObject.process.call(testCommon, message, testCommon.configuration);
+      const result = await getResult;
+
+      chai.expect(result.body).to.deep.equal({});
+    });
+
+    it('No unique criteria provided', async () => {
+      testCommon.configuration.lookupField = 'Ids';
+      testCommon.configuration.allowCriteriaToBeOmitted = false;
+
+      const getResult = new Promise((resolve) => {
+        testCommon.emitCallback = (what, msg) => {
+          if (what === 'data') resolve(msg);
+        };
+      });
+
+      try {
+        await lookupObject.process.call(testCommon, message, testCommon.configuration);
+        await getResult;
+      } catch (err) {
+        chai.expect(err.message).to.deep.equal('No unique criteria provided');
+      }
+    });
+
+    it('Linked objects', async () => {
+      testCommon.configuration.lookupField = 'Id';
+      testCommon.configuration.passBinaryData = false;
+      testCommon.configuration.linkedObjects = ['uno', '!'];
+
+      nock(testCommon.instanceUrl, { encodedQueryParams: true })
+        .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
+        .reply(200, metaModelDocumentReply)
+        .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/query?q=${testCommon.buildSOQL(metaModelDocumentReply, { Id: message.body.Id })}%20ORDER%20BY%20LastModifiedDate%20ASC`)
+        .reply(200, { done: true, totalSize: 1, records: [message.body] })
+        .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/CustomBrandAsset/describe`)
+        .reply(200, metaModelDocumentReply)
+        .get(/.*/)
+        .reply(200, { done: true, totalSize: 1, records: [message.body] });
+
+      const getResult = new Promise((resolve) => {
+        testCommon.emitCallback = (what, msg) => {
+          if (what === 'data') resolve(msg);
+        };
+      });
+
+      await lookupObject.process.call(testCommon, message, testCommon.configuration);
+      const result = await getResult;
+
+      chai.expect(result.body).to.deep.equal(message.body);
+      chai.expect(result.attachments).to.deep.equal({});
+    });
+
+    it('Allow zero results', async () => {
+      testCommon.configuration.linkedObjects = [];
+      testCommon.configuration.type = '';
+      testCommon.configuration.allowZeroResults = true;
+
+      const scope = nock(testCommon.instanceUrl, { encodedQueryParams: true })
+        .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
+        .reply(200, metaModelDocumentReply)
+        .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/query?q=${testCommon.buildSOQL(metaModelDocumentReply, { Id: message.body.Id })}%20ORDER%20BY%20LastModifiedDate%20ASC`)
+        .reply(200, { done: true, totalSize: 1, records: [] });
+
+      const getResult = new Promise((resolve) => {
+        testCommon.emitCallback = (what, msg) => {
+          if (what === 'data') resolve(msg);
+        };
+      });
+
+      await lookupObject.process.call(testCommon, message, testCommon.configuration);
+      const result = await getResult;
+
+      chai.expect(result.body).to.deep.equal({});
+      chai.expect(result.attachments).to.deep.equal({});
+      scope.done();
+    });
+
+    it('No objects found', async () => {
+      testCommon.configuration.allowZeroResults = false;
+
+      const scope = nock(testCommon.instanceUrl, { encodedQueryParams: true })
+        .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
+        .reply(200, metaModelDocumentReply)
+        .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/query?q=${testCommon.buildSOQL(metaModelDocumentReply, { Id: message.body.Id })}%20ORDER%20BY%20LastModifiedDate%20ASC`)
+        .reply(200, { done: true, totalSize: 1, records: [] });
+
+      const getResult = new Promise((resolve) => {
+        testCommon.emitCallback = (what, msg) => {
+          if (what === 'data') resolve(msg);
+        };
+      });
+
+      try {
+        await lookupObject.process.call(testCommon, message, testCommon.configuration);
+        await getResult;
+      } catch (err) {
+        chai.expect(err.message).to.deep.equal('No objects found');
+      }
+      scope.done();
+    });
+
+    it('More than one object found', async () => {
+      testCommon.configuration.linkedObjects = [];
+      testCommon.configuration.type = '';
+      testCommon.configuration.allowZeroResults = false;
+
+      const scope = nock(testCommon.instanceUrl, { encodedQueryParams: true })
+        .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
+        .reply(200, metaModelDocumentReply)
+        .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/query?q=${testCommon.buildSOQL(metaModelDocumentReply, { Id: message.body.Id })}%20ORDER%20BY%20LastModifiedDate%20ASC`)
+        .reply(200, { done: true, totalSize: 1, records: ['', ''] });
+
+      const getResult = new Promise((resolve) => {
+        testCommon.emitCallback = (what, msg) => {
+          if (what === 'data') resolve(msg);
+        };
+      });
+
+      try {
+        await lookupObject.process.call(testCommon, message, testCommon.configuration);
+        await getResult;
+      } catch (err) {
+        chai.expect(err.message).to.deep.equal('More than one object found');
+      }
+      scope.done();
+    });
+
+    it('Lookup Object error occurred', async () => {
+      const scope = nock(testCommon.instanceUrl, { encodedQueryParams: true })
+        .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
+        .reply(200, metaModelDocumentReply)
+        .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/query?q=${testCommon.buildSOQL(metaModelDocumentReply, { Id: message.body.Id })}%20ORDER%20BY%20LastModifiedDate%20ASC`)
+        .reply(200, { done: true, totalSize: 1, records: '1' });
+
+      const testCommon2 = _.cloneDeep(testCommon);
+      testCommon2.emit = async () => new Promise(() => {
+        throw new Error('Lookup Object error occurred');
+      });
+
+      try {
+        await lookupObject.process.call(testCommon2, message, testCommon.configuration);
+      } catch (err) {
+        chai.expect(err.message).to.deep.equal('Lookup Object error occurred');
+      }
+      scope.done();
+    });
+
+    it('Use cache', async () => {
+      testCommon.configuration.enableCacheUsage = true;
+      nock(testCommon.instanceUrl, { encodedQueryParams: true })
+        .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
+        .times(2)
+        .reply(200, metaModelDocumentReply)
+        .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/query?q=${testCommon.buildSOQL(metaModelDocumentReply, { Id: message.body.Id })}%20ORDER%20BY%20LastModifiedDate%20ASC`)
+        .reply(200, { done: true, totalSize: 1, records: [message.body] });
+
+      const getResult = new Promise((resolve) => {
+        testCommon.emitCallback = (what, msg) => {
+          if (what === 'data') resolve(msg);
+        };
+      });
+
+      await lookupObject.process.call(testCommon, message, testCommon.configuration);
+      await lookupObject.process.call(testCommon, message, testCommon.configuration);
+      const result = await getResult;
+      chai.expect(result.body).to.deep.equal(message.body);
     });
   });
 });
