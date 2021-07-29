@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/elasticio/salesforce-component#readme",
   "engines": {
-    "node": ">=12.18.2"
+    "node": "14"
   },
   "dependencies": {
     "@elastic.io/component-commons-library": "1.1.5",

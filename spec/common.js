@@ -1,4 +1,7 @@
 require('elasticio-rest-node');
+const { getLogger } = require('@elastic.io/component-commons-library/lib/logger/logger');
+const nock = require('nock');
+const sinon = require('sinon');
 
 process.env.OAUTH_CLIENT_ID = 'asd';
 process.env.OAUTH_CLIENT_SECRET = 'sdc';
@@ -9,6 +12,19 @@ process.env.ELASTICIO_WORKSPACE_ID = 'workspaceId';
 
 const EXT_FILE_STORAGE = 'http://file.storage.server';
 const instanceUrl = 'https://test.salesforce.com';
+const secretId = 'secretId';
+const secret = {
+  data: {
+    attributes: {
+      credentials: {
+        access_token: 'accessToken',
+        undefined_params: {
+          instance_url: instanceUrl,
+        },
+      },
+    },
+  },
+};
 
 require.cache[require.resolve('elasticio-rest-node')] = {
   exports: () => ({
@@ -24,74 +40,56 @@ require.cache[require.resolve('elasticio-rest-node')] = {
 };
 
 module.exports = {
-  configuration: {
-    secretId: 'secretId',
-  },
-  secretId: 'secretId',
-  instanceUrl,
-  secret: {
-    data: {
-      attributes: {
-        credentials: {
-          access_token: 'accessToken',
-          undefined_params: {
-            instance_url: instanceUrl,
-          },
-        },
+  testsCommon: {
+    instanceUrl,
+    secret,
+    secretId,
+    EXT_FILE_STORAGE,
+    refresh_token: {
+      url: 'https://login.salesforce.com/services/oauth2/token',
+      response: {
+        access_token: 'the unthinkable top secret access token',
+        refresh_token: 'the not less important also unthinkable top secret refresh token',
       },
     },
-  },
-  refresh_token: {
-    url: 'https://login.salesforce.com/services/oauth2/token',
-    response: {
-      access_token: 'the unthinkable top secret access token',
-      refresh_token: 'the not less important also unthinkable top secret refresh token',
-    },
-  },
-  emit(what, message) {
-    if (typeof what === 'string' && what.toLowerCase().includes('error')) {
-      throw message;
-    }
+    buildSOQL: (objectMeta, where) => {
+      let soql = `SELECT%20${objectMeta.fields[0].name}`;
 
-    if (typeof (this.emitCallback) === 'function') {
-      this.emitCallback(what, message);
-    }
-  },
-  logger: {
-    fatal: () => { },
-    error: () => { },
-    warn: () => { },
-    info: () => { },
-    debug: () => { },
-    trace: () => { },
-  },
-  emitCallback: null,
-  buildSOQL: (objectMeta, where) => {
-    let soql = `SELECT%20${objectMeta.fields[0].name}`;
+      for (let i = 1; i < objectMeta.fields.length; i += 1) soql += `%2C%20${objectMeta.fields[i].name}`;
 
-    for (let i = 1; i < objectMeta.fields.length; i += 1) soql += `%2C%20${objectMeta.fields[i].name}`;
+      soql += `%20FROM%20${objectMeta.name}%20WHERE%20`;
 
-    soql += `%20FROM%20${objectMeta.name}%20WHERE%20`;
-
-    if (typeof (where) === 'string') {
-      soql += where;
-    } else {
+      if (typeof (where) === 'string') {
+        soql += where;
+      } else {
       // eslint-disable-next-line guard-for-in,no-restricted-syntax
-      for (const key in where) {
-        soql += `${key}%20%3D%20`;
-        const field = objectMeta.fields.find((f) => f.name === key);
-        if (!field) {
-          throw new Error(`There is not ${key} field in ${objectMeta.name} object`);
-        }
-        if (field.soapType === 'tns:ID' || field.soapType === 'xsd:string') {
-          soql += `%27${where[key]}%27`;
-        } else {
-          soql += `${where[key]}`;
+        for (const key in where) {
+          soql += `${key}%20%3D%20`;
+          const field = objectMeta.fields.find((f) => f.name === key);
+          if (!field) {
+            throw new Error(`There is not ${key} field in ${objectMeta.name} object`);
+          }
+          if (field.soapType === 'tns:ID' || field.soapType === 'xsd:string') {
+            soql += `%27${where[key]}%27`;
+          } else {
+            soql += `${where[key]}`;
+          }
         }
       }
-    }
 
-    return soql;
+      return soql;
+    },
   },
-  EXT_FILE_STORAGE,
+  defaultCfg: {
+    secretId,
+  },
+  getContext: () => ({
+    emit: sinon.spy(),
+    logger: getLogger(),
+  }),
+  fetchToken: () => {
+    nock(process.env.ELASTICIO_API_URI)
+      .get(`/v2/workspaces/${process.env.ELASTICIO_WORKSPACE_ID}/secrets/${secretId}`)
+      .reply(200, secret);
+  },
 };
