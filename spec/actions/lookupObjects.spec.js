@@ -1,7 +1,9 @@
 const chai = require('chai');
 const nock = require('nock');
-const _ = require('lodash');
+const sinon = require('sinon');
+const { getLogger } = require('@elastic.io/component-commons-library/lib/logger/logger');
 
+const { expect } = require('chai');
 const common = require('../../lib/common.js');
 const testCommon = require('../common.js');
 const objectTypesReply = require('../testData/sfObjects.json');
@@ -9,15 +11,26 @@ const metaModelDocumentReply = require('../testData/sfDocumentMetadata.json');
 const metaModelAccountReply = require('../testData/sfAccountMetadata.json');
 
 process.env.HASH_LIMIT_TIME = 1000;
+const DEFAULT_LIMIT_EMITALL = 1000;
 const lookupObjects = require('../../lib/actions/lookupObjects.js');
 
 const COMPARISON_OPERATORS = ['=', '!=', '<', '<=', '>', '>=', 'LIKE', 'IN', 'NOT IN', 'INCLUDES', 'EXCLUDES'];
 
 describe('Lookup Objects action test', () => {
+  const validateEmitEqualsToReply = (emit, reply) => {
+    expect(emit.callCount).to.be.equal(1);
+    expect(emit.getCall(0).args[0]).to.be.equal('data');
+    expect(emit.getCall(0).args[1].body).to.be.deep.equal(reply);
+  };
+  const context = {
+    logger: getLogger(),
+    emit: sinon.spy(),
+  };
   beforeEach(async () => {
+    context.emit.resetHistory();
     nock(process.env.ELASTICIO_API_URI)
       .get(`/v2/workspaces/${process.env.ELASTICIO_WORKSPACE_ID}/secrets/${testCommon.secretId}`)
-      .times(10)
+      .times(11)
       .reply(200, testCommon.secret);
   });
   afterEach(() => {
@@ -43,7 +56,7 @@ describe('Lookup Objects action test', () => {
 
   describe('Lookup Objects module: getMetaModel', () => {
     function testMetaData(configuration, getMetaModelReply) {
-      const sfScope = nock(testCommon.instanceUrl)
+      const scope = nock(testCommon.instanceUrl)
         .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/${configuration.sobject}/describe`)
         .reply(200, getMetaModelReply);
 
@@ -216,41 +229,112 @@ describe('Lookup Objects action test', () => {
       return lookupObjects.getMetaModel.call(testCommon, configuration)
         .then((data) => {
           chai.expect(data).to.deep.equal(expectedResult);
-          sfScope.done();
+          scope.done();
         });
     }
 
-    it('Retrieves metadata for Document object', testMetaData.bind(null, {
-      ...testCommon.configuration,
-      sobject: 'Document',
-      outputMethod: 'emitAll',
-      termNumber: '1',
-    },
-    metaModelDocumentReply));
-
-    it('Retrieves metadata for Document object 2 terms', testMetaData.bind(null, {
-      ...testCommon.configuration,
-      sobject: 'Document',
-      outputMethod: 'emitAll',
-      termNumber: '2',
-    },
-    metaModelDocumentReply));
-
-    it('Retrieves metadata for Account object', testMetaData.bind(null, {
-      ...testCommon.configuration,
-      sobject: 'Account',
-      outputMethod: 'emitPage',
-      termNumber: '2',
-    },
-    metaModelAccountReply));
+    describe('valid input', () => {
+      it('Retrieves metadata for Document object', testMetaData.bind(null, {
+        ...testCommon.configuration,
+        sobject: 'Document',
+        outputMethod: 'emitAll',
+        termNumber: '1',
+      }, metaModelDocumentReply));
+      it('Retrieves metadata for Document object 2 terms', testMetaData.bind(null, {
+        ...testCommon.configuration,
+        sobject: 'Document',
+        outputMethod: 'emitAll',
+        termNumber: '2',
+      }, metaModelDocumentReply));
+      it('Retrieves metadata for Account object', testMetaData.bind(null, {
+        ...testCommon.configuration,
+        sobject: 'Account',
+        outputMethod: 'emitPage',
+        termNumber: '2',
+      }, metaModelAccountReply));
+    });
+    describe('invalid input', () => {
+      it('Should throw an error (termNumber is not valid)', async () => {
+        const configuration = {
+          ...testCommon.configuration,
+          sobject: 'Account',
+          outputMethod: 'emitPage',
+          termNumber: 'invalid',
+        };
+        const scope = nock(testCommon.instanceUrl)
+          .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/${configuration.sobject}/describe`)
+          .reply(200, metaModelAccountReply);
+        try {
+          await lookupObjects.getMetaModel.call(context, configuration);
+        } catch (err) {
+          expect(err.message).to.be.equal('Number of search terms must be an integer value from the interval [0-99]');
+        }
+        scope.done();
+      });
+      it('Should throw an error (termNumber is not valid)', async () => {
+        const configuration = {
+          ...testCommon.configuration,
+          sobject: 'Account',
+          outputMethod: 'emitPage',
+          termNumber: '',
+        };
+        const scope = nock(testCommon.instanceUrl)
+          .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/${configuration.sobject}/describe`)
+          .reply(200, metaModelAccountReply);
+        try {
+          await lookupObjects.getMetaModel.call(context, configuration);
+        } catch (err) {
+          expect(err.message).to.be.equal('Number of search terms must be an integer value from the interval [0-99]');
+        }
+        scope.done();
+      });
+      it('Should throw an error (termNumber is not valid)', async () => {
+        const configuration = {
+          ...testCommon.configuration,
+          sobject: 'Account',
+          outputMethod: 'emitPage',
+          termNumber: undefined,
+        };
+        const scope = nock(testCommon.instanceUrl)
+          .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/${configuration.sobject}/describe`)
+          .reply(200, metaModelAccountReply);
+        try {
+          await lookupObjects.getMetaModel.call(context, configuration);
+        } catch (err) {
+          expect(err.message).to.be.equal('Number of search terms must be an integer value from the interval [0-99]');
+        }
+        scope.done();
+      });
+      it('Should throw an error (termNumber is not valid)', async () => {
+        const configuration = {
+          ...testCommon.configuration,
+          sobject: 'Account',
+          outputMethod: 'emitPage',
+          termNumber: [1, 2],
+        };
+        const scope = nock(testCommon.instanceUrl)
+          .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/${configuration.sobject}/describe`)
+          .reply(200, metaModelAccountReply);
+        try {
+          await lookupObjects.getMetaModel.call(context, configuration);
+        } catch (err) {
+          expect(err.message).to.be.equal('Number of search terms must be an integer value from the interval [0-99]');
+        }
+        scope.done();
+      });
+    });
   });
 
   describe('Lookup Objects module: processAction', () => {
-    it('Gets Document objects: 2 string search terms, emitAll, limit', () => {
-      testCommon.configuration.sobject = 'Document';
-      testCommon.configuration.includeDeleted = false;
-      testCommon.configuration.outputMethod = 'emitAll';
-      testCommon.configuration.termNumber = '2';
+    it('Gets Document objects: 2 string search terms, emitAll, limit', async () => {
+      const testConfiguration = {
+        sobject: 'Document',
+        includeDeleted: false,
+        outputMethod: 'emitAll',
+        termNumber: '2',
+      };
+      testCommon.configuration = { ...testCommon.configuration, ...testConfiguration };
+      context.testCommon = testCommon;
 
       const message = {
         body: {
@@ -270,30 +354,31 @@ describe('Lookup Objects action test', () => {
       };
 
       const testReply = {
-        results: [{
-          Id: 'testObjId',
-          FolderId: 'xxxyyyzzz',
-          Name: 'NotVeryImportantDoc',
-          IsPublic: false,
-          Body: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Everest_kalapatthar.jpg/800px-Everest_kalapatthar.jpg',
-          ContentType: 'imagine/noHeaven',
-        },
-        {
-          Id: 'testObjId',
-          FolderId: '123yyyzzz',
-          Name: 'VeryImportantDoc',
-          IsPublic: true,
-          Body: 'wikipedia.org',
-          ContentType: 'imagine/noHell',
-        },
+        results: [
+          {
+            Id: 'testObjId',
+            FolderId: 'xxxyyyzzz',
+            Name: 'NotVeryImportantDoc',
+            IsPublic: false,
+            Body: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Everest_kalapatthar.jpg/800px-Everest_kalapatthar.jpg',
+            ContentType: 'imagine/noHeaven',
+          },
+          {
+            Id: 'testObjId',
+            FolderId: '123yyyzzz',
+            Name: 'VeryImportantDoc',
+            IsPublic: true,
+            Body: 'wikipedia.org',
+            ContentType: 'imagine/noHell',
+          },
         ],
       };
 
       let expectedQuery = testCommon.buildSOQL(metaModelDocumentReply,
         `Name%20%3D%20%27${message.body.sTerm_1.fieldValue}%27%20`
-      + `${message.body.link_1_2}%20`
-      + `FolderId%20%3D%20%27${message.body.sTerm_2.fieldValue}%27%20`
-      + `%20LIMIT%20${message.body.limit}`);
+        + `${message.body.link_1_2}%20`
+        + `FolderId%20%3D%20%27${message.body.sTerm_2.fieldValue}%27%20`
+        + `%20LIMIT%20${message.body.limit}`);
       expectedQuery = expectedQuery.replace(/ /g, '%20');
 
       const scope = nock(testCommon.instanceUrl, { encodedQueryParams: true })
@@ -302,23 +387,19 @@ describe('Lookup Objects action test', () => {
         .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/query?q=${expectedQuery}`)
         .reply(200, { done: true, totalSize: testReply.results.length, records: testReply.results });
 
-      lookupObjects.process.call(testCommon, _.cloneDeep(message), testCommon.configuration);
-      return new Promise((resolve) => {
-        testCommon.emitCallback = (what, msg) => {
-          if (what === 'data') {
-            chai.expect(msg.body).to.deep.equal(testReply);
-            scope.done();
-            resolve();
-          }
-        };
-      });
+      await lookupObjects.process.call(context, message, testCommon.configuration);
+      validateEmitEqualsToReply(context.emit, testReply);
+      scope.done();
     });
-
-    it('Gets Document objects: 2 string search terms, IN operator, emitAll, limit', () => {
-      testCommon.configuration.sobject = 'Document';
-      testCommon.configuration.includeDeleted = false;
-      testCommon.configuration.outputMethod = 'emitAll';
-      testCommon.configuration.termNumber = '2';
+    it('Gets Document objects: 2 string search terms, IN operator, emitAll, limit', async () => {
+      const testConfiguration = {
+        sobject: 'Document',
+        includeDeleted: false,
+        outputMethod: 'emitAll',
+        termNumber: '2',
+      };
+      testCommon.configuration = { ...testCommon.configuration, ...testConfiguration };
+      context.testCommon = testCommon;
 
       const message = {
         body: {
@@ -338,30 +419,31 @@ describe('Lookup Objects action test', () => {
       };
 
       const testReply = {
-        results: [{
-          Id: 'testObjId',
-          FolderId: 'xxxyyyzzz',
-          Name: 'NotVeryImportantDoc',
-          IsPublic: false,
-          Body: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Everest_kalapatthar.jpg/800px-Everest_kalapatthar.jpg',
-          ContentType: 'imagine/noHeaven',
-        },
-        {
-          Id: 'testObjId',
-          FolderId: '123yyyzzz',
-          Name: 'VeryImportantDoc',
-          IsPublic: true,
-          Body: 'wikipedia.org',
-          ContentType: 'imagine/noHell',
-        },
+        results: [
+          {
+            Id: 'testObjId',
+            FolderId: 'xxxyyyzzz',
+            Name: 'NotVeryImportantDoc',
+            IsPublic: false,
+            Body: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Everest_kalapatthar.jpg/800px-Everest_kalapatthar.jpg',
+            ContentType: 'imagine/noHeaven',
+          },
+          {
+            Id: 'testObjId',
+            FolderId: '123yyyzzz',
+            Name: 'VeryImportantDoc',
+            IsPublic: true,
+            Body: 'wikipedia.org',
+            ContentType: 'imagine/noHell',
+          },
         ],
       };
 
       let expectedQuery = testCommon.buildSOQL(metaModelDocumentReply,
         'Name%20IN%20(%27NotVeryImportantDoc%27%2C%27Value_1%27%2C%27Value_2%27)%20'
-      + `${message.body.link_1_2}%20`
-      + `FolderId%20%3D%20%27${message.body.sTerm_2.fieldValue}%27%20`
-      + `%20LIMIT%20${message.body.limit}`);
+        + `${message.body.link_1_2}%20`
+        + `FolderId%20%3D%20%27${message.body.sTerm_2.fieldValue}%27%20`
+        + `%20LIMIT%20${message.body.limit}`);
       expectedQuery = expectedQuery.replace(/ /g, '%20');
 
       const scope = nock(testCommon.instanceUrl, { encodedQueryParams: true })
@@ -370,24 +452,19 @@ describe('Lookup Objects action test', () => {
         .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/query?q=${expectedQuery}`)
         .reply(200, { done: true, totalSize: testReply.results.length, records: testReply.results });
 
-      lookupObjects.process.call(testCommon, _.cloneDeep(message), testCommon.configuration);
-
-      return new Promise((resolve) => {
-        testCommon.emitCallback = (what, msg) => {
-          if (what === 'data') {
-            chai.expect(msg.body).to.deep.equal(testReply);
-            scope.done();
-            resolve();
-          }
-        };
-      });
+      await lookupObjects.process.call(context, message, testCommon.configuration);
+      validateEmitEqualsToReply(context.emit, testReply);
+      scope.done();
     });
-
-    it('Gets Document objects: 2 string search terms, NOT IN operator, emitAll, limit', () => {
-      testCommon.configuration.sobject = 'Document';
-      testCommon.configuration.includeDeleted = false;
-      testCommon.configuration.outputMethod = 'emitAll';
-      testCommon.configuration.termNumber = '2';
+    it('Gets Document objects: 2 string search terms, NOT IN operator, emitAll, limit', async () => {
+      const testConfiguration = {
+        sobject: 'Document',
+        includeDeleted: false,
+        outputMethod: 'emitAll',
+        termNumber: '2',
+      };
+      testCommon.configuration = { ...testCommon.configuration, ...testConfiguration };
+      context.testCommon = testCommon;
 
       const message = {
         body: {
@@ -407,30 +484,31 @@ describe('Lookup Objects action test', () => {
       };
 
       const testReply = {
-        results: [{
-          Id: 'testObjId',
-          FolderId: 'xxxyyyzzz',
-          Name: 'NotVeryImportantDoc',
-          IsPublic: false,
-          Body: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Everest_kalapatthar.jpg/800px-Everest_kalapatthar.jpg',
-          ContentType: 'imagine/noHeaven',
-        },
-        {
-          Id: 'testObjId',
-          FolderId: '123yyyzzz',
-          Name: 'VeryImportantDoc',
-          IsPublic: true,
-          Body: 'wikipedia.org',
-          ContentType: 'imagine/noHell',
-        },
+        results: [
+          {
+            Id: 'testObjId',
+            FolderId: 'xxxyyyzzz',
+            Name: 'NotVeryImportantDoc',
+            IsPublic: false,
+            Body: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Everest_kalapatthar.jpg/800px-Everest_kalapatthar.jpg',
+            ContentType: 'imagine/noHeaven',
+          },
+          {
+            Id: 'testObjId',
+            FolderId: '123yyyzzz',
+            Name: 'VeryImportantDoc',
+            IsPublic: true,
+            Body: 'wikipedia.org',
+            ContentType: 'imagine/noHell',
+          },
         ],
       };
 
       let expectedQuery = testCommon.buildSOQL(metaModelDocumentReply,
         'BodyLength%20NOT%20IN%20(32%2C12%2C234)%20'
-      + `${message.body.link_1_2}%20`
-      + `FolderId%20%3D%20%27${message.body.sTerm_2.fieldValue}%27%20`
-      + `%20LIMIT%20${message.body.limit}`);
+        + `${message.body.link_1_2}%20`
+        + `FolderId%20%3D%20%27${message.body.sTerm_2.fieldValue}%27%20`
+        + `%20LIMIT%20${message.body.limit}`);
       expectedQuery = expectedQuery.replace(/ /g, '%20');
 
       const scope = nock(testCommon.instanceUrl, { encodedQueryParams: true })
@@ -439,24 +517,19 @@ describe('Lookup Objects action test', () => {
         .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/query?q=${expectedQuery}`)
         .reply(200, { done: true, totalSize: testReply.results.length, records: testReply.results });
 
-      lookupObjects.process.call(testCommon, _.cloneDeep(message), testCommon.configuration);
-
-      return new Promise((resolve) => {
-        testCommon.emitCallback = (what, msg) => {
-          if (what === 'data') {
-            chai.expect(msg.body).to.deep.equal(testReply);
-            scope.done();
-            resolve();
-          }
-        };
-      });
+      await lookupObjects.process.call(context, message, testCommon.configuration);
+      validateEmitEqualsToReply(context.emit, testReply);
+      scope.done();
     });
-
-    it('Gets Document objects: 2 string search terms, INCLUDES operator, emitAll, limit', () => {
-      testCommon.configuration.sobject = 'Document';
-      testCommon.configuration.includeDeleted = false;
-      testCommon.configuration.outputMethod = 'emitAll';
-      testCommon.configuration.termNumber = '2';
+    it('Gets Document objects: 2 string search terms, INCLUDES operator, emitAll, limit', async () => {
+      const testConfiguration = {
+        sobject: 'Document',
+        includeDeleted: false,
+        outputMethod: 'emitAll',
+        termNumber: '2',
+      };
+      testCommon.configuration = { ...testCommon.configuration, ...testConfiguration };
+      context.testCommon = testCommon;
 
       const message = {
         body: {
@@ -476,30 +549,31 @@ describe('Lookup Objects action test', () => {
       };
 
       const testReply = {
-        results: [{
-          Id: 'testObjId',
-          FolderId: 'xxxyyyzzz',
-          Name: 'NotVeryImportantDoc',
-          IsPublic: false,
-          Body: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Everest_kalapatthar.jpg/800px-Everest_kalapatthar.jpg',
-          ContentType: 'imagine/noHeaven',
-        },
-        {
-          Id: 'testObjId',
-          FolderId: '123yyyzzz',
-          Name: 'VeryImportantDoc',
-          IsPublic: true,
-          Body: 'wikipedia.org',
-          ContentType: 'imagine/noHell',
-        },
+        results: [
+          {
+            Id: 'testObjId',
+            FolderId: 'xxxyyyzzz',
+            Name: 'NotVeryImportantDoc',
+            IsPublic: false,
+            Body: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Everest_kalapatthar.jpg/800px-Everest_kalapatthar.jpg',
+            ContentType: 'imagine/noHeaven',
+          },
+          {
+            Id: 'testObjId',
+            FolderId: '123yyyzzz',
+            Name: 'VeryImportantDoc',
+            IsPublic: true,
+            Body: 'wikipedia.org',
+            ContentType: 'imagine/noHell',
+          },
         ],
       };
 
       let expectedQuery = testCommon.buildSOQL(metaModelDocumentReply,
         'Name%20INCLUDES%20(%27NotVeryImportantDoc%27%2C%27Value_1%27%2C%27Value_2%27)%20'
-      + `${message.body.link_1_2}%20`
-      + `FolderId%20%3D%20%27${message.body.sTerm_2.fieldValue}%27%20`
-      + `%20LIMIT%20${message.body.limit}`);
+        + `${message.body.link_1_2}%20`
+        + `FolderId%20%3D%20%27${message.body.sTerm_2.fieldValue}%27%20`
+        + `%20LIMIT%20${message.body.limit}`);
       expectedQuery = expectedQuery.replace(/ /g, '%20');
 
       const scope = nock(testCommon.instanceUrl, { encodedQueryParams: true })
@@ -508,24 +582,19 @@ describe('Lookup Objects action test', () => {
         .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/query?q=${expectedQuery}`)
         .reply(200, { done: true, totalSize: testReply.results.length, records: testReply.results });
 
-      lookupObjects.process.call(testCommon, _.cloneDeep(message), testCommon.configuration);
-
-      return new Promise((resolve) => {
-        testCommon.emitCallback = (what, msg) => {
-          if (what === 'data') {
-            chai.expect(msg.body).to.deep.equal(testReply);
-            scope.done();
-            resolve();
-          }
-        };
-      });
+      await lookupObjects.process.call(context, message, testCommon.configuration);
+      validateEmitEqualsToReply(context.emit, testReply);
+      scope.done();
     });
-
-    it('Gets Document objects: 2 string search terms, EXCLUDES operator, emitAll, limit', () => {
-      testCommon.configuration.sobject = 'Document';
-      testCommon.configuration.includeDeleted = false;
-      testCommon.configuration.outputMethod = 'emitAll';
-      testCommon.configuration.termNumber = '2';
+    it('Gets Document objects: 2 string search terms, EXCLUDES operator, emitAll, limit', async () => {
+      const testConfiguration = {
+        sobject: 'Document',
+        includeDeleted: false,
+        outputMethod: 'emitAll',
+        termNumber: '2',
+      };
+      testCommon.configuration = { ...testCommon.configuration, ...testConfiguration };
+      context.testCommon = testCommon;
 
       const message = {
         body: {
@@ -545,30 +614,31 @@ describe('Lookup Objects action test', () => {
       };
 
       const testReply = {
-        results: [{
-          Id: 'testObjId',
-          FolderId: 'xxxyyyzzz',
-          Name: 'NotVeryImportantDoc',
-          IsPublic: false,
-          Body: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Everest_kalapatthar.jpg/800px-Everest_kalapatthar.jpg',
-          ContentType: 'imagine/noHeaven',
-        },
-        {
-          Id: 'testObjId',
-          FolderId: '123yyyzzz',
-          Name: 'VeryImportantDoc',
-          IsPublic: true,
-          Body: 'wikipedia.org',
-          ContentType: 'imagine/noHell',
-        },
+        results: [
+          {
+            Id: 'testObjId',
+            FolderId: 'xxxyyyzzz',
+            Name: 'NotVeryImportantDoc',
+            IsPublic: false,
+            Body: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Everest_kalapatthar.jpg/800px-Everest_kalapatthar.jpg',
+            ContentType: 'imagine/noHeaven',
+          },
+          {
+            Id: 'testObjId',
+            FolderId: '123yyyzzz',
+            Name: 'VeryImportantDoc',
+            IsPublic: true,
+            Body: 'wikipedia.org',
+            ContentType: 'imagine/noHell',
+          },
         ],
       };
 
       let expectedQuery = testCommon.buildSOQL(metaModelDocumentReply,
         'BodyLength%20EXCLUDES%20(32%2C12%2C234)%20'
-      + `${message.body.link_1_2}%20`
-      + `FolderId%20%3D%20%27${message.body.sTerm_2.fieldValue}%27%20`
-      + `%20LIMIT%20${message.body.limit}`);
+        + `${message.body.link_1_2}%20`
+        + `FolderId%20%3D%20%27${message.body.sTerm_2.fieldValue}%27%20`
+        + `%20LIMIT%20${message.body.limit}`);
       expectedQuery = expectedQuery.replace(/ /g, '%20');
 
       const scope = nock(testCommon.instanceUrl, { encodedQueryParams: true })
@@ -577,24 +647,19 @@ describe('Lookup Objects action test', () => {
         .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/query?q=${expectedQuery}`)
         .reply(200, { done: true, totalSize: testReply.results.length, records: testReply.results });
 
-      lookupObjects.process.call(testCommon, _.cloneDeep(message), testCommon.configuration);
-
-      return new Promise((resolve) => {
-        testCommon.emitCallback = (what, msg) => {
-          if (what === 'data') {
-            chai.expect(msg.body).to.deep.equal(testReply);
-            scope.done();
-            resolve();
-          }
-        };
-      });
+      await lookupObjects.process.call(context, message, testCommon.configuration);
+      validateEmitEqualsToReply(context.emit, testReply);
+      scope.done();
     });
-
-    it('Gets Account objects: 2 numeric search term, emitAll', () => {
-      testCommon.configuration.sobject = 'Account';
-      testCommon.configuration.includeDeleted = false;
-      testCommon.configuration.outputMethod = 'emitAll';
-      testCommon.configuration.termNumber = '2';
+    it('Gets Account objects: 2 numeric search term, emitAll', async () => {
+      const testConfiguration = {
+        sobject: 'Account',
+        includeDeleted: false,
+        outputMethod: 'emitAll',
+        termNumber: '2',
+      };
+      testCommon.configuration = { ...testCommon.configuration, ...testConfiguration };
+      context.testCommon = testCommon;
 
       const message = {
         body: {
@@ -613,30 +678,31 @@ describe('Lookup Objects action test', () => {
       };
 
       const testReply = {
-        results: [{
-          Id: 'testObjId',
-          FolderId: 'xxxyyyzzz',
-          Name: 'NotVeryImportantDoc',
-          IsPublic: false,
-          Body: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Everest_kalapatthar.jpg/800px-Everest_kalapatthar.jpg',
-          ContentType: 'imagine/noHeaven',
-        },
-        {
-          Id: 'testObjId',
-          FolderId: '123yyyzzz',
-          Name: 'VeryImportantDoc',
-          IsPublic: true,
-          Body: 'wikipedia.org',
-          ContentType: 'imagine/noHell',
-        },
+        results: [
+          {
+            Id: 'testObjId',
+            FolderId: 'xxxyyyzzz',
+            Name: 'NotVeryImportantDoc',
+            IsPublic: false,
+            Body: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Everest_kalapatthar.jpg/800px-Everest_kalapatthar.jpg',
+            ContentType: 'imagine/noHeaven',
+          },
+          {
+            Id: 'testObjId',
+            FolderId: '123yyyzzz',
+            Name: 'VeryImportantDoc',
+            IsPublic: true,
+            Body: 'wikipedia.org',
+            ContentType: 'imagine/noHell',
+          },
         ],
       };
 
       const expectedQuery = testCommon.buildSOQL(metaModelAccountReply,
         `NumberOfEmployees%20%3D%20${message.body.sTerm_1.fieldValue}%20`
-      + `${message.body.link_1_2}%20`
-      + `NumberOfEmployees%20%3E%20${message.body.sTerm_2.fieldValue}%20`
-      + '%20LIMIT%201000');
+        + `${message.body.link_1_2}%20`
+        + `NumberOfEmployees%20%3E%20${message.body.sTerm_2.fieldValue}%20`
+        + '%20LIMIT%201000');
 
       const scope = nock(testCommon.instanceUrl, { encodedQueryParams: true })
         .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Account/describe`)
@@ -644,23 +710,19 @@ describe('Lookup Objects action test', () => {
         .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/query?q=${expectedQuery}`)
         .reply(200, { done: true, totalSize: testReply.results.length, records: testReply.results });
 
-      lookupObjects.process.call(testCommon, _.cloneDeep(message), testCommon.configuration);
-      return new Promise((resolve) => {
-        testCommon.emitCallback = (what, msg) => {
-          if (what === 'data') {
-            chai.expect(msg.body).to.deep.equal(testReply);
-            scope.done();
-            resolve();
-          }
-        };
-      });
+      await lookupObjects.process.call(context, message, testCommon.configuration);
+      validateEmitEqualsToReply(context.emit, testReply);
+      scope.done();
     });
-
-    it('Gets Account objects: 2 numeric search term, emitIndividually, limit = 2', () => {
-      testCommon.configuration.sobject = 'Account';
-      testCommon.configuration.includeDeleted = false;
-      testCommon.configuration.outputMethod = 'emitIndividually';
-      testCommon.configuration.termNumber = '2';
+    it('Gets Account objects: 2 numeric search term, emitIndividually, limit = 2', async () => {
+      const testConfiguration = {
+        sobject: 'Account',
+        includeDeleted: false,
+        outputMethod: 'emitIndividually',
+        termNumber: '2',
+      };
+      testCommon.configuration = { ...testCommon.configuration, ...testConfiguration };
+      context.testCommon = testCommon;
 
       const message = {
         body: {
@@ -680,38 +742,39 @@ describe('Lookup Objects action test', () => {
       };
 
       const testReply = {
-        results: [{
-          Id: 'testObjId',
-          FolderId: 'xxxyyyzzz',
-          Name: 'NotVeryImportantDoc',
-          IsPublic: false,
-          Body: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Everest_kalapatthar.jpg/800px-Everest_kalapatthar.jpg',
-          ContentType: 'imagine/noHeaven',
-        },
-        {
-          Id: 'testObjId',
-          FolderId: '123yyyzzz',
-          Name: 'VeryImportantDoc',
-          IsPublic: true,
-          Body: 'wikipedia.org',
-          ContentType: 'imagine/noHell',
-        },
-        {
-          Id: 'tes12jId',
-          FolderId: '123sdfyyyzzz',
-          Name: 'sdfsdfg',
-          IsPublic: true,
-          Body: 'dfg.org',
-          ContentType: 'imagine/noHell',
-        },
+        results: [
+          {
+            Id: 'testObjId',
+            FolderId: 'xxxyyyzzz',
+            Name: 'NotVeryImportantDoc',
+            IsPublic: false,
+            Body: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Everest_kalapatthar.jpg/800px-Everest_kalapatthar.jpg',
+            ContentType: 'imagine/noHeaven',
+          },
+          {
+            Id: 'testObjId',
+            FolderId: '123yyyzzz',
+            Name: 'VeryImportantDoc',
+            IsPublic: true,
+            Body: 'wikipedia.org',
+            ContentType: 'imagine/noHell',
+          },
+          {
+            Id: 'tes12jId',
+            FolderId: '123sdfyyyzzz',
+            Name: 'sdfsdfg',
+            IsPublic: true,
+            Body: 'dfg.org',
+            ContentType: 'imagine/noHell',
+          },
         ],
       };
 
       const expectedQuery = testCommon.buildSOQL(metaModelAccountReply,
         `NumberOfEmployees%20%3D%20${message.body.sTerm_1.fieldValue}%20`
-      + `${message.body.link_1_2}%20`
-      + `NumberOfEmployees%20%3E%20${message.body.sTerm_2.fieldValue}%20`
-      + `%20LIMIT%20${message.body.limit}`);
+        + `${message.body.link_1_2}%20`
+        + `NumberOfEmployees%20%3E%20${message.body.sTerm_2.fieldValue}%20`
+        + `%20LIMIT%20${message.body.limit}`);
 
       const scope = nock(testCommon.instanceUrl, { encodedQueryParams: true })
         .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Account/describe`)
@@ -719,25 +782,22 @@ describe('Lookup Objects action test', () => {
         .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/query?q=${expectedQuery}`)
         .reply(200, { done: true, totalSize: testReply.results.length, records: testReply.results });
 
-      lookupObjects.process.call(testCommon, _.cloneDeep(message), testCommon.configuration);
-      return new Promise((resolve) => {
-        testCommon.emitCallback = (what, msg) => {
-          if (what === 'data') {
-            chai.expect(msg.body).to.deep.equal({ results: [testReply.results.shift()] });
-            if (testReply.results.length === 1) {
-              scope.done();
-              resolve();
-            }
-          }
-        };
-      });
+      await lookupObjects.process.call(context, message, testCommon.configuration);
+      const { emit } = context;
+      expect(emit.callCount).to.be.equal(2);
+      expect(emit.getCall(0).args[0]).to.be.equal('data');
+      expect(emit.getCall(0).args[1].body).to.be.deep.equal({ results: [testReply.results.shift()] });
+      scope.done();
     });
-
-    it('Gets Account objects: 2 numeric search term, emitPage, pageNumber = 0, pageSize = 2, includeDeleted', () => {
-      testCommon.configuration.sobject = 'Account';
-      testCommon.configuration.includeDeleted = true;
-      testCommon.configuration.outputMethod = 'emitPage';
-      testCommon.configuration.termNumber = '2';
+    it('Gets Account objects: 2 numeric search term, emitPage, pageNumber = 0, pageSize = 2, includeDeleted', async () => {
+      const testConfiguration = {
+        sobject: 'Account',
+        includeDeleted: true,
+        outputMethod: 'emitPage',
+        termNumber: '2',
+      };
+      testCommon.configuration = { ...testCommon.configuration, ...testConfiguration };
+      context.testCommon = testCommon;
 
       const message = {
         body: {
@@ -758,54 +818,55 @@ describe('Lookup Objects action test', () => {
       };
 
       const testReply = {
-        results: [{
-          Id: 'testObjId',
-          FolderId: 'xxxyyyzzz',
-          Name: 'NotVeryImportantDoc',
-          IsPublic: false,
-          Body: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Everest_kalapatthar.jpg/800px-Everest_kalapatthar.jpg',
-          ContentType: 'imagine/noHeaven',
-        },
-        {
-          Id: 'testObjId',
-          FolderId: '123yyyzzz',
-          Name: 'VeryImportantDoc',
-          IsPublic: true,
-          Body: 'wikipedia.org',
-          ContentType: 'imagine/noHell',
-        },
-        {
-          Id: 'tes12jId',
-          FolderId: '123sdfyyyzzz',
-          Name: 'sdfsdfg',
-          IsPublic: true,
-          Body: 'dfg.org',
-          ContentType: 'imagine/noHell',
-        },
-        {
-          Id: 't123es12jId',
-          FolderId: '123sdfysdfyyzzz',
-          Name: 'sdfsdfg',
-          IsPublic: true,
-          Body: 'dfg.osdfrg',
-          ContentType: 'imagine/nasdoHell',
-        },
-        {
-          Id: 'zzzzzzz',
-          FolderId: '123sdfysdfyyzzz',
-          Name: 'sdfsdfg',
-          IsPublic: true,
-          Body: 'dfg.osdfrg',
-          ContentType: 'imagine/nasdoHell',
-        },
+        results: [
+          {
+            Id: 'testObjId',
+            FolderId: 'xxxyyyzzz',
+            Name: 'NotVeryImportantDoc',
+            IsPublic: false,
+            Body: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Everest_kalapatthar.jpg/800px-Everest_kalapatthar.jpg',
+            ContentType: 'imagine/noHeaven',
+          },
+          {
+            Id: 'testObjId',
+            FolderId: '123yyyzzz',
+            Name: 'VeryImportantDoc',
+            IsPublic: true,
+            Body: 'wikipedia.org',
+            ContentType: 'imagine/noHell',
+          },
+          {
+            Id: 'tes12jId',
+            FolderId: '123sdfyyyzzz',
+            Name: 'sdfsdfg',
+            IsPublic: true,
+            Body: 'dfg.org',
+            ContentType: 'imagine/noHell',
+          },
+          {
+            Id: 't123es12jId',
+            FolderId: '123sdfysdfyyzzz',
+            Name: 'sdfsdfg',
+            IsPublic: true,
+            Body: 'dfg.osdfrg',
+            ContentType: 'imagine/nasdoHell',
+          },
+          {
+            Id: 'zzzzzzz',
+            FolderId: '123sdfysdfyyzzz',
+            Name: 'sdfsdfg',
+            IsPublic: true,
+            Body: 'dfg.osdfrg',
+            ContentType: 'imagine/nasdoHell',
+          },
         ],
       };
 
       const expectedQuery = testCommon.buildSOQL(metaModelAccountReply,
         `NumberOfEmployees%20%3D%20${message.body.sTerm_1.fieldValue}%20`
-      + `${message.body.link_1_2}%20`
-      + `NumberOfEmployees%20%3E%20${message.body.sTerm_2.fieldValue}%20`
-      + `%20LIMIT%20${message.body.pageSize}`);
+        + `${message.body.link_1_2}%20`
+        + `NumberOfEmployees%20%3E%20${message.body.sTerm_2.fieldValue}%20`
+        + `%20LIMIT%20${message.body.pageSize}`);
 
       const scope = nock(testCommon.instanceUrl, { encodedQueryParams: true })
         .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Account/describe`)
@@ -813,25 +874,20 @@ describe('Lookup Objects action test', () => {
         .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/queryAll?q=${expectedQuery}`)
         .reply(200, { done: true, totalSize: testReply.results.length, records: testReply.results });
 
-      lookupObjects.process.call(testCommon, _.cloneDeep(message), testCommon.configuration);
-      return new Promise((resolve) => {
-        testCommon.emitCallback = (what, msg) => {
-          if (what === 'data') {
-            chai.expect(msg.body).to.deep.equal({
-              results: [testReply.results[0], testReply.results[1]],
-            });
-            scope.done();
-            resolve();
-          }
-        };
-      });
+      await lookupObjects.process.call(testCommon, message, testCommon.configuration);
+      const { emit } = context;
+      expect(emit.callCount).to.be.equal(0);
+      scope.done();
     });
-
-    it('Gets Account objects: 3 search term, emitPage, pageNumber = 1, pageSize = 2', () => {
-      testCommon.configuration.sobject = 'Account';
-      testCommon.configuration.includeDeleted = false;
-      testCommon.configuration.outputMethod = 'emitPage';
-      testCommon.configuration.termNumber = '3';
+    it('Gets Account objects: 3 search term, emitPage, pageNumber = 1, pageSize = 2', async () => {
+      const testConfiguration = {
+        sobject: 'Account',
+        includeDeleted: false,
+        outputMethod: 'emitPage',
+        termNumber: '3',
+      };
+      testCommon.configuration = { ...testCommon.configuration, ...testConfiguration };
+      context.testCommon = testCommon;
 
       const message = {
         body: {
@@ -858,57 +914,58 @@ describe('Lookup Objects action test', () => {
       };
 
       const testReply = {
-        results: [{
-          Id: 'testObjId',
-          FolderId: 'xxxyyyzzz',
-          Name: 'NotVeryImportantDoc',
-          IsPublic: false,
-          Body: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Everest_kalapatthar.jpg/800px-Everest_kalapatthar.jpg',
-          ContentType: 'imagine/noHeaven',
-        },
-        {
-          Id: 'testObjId',
-          FolderId: '123yyyzzz',
-          Name: 'VeryImportantDoc',
-          IsPublic: true,
-          Body: 'wikipedia.org',
-          ContentType: 'imagine/noHell',
-        },
-        {
-          Id: 'tes12jId',
-          FolderId: '123sdfyyyzzz',
-          Name: 'sdfsdfg',
-          IsPublic: true,
-          Body: 'dfg.org',
-          ContentType: 'imagine/noHell',
-        },
-        {
-          Id: 't123es12jId',
-          FolderId: '123sdfysdfyyzzz',
-          Name: 'sdfsdfg',
-          IsPublic: true,
-          Body: 'dfg.osdfrg',
-          ContentType: 'imagine/nasdoHell',
-        },
-        {
-          Id: 'zzzzzzz',
-          FolderId: '123sdfysdfyyzzz',
-          Name: 'sdfsdfg',
-          IsPublic: true,
-          Body: 'dfg.osdfrg',
-          ContentType: 'imagine/nasdoHell',
-        },
+        results: [
+          {
+            Id: 'testObjId',
+            FolderId: 'xxxyyyzzz',
+            Name: 'NotVeryImportantDoc',
+            IsPublic: false,
+            Body: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Everest_kalapatthar.jpg/800px-Everest_kalapatthar.jpg',
+            ContentType: 'imagine/noHeaven',
+          },
+          {
+            Id: 'testObjId',
+            FolderId: '123yyyzzz',
+            Name: 'VeryImportantDoc',
+            IsPublic: true,
+            Body: 'wikipedia.org',
+            ContentType: 'imagine/noHell',
+          },
+          {
+            Id: 'tes12jId',
+            FolderId: '123sdfyyyzzz',
+            Name: 'sdfsdfg',
+            IsPublic: true,
+            Body: 'dfg.org',
+            ContentType: 'imagine/noHell',
+          },
+          {
+            Id: 't123es12jId',
+            FolderId: '123sdfysdfyyzzz',
+            Name: 'sdfsdfg',
+            IsPublic: true,
+            Body: 'dfg.osdfrg',
+            ContentType: 'imagine/nasdoHell',
+          },
+          {
+            Id: 'zzzzzzz',
+            FolderId: '123sdfysdfyyzzz',
+            Name: 'sdfsdfg',
+            IsPublic: true,
+            Body: 'dfg.osdfrg',
+            ContentType: 'imagine/nasdoHell',
+          },
         ],
       };
 
       const expectedQuery = testCommon.buildSOQL(metaModelAccountReply,
         `NumberOfEmployees%20%3D%20${message.body.sTerm_1.fieldValue}%20`
-      + `${message.body.link_1_2}%20`
-      + `NumberOfEmployees%20%3E%20${message.body.sTerm_2.fieldValue}%20`
-      + `${message.body.link_2_3}%20`
-      + `Name%20LIKE%20%27${message.body.sTerm_3.fieldValue}%27%20`
-      + `%20LIMIT%20${message.body.pageSize}`
-      + `%20OFFSET%20${message.body.pageSize}`);
+        + `${message.body.link_1_2}%20`
+        + `NumberOfEmployees%20%3E%20${message.body.sTerm_2.fieldValue}%20`
+        + `${message.body.link_2_3}%20`
+        + `Name%20LIKE%20%27${message.body.sTerm_3.fieldValue}%27%20`
+        + `%20LIMIT%20${message.body.pageSize}`
+        + `%20OFFSET%20${message.body.pageSize}`);
 
       const scope = nock(testCommon.instanceUrl, { encodedQueryParams: true })
         .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Account/describe`)
@@ -916,18 +973,124 @@ describe('Lookup Objects action test', () => {
         .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/query?q=${expectedQuery}`)
         .reply(200, { done: true, totalSize: testReply.results.length, records: testReply.results });
 
-      lookupObjects.process.call(testCommon, _.cloneDeep(message), testCommon.configuration);
-      return new Promise((resolve) => {
-        testCommon.emitCallback = (what, msg) => {
-          if (what === 'data') {
-            chai.expect(msg.body).to.deep.equal({
-              results: [testReply.results[0], testReply.results[1]],
-            });
-            scope.done();
-            resolve();
-          }
-        };
-      });
+      await lookupObjects.process.call(context, message, testCommon.configuration);
+      const { emit } = context;
+      expect(emit.callCount).to.be.equal(1);
+      expect(emit.getCall(0).args[0]).to.be.equal('data');
+      expect(emit.getCall(0).args[1].body).to.be.deep.equal({ results: [testReply.results[0], testReply.results[1]] });
+      scope.done();
+    });
+    it('Should use default limit value', async () => {
+      const testConfiguration = {
+        sobject: 'Document',
+        includeDeleted: false,
+        outputMethod: 'emitAll',
+        termNumber: '2',
+      };
+      testCommon.configuration = { ...testCommon.configuration, ...testConfiguration };
+      context.testCommon = testCommon;
+
+      const message = {
+        body: {
+          limit: 0,
+          sTerm_1: {
+            fieldName: 'Document Name',
+            fieldValue: 'NotVeryImportantDoc',
+            condition: '=',
+          },
+          link_1_2: 'AND',
+          sTerm_2: {
+            fieldName: 'Folder ID',
+            fieldValue: 'Some folder ID',
+            condition: '=',
+          },
+        },
+      };
+
+      const testReply = {
+        results: [
+          {
+            Id: 'testObjId',
+            FolderId: 'xxxyyyzzz',
+            Name: 'NotVeryImportantDoc',
+            IsPublic: false,
+            Body: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Everest_kalapatthar.jpg/800px-Everest_kalapatthar.jpg',
+            ContentType: 'imagine/noHeaven',
+          },
+          {
+            Id: 'testObjId',
+            FolderId: '123yyyzzz',
+            Name: 'VeryImportantDoc',
+            IsPublic: true,
+            Body: 'wikipedia.org',
+            ContentType: 'imagine/noHell',
+          },
+        ],
+      };
+
+      let expectedQuery = testCommon.buildSOQL(metaModelDocumentReply,
+        `Name%20%3D%20%27${message.body.sTerm_1.fieldValue}%27%20`
+        + `${message.body.link_1_2}%20`
+        + `FolderId%20%3D%20%27${message.body.sTerm_2.fieldValue}%27%20`
+        + `%20LIMIT%20${DEFAULT_LIMIT_EMITALL}`);
+      expectedQuery = expectedQuery.replace(/ /g, '%20');
+
+      const scope = nock(testCommon.instanceUrl, { encodedQueryParams: true })
+        .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
+        .reply(200, metaModelDocumentReply)
+        .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/query?q=${expectedQuery}`)
+        .reply(200, { done: true, totalSize: testReply.results.length, records: testReply.results });
+
+      await lookupObjects.process.call(context, message, testCommon.configuration);
+      validateEmitEqualsToReply(context.emit, testReply);
+      scope.done();
+    });
+    it('emitIndividually, no results found => should emit empty array', async () => {
+      const testConfiguration = {
+        sobject: 'Document',
+        includeDeleted: false,
+        outputMethod: 'emitIndividually',
+        termNumber: '2',
+      };
+      testCommon.configuration = { ...testCommon.configuration, ...testConfiguration };
+      context.testCommon = testCommon;
+
+      const message = {
+        body: {
+          limit: 30,
+          sTerm_1: {
+            fieldName: 'Document Name',
+            fieldValue: 'NotVeryImportantDoc',
+            condition: '=',
+          },
+          link_1_2: 'AND',
+          sTerm_2: {
+            fieldName: 'Folder ID',
+            fieldValue: 'Some folder ID',
+            condition: '=',
+          },
+        },
+      };
+
+      let expectedQuery = testCommon.buildSOQL(metaModelDocumentReply,
+        `Name%20%3D%20%27${message.body.sTerm_1.fieldValue}%27%20`
+        + `${message.body.link_1_2}%20`
+        + `FolderId%20%3D%20%27${message.body.sTerm_2.fieldValue}%27%20`
+        + `%20LIMIT%20${message.body.limit}`);
+      expectedQuery = expectedQuery.replace(/ /g, '%20');
+
+      const scope = nock(testCommon.instanceUrl, { encodedQueryParams: true })
+        .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
+        .reply(200, metaModelDocumentReply)
+        .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/query?q=${expectedQuery}`)
+        .reply(200, { done: true, totalSize: 0, records: [] });
+
+      await lookupObjects.process.call(context, message, testCommon.configuration);
+      const spy = context.emit;
+      expect(spy.callCount).to.be.equal(1);
+      expect(spy.getCall(0).args[0]).to.be.equal('data');
+      expect(spy.getCall(0).args[1].body).to.be.deep.equal({ results: [] });
+      scope.done();
     });
   });
 });
