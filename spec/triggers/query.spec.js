@@ -35,6 +35,7 @@ describe('Query module: processTrigger', () => {
   };
   const expectedQuery = 'select%20name%2C%20id%20from%20account%20where%20name%20%3D%20%27testtest%27';
   beforeEach(() => {
+    context.emit.resetHistory();
     nock(process.env.ELASTICIO_API_URI)
       .get(`/v2/workspaces/${process.env.ELASTICIO_WORKSPACE_ID}/secrets/${testCommon.secretId}`)
       .times(5)
@@ -46,7 +47,6 @@ describe('Query module: processTrigger', () => {
 
   afterEach(() => {
     nock.cleanAll();
-    context.emit.resetHistory();
   });
 
   it('Gets objects emitAll', async () => {
