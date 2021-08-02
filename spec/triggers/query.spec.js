@@ -55,7 +55,7 @@ describe('Query module: processTrigger', () => {
     expect(context.emit.getCall(0).lastArg.body.records).to.deep.equal(testReply.result);
   });
 
-  it.skip('Gets objects emitIndividually', async () => {
+  it('Gets objects emitIndividually', async () => {
     testCommon.configuration.outputMethod = 'emitIndividually';
     await queryObjects.process.call(context, {}, testCommon.configuration);
     expect(context.emit.getCall(0).lastArg.body).to.deep.equal(testReply.result[0]);

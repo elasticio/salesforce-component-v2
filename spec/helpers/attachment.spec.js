@@ -36,10 +36,10 @@ describe('attachment helper', () => {
   };
 
   describe('prepareBinaryData test', () => {
-    it.skip('should upload attachment utilizeAttachment:true', async () => {
+    it('should upload attachment utilizeAttachment:true', async () => {
       const msg = {
         body: {
-          Name: 'Attachment',
+          Name: 'TryTest',
         },
         attachments: {
           'Fox.jpeg': {
@@ -50,7 +50,7 @@ describe('attachment helper', () => {
         },
       };
       await prepareBinaryData(msg, { ...configuration, utilizeAttachment: true }, { logger });
-      expect(msg.body.Name).to.eql('Attachment');
+      expect(msg.body.Name).to.eql('TryTest');
       expect(msg.body.ContentType).to.eql('image/jpeg');
       expect(Object.prototype.hasOwnProperty.call(msg.body, 'Body')).to.eql(true);
     });
