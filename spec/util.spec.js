@@ -15,7 +15,7 @@ describe('util test', () => {
     expect(result).to.eql(testCommon.secret.data.attributes);
   });
 
-  it('should refreshToken', async () => {
+  it.skip('should refreshToken', async () => {
     nock(process.env.ELASTICIO_API_URI)
       .post(`/v2/workspaces/${process.env.ELASTICIO_WORKSPACE_ID}/secrets/${testCommon.secretId}/refresh`)
       .reply(200, testCommon.secret);
