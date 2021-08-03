@@ -2,12 +2,12 @@
 const nock = require('nock');
 const { expect } = require('chai');
 
-const documentWith_1_searchTerm = require('./outMetadataSchemas/DocumentWith_1_searchTerm.json');
-const documentWith_2_searchTerms = require('./outMetadataSchemas/DocumentWith_2_searchTerms.json');
-const accountWith_2_searchTerms = require('./outMetadataSchemas/AccountWith_2_searchTerms.json');
+const documentWith_1_searchTerm = require('./outMetadataSchemas/lookupObjects/DocumentWith_1_searchTerm.json');
+const documentWith_2_searchTerms = require('./outMetadataSchemas/lookupObjects/DocumentWith_2_searchTerms.json');
+const accountWith_2_searchTerms = require('./outMetadataSchemas/lookupObjects/AccountWith_2_searchTerms.json');
 const { globalConsts } = require('../../lib/common.js');
 const {
-  getContext, fetchToken, defaultCfg, testsCommon,
+  getContext, fetchToken, defaultCfg, testsCommon, validateEmitEqualsToData,
 } = require('../common.js');
 const objectTypesReply = require('../testData/sfObjects.json');
 const metaModelDocumentReply = require('../testData/sfDocumentMetadata.json');
@@ -18,11 +18,6 @@ const DEFAULT_LIMIT_EMITALL = 1000;
 const lookupObjects = require('../../lib/actions/lookupObjects.js');
 
 describe('Lookup Objects action test', () => {
-  const validateEmitEqualsToReply = (emit, reply) => {
-    expect(emit.callCount).to.be.equal(1);
-    expect(emit.getCall(0).args[0]).to.be.equal('data');
-    expect(emit.getCall(0).args[1].body).to.be.deep.equal(reply);
-  };
   describe('Lookup Objects module: objectTypes', () => {
     it('Retrieves the list of queryable sobjects', async () => {
       fetchToken();
@@ -45,6 +40,7 @@ describe('Lookup Objects action test', () => {
     describe('valid input', () => {
       it('Retrieves metadata for Document object', async () => {
         const testCfg = {
+          ...defaultCfg,
           sobject: 'Document',
           outputMethod: 'emitAll',
           termNumber: '1',
@@ -54,12 +50,13 @@ describe('Lookup Objects action test', () => {
           .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/${testCfg.sobject}/describe`)
           .reply(200, metaModelDocumentReply);
 
-        const result = await lookupObjects.getMetaModel.call(getContext(), { ...defaultCfg, ...testCfg });
+        const result = await lookupObjects.getMetaModel.call(getContext(), testCfg);
         expect(result).to.be.deep.equal(documentWith_1_searchTerm);
         describeReq.done();
       });
       it('Retrieves metadata for Document object 2 terms', async () => {
         const testCfg = {
+          ...defaultCfg,
           sobject: 'Document',
           outputMethod: 'emitAll',
           termNumber: '2',
@@ -69,12 +66,13 @@ describe('Lookup Objects action test', () => {
           .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/${testCfg.sobject}/describe`)
           .reply(200, metaModelDocumentReply);
 
-        const result = await lookupObjects.getMetaModel.call(getContext(), { ...defaultCfg, ...testCfg });
+        const result = await lookupObjects.getMetaModel.call(getContext(), testCfg);
         expect(result).to.be.deep.equal(documentWith_2_searchTerms);
         describeReq.done();
       });
       it('Retrieves metadata for Account object 2 terms', async () => {
         const testCfg = {
+          ...defaultCfg,
           sobject: 'Account',
           outputMethod: 'emitPage',
           termNumber: '2',
@@ -84,7 +82,7 @@ describe('Lookup Objects action test', () => {
           .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/${testCfg.sobject}/describe`)
           .reply(200, metaModelAccountReply);
 
-        const result = await lookupObjects.getMetaModel.call(getContext(), { ...defaultCfg, ...testCfg });
+        const result = await lookupObjects.getMetaModel.call(getContext(), testCfg);
         expect(result).to.be.deep.equal(accountWith_2_searchTerms);
         describeReq.done();
       });
@@ -92,6 +90,7 @@ describe('Lookup Objects action test', () => {
     describe('invalid input', () => {
       it('Should throw an error (termNumber is not valid)', async () => {
         const testCfg = {
+          ...defaultCfg,
           sobject: 'Account',
           outputMethod: 'emitPage',
           termNumber: 'invalid',
@@ -101,7 +100,7 @@ describe('Lookup Objects action test', () => {
           .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/${testCfg.sobject}/describe`)
           .reply(200, metaModelAccountReply);
         try {
-          await lookupObjects.getMetaModel.call(getContext(), { ...defaultCfg, ...testCfg });
+          await lookupObjects.getMetaModel.call(getContext(), testCfg);
         } catch (err) {
           expect(err.message).to.be.equal('Number of search terms must be an integer value from the interval [0-99]');
         }
@@ -109,6 +108,7 @@ describe('Lookup Objects action test', () => {
       });
       it('Should throw an error (termNumber is not valid)', async () => {
         const testCfg = {
+          ...defaultCfg,
           sobject: 'Account',
           outputMethod: 'emitPage',
           termNumber: '',
@@ -118,7 +118,7 @@ describe('Lookup Objects action test', () => {
           .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/${testCfg.sobject}/describe`)
           .reply(200, metaModelAccountReply);
         try {
-          await lookupObjects.getMetaModel.call(getContext(), { ...defaultCfg, ...testCfg });
+          await lookupObjects.getMetaModel.call(getContext(), testCfg);
         } catch (err) {
           expect(err.message).to.be.equal('Number of search terms must be an integer value from the interval [0-99]');
         }
@@ -126,6 +126,7 @@ describe('Lookup Objects action test', () => {
       });
       it('Should throw an error (termNumber is not valid)', async () => {
         const testCfg = {
+          ...defaultCfg,
           sobject: 'Account',
           outputMethod: 'emitPage',
           termNumber: undefined,
@@ -135,7 +136,7 @@ describe('Lookup Objects action test', () => {
           .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/${testCfg.sobject}/describe`)
           .reply(200, metaModelAccountReply);
         try {
-          await lookupObjects.getMetaModel.call(getContext(), { ...defaultCfg, ...testCfg });
+          await lookupObjects.getMetaModel.call(getContext(), testCfg);
         } catch (err) {
           expect(err.message).to.be.equal('Number of search terms must be an integer value from the interval [0-99]');
         }
@@ -143,6 +144,7 @@ describe('Lookup Objects action test', () => {
       });
       it('Should throw an error (termNumber is not valid)', async () => {
         const testCfg = {
+          ...defaultCfg,
           sobject: 'Account',
           outputMethod: 'emitPage',
           termNumber: [1, 2],
@@ -152,7 +154,7 @@ describe('Lookup Objects action test', () => {
           .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/${testCfg.sobject}/describe`)
           .reply(200, metaModelAccountReply);
         try {
-          await lookupObjects.getMetaModel.call(getContext(), { ...defaultCfg, ...testCfg });
+          await lookupObjects.getMetaModel.call(getContext(), testCfg);
         } catch (err) {
           expect(err.message).to.be.equal('Number of search terms must be an integer value from the interval [0-99]');
         }
@@ -164,6 +166,7 @@ describe('Lookup Objects action test', () => {
   describe('Lookup Objects module: processAction', () => {
     it('Gets Document objects: 2 string search terms, emitAll, limit', async () => {
       const testCfg = {
+        ...defaultCfg,
         sobject: 'Document',
         includeDeleted: false,
         outputMethod: 'emitAll',
@@ -223,13 +226,14 @@ describe('Lookup Objects action test', () => {
         .reply(200, { done: true, totalSize: testReply.results.length, records: testReply.results });
 
       const context = getContext();
-      await lookupObjects.process.call(context, msg, { ...defaultCfg, ...testCfg });
-      validateEmitEqualsToReply(context.emit, testReply);
+      await lookupObjects.process.call(context, msg, testCfg);
+      validateEmitEqualsToData(context.emit, testReply);
       describeReq.done();
       queryReq.done();
     });
     it('Gets Document objects: 2 string search terms, IN operator, emitAll, limit', async () => {
       const testCfg = {
+        ...defaultCfg,
         sobject: 'Document',
         includeDeleted: false,
         outputMethod: 'emitAll',
@@ -289,13 +293,14 @@ describe('Lookup Objects action test', () => {
         .reply(200, { done: true, totalSize: testReply.results.length, records: testReply.results });
 
       const context = getContext();
-      await lookupObjects.process.call(context, msg, { ...defaultCfg, ...testCfg });
-      validateEmitEqualsToReply(context.emit, testReply);
+      await lookupObjects.process.call(context, msg, testCfg);
+      validateEmitEqualsToData(context.emit, testReply);
       describeReq.done();
       queryReq.done();
     });
     it('Gets Document objects: 2 string search terms, NOT IN operator, emitAll, limit', async () => {
       const testCfg = {
+        ...defaultCfg,
         sobject: 'Document',
         includeDeleted: false,
         outputMethod: 'emitAll',
@@ -355,13 +360,14 @@ describe('Lookup Objects action test', () => {
         .reply(200, { done: true, totalSize: testReply.results.length, records: testReply.results });
 
       const context = getContext();
-      await lookupObjects.process.call(context, msg, { ...defaultCfg, ...testCfg });
-      validateEmitEqualsToReply(context.emit, testReply);
+      await lookupObjects.process.call(context, msg, testCfg);
+      validateEmitEqualsToData(context.emit, testReply);
       describeReq.done();
       queryReq.done();
     });
     it('Gets Document objects: 2 string search terms, INCLUDES operator, emitAll, limit', async () => {
       const testCfg = {
+        ...defaultCfg,
         sobject: 'Document',
         includeDeleted: false,
         outputMethod: 'emitAll',
@@ -421,13 +427,14 @@ describe('Lookup Objects action test', () => {
         .reply(200, { done: true, totalSize: testReply.results.length, records: testReply.results });
 
       const context = getContext();
-      await lookupObjects.process.call(context, msg, { ...defaultCfg, ...testCfg });
-      validateEmitEqualsToReply(context.emit, testReply);
+      await lookupObjects.process.call(context, msg, testCfg);
+      validateEmitEqualsToData(context.emit, testReply);
       describeReq.done();
       queryReq.done();
     });
     it('Gets Document objects: 2 string search terms, EXCLUDES operator, emitAll, limit', async () => {
       const testCfg = {
+        ...defaultCfg,
         sobject: 'Document',
         includeDeleted: false,
         outputMethod: 'emitAll',
@@ -489,13 +496,14 @@ describe('Lookup Objects action test', () => {
         .reply(200, { done: true, totalSize: testReply.results.length, records: testReply.results });
 
       const context = getContext();
-      await lookupObjects.process.call(context, msg, { ...defaultCfg, ...testCfg });
-      validateEmitEqualsToReply(context.emit, testReply);
+      await lookupObjects.process.call(context, msg, testCfg);
+      validateEmitEqualsToData(context.emit, testReply);
       describeReq.done();
       queryReq.done();
     });
     it('Gets Account objects: 2 numeric search term, emitAll', async () => {
       const testCfg = {
+        ...defaultCfg,
         sobject: 'Account',
         includeDeleted: false,
         outputMethod: 'emitAll',
@@ -553,12 +561,13 @@ describe('Lookup Objects action test', () => {
         .reply(200, { done: true, totalSize: testReply.results.length, records: testReply.results });
 
       const context = getContext();
-      await lookupObjects.process.call(context, msg, { ...defaultCfg, ...testCfg });
+      await lookupObjects.process.call(context, msg, testCfg);
       describeReq.done();
       queryReq.done();
     });
     it('Gets Account objects: 2 numeric search term, emitIndividually, limit = 2', async () => {
       const testCfg = {
+        ...defaultCfg,
         sobject: 'Account',
         includeDeleted: false,
         outputMethod: 'emitIndividually',
@@ -625,7 +634,7 @@ describe('Lookup Objects action test', () => {
         .reply(200, { done: true, totalSize: testReply.results.length, records: testReply.results });
 
       const context = getContext();
-      await lookupObjects.process.call(context, msg, { ...defaultCfg, ...testCfg });
+      await lookupObjects.process.call(context, msg, testCfg);
       const { emit } = context;
       expect(emit.callCount).to.be.equal(2);
       expect(emit.getCall(0).args[0]).to.be.equal('data');
@@ -635,6 +644,7 @@ describe('Lookup Objects action test', () => {
     });
     it('Gets Account objects: 2 numeric search term, emitPage, pageNumber = 0, pageSize = 2, includeDeleted', async () => {
       const testCfg = {
+        ...defaultCfg,
         sobject: 'Account',
         includeDeleted: true,
         outputMethod: 'emitPage',
@@ -718,7 +728,7 @@ describe('Lookup Objects action test', () => {
         .reply(200, { done: true, totalSize: testReply.results.length, records: testReply.results });
 
       const context = getContext();
-      await lookupObjects.process.call(context, msg, { ...defaultCfg, ...testCfg });
+      await lookupObjects.process.call(context, msg, testCfg);
       const { emit } = context;
       expect(emit.getCall(0).args[1].body).to.be.deep.equal({ results: [testReply.results[0], testReply.results[1]] });
       describeReq.done();
@@ -726,6 +736,7 @@ describe('Lookup Objects action test', () => {
     });
     it('Gets Account objects: 3 search term, emitPage, pageNumber = 1, pageSize = 2', async () => {
       const testCfg = {
+        ...defaultCfg,
         sobject: 'Account',
         includeDeleted: false,
         outputMethod: 'emitPage',
@@ -818,7 +829,7 @@ describe('Lookup Objects action test', () => {
         .reply(200, { done: true, totalSize: testReply.results.length, records: testReply.results });
 
       const context = getContext();
-      await lookupObjects.process.call(context, msg, { ...defaultCfg, ...testCfg });
+      await lookupObjects.process.call(context, msg, testCfg);
       const { emit } = context;
       expect(emit.callCount).to.be.equal(1);
       expect(emit.getCall(0).args[0]).to.be.equal('data');
@@ -888,12 +899,13 @@ describe('Lookup Objects action test', () => {
 
       const context = getContext();
       await lookupObjects.process.call(context, msg, { ...defaultCfg, ...testsCfg });
-      validateEmitEqualsToReply(context.emit, testReply);
+      validateEmitEqualsToData(context.emit, testReply);
       describeReq.done();
       queryReq.done();
     });
     it('emitIndividually, no results found => should emit empty array', async () => {
       const testCfg = {
+        ...defaultCfg,
         sobject: 'Document',
         includeDeleted: false,
         outputMethod: 'emitIndividually',
@@ -933,7 +945,7 @@ describe('Lookup Objects action test', () => {
         .reply(200, { done: true, totalSize: 0, records: [] });
 
       const context = getContext();
-      await lookupObjects.process.call(context, msg, { ...defaultCfg, ...testCfg });
+      await lookupObjects.process.call(context, msg, testCfg);
       const spy = context.emit;
       expect(spy.callCount).to.be.equal(1);
       expect(spy.getCall(0).args[0]).to.be.equal('data');

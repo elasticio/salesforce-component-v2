@@ -2,6 +2,7 @@ require('elasticio-rest-node');
 const { getLogger } = require('@elastic.io/component-commons-library/lib/logger/logger');
 const nock = require('nock');
 const sinon = require('sinon');
+const { expect } = require('chai');
 
 process.env.OAUTH_CLIENT_ID = 'asd';
 process.env.OAUTH_CLIENT_SECRET = 'sdc';
@@ -91,5 +92,10 @@ module.exports = {
     nock(process.env.ELASTICIO_API_URI)
       .get(`/v2/workspaces/${process.env.ELASTICIO_WORKSPACE_ID}/secrets/${secretId}`)
       .reply(200, secret);
+  },
+  validateEmitEqualsToData: (emit, data) => {
+    expect(emit.callCount).to.be.equal(1);
+    expect(emit.getCall(0).args[0]).to.be.equal('data');
+    expect(emit.getCall(0).args[1].body).to.be.deep.equal(data);
   },
 };
