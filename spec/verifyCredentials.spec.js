@@ -1,17 +1,12 @@
-const chaiAsPromised = require('chai-as-promised');
-const chai = require('chai');
-
-chai.use(chaiAsPromised);
-const { expect } = chai;
-
+const { expect } = require('chai');
 const nock = require('nock');
-const logger = require('@elastic.io/component-logger')();
 
-const common = require('../lib/common.js');
-const testCommon = require('./common');
+const { globalConsts } = require('../lib/common.js');
 const verify = require('../verifyCredentials');
+const {
+  getContext, testsCommon, fetchToken,
+} = require('./common');
 
-let cfg;
 const testReply = {
   result: [
     {
@@ -35,33 +30,35 @@ const testReply = {
 
 describe('Verify Credentials', () => {
   it('should return verified true for 200 answer', async () => {
-    cfg = {
-      oauth: {
-        access_token: 'accessToken',
-        undefined_params: {
-          instance_url: testCommon.instanceUrl,
-        },
-      },
+    const testCfg = {
+      oauth: testsCommon.secret.data.attributes.credentials,
     };
-    nock(testCommon.instanceUrl, { encodedQueryParams: true })
-      .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects`)
+
+    fetchToken();
+    const sobjectsReq = nock(testsCommon.instanceUrl)
+      .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects`)
       .reply(200, { done: true, totalSize: testReply.result.length, sobjects: testReply.result });
-    const result = await verify.call({ logger }, cfg);
+
+    const result = await verify.call(getContext(), testCfg);
     expect(result).to.deep.equal({ verified: true });
+    sobjectsReq.done();
   });
 
   it('should throwError', async () => {
-    cfg = {
-      oauth: {
-        access_token: 'accessToken',
-        undefined_params: {
-          instance_url: testCommon.instanceUrl,
-        },
-      },
+    const testCfg = {
+      oauth: testsCommon.secret.data.attributes.credentials,
     };
-    nock(testCommon.instanceUrl, { encodedQueryParams: true })
-      .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects`)
-      .reply(500);
-    await expect(verify.call({ logger }, cfg)).be.rejected;
+
+    fetchToken();
+    const sobjectsReq = nock(testsCommon.instanceUrl)
+      .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects`)
+      .replyWithError('some error');
+
+    try {
+      await verify.call(getContext(), testCfg);
+    } catch (err) {
+      expect(err.message).to.be.equal('some error');
+    }
+    sobjectsReq.done();
   });
 });
