@@ -9,7 +9,7 @@ const metaModelDocumentReply = require('../testData/sfDocumentMetadata.json');
 const metaModelAccountReply = require('../testData/sfAccountMetadata.json');
 const createObject = require('../../lib/actions/createObject.js');
 
-describe('Create Object action test', () => {
+xdescribe('Create Object action test', () => {
   beforeEach(() => {
     nock(process.env.ELASTICIO_API_URI)
       .get(`/v2/workspaces/${process.env.ELASTICIO_WORKSPACE_ID}/secrets/${testCommon.secretId}`)

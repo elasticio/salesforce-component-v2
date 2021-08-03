@@ -10,7 +10,7 @@ const metaModelDocumentReply = require('../testData/sfDocumentMetadata.json');
 const metaModelAccountReply = require('../testData/sfAccountMetadata.json');
 const upsertObject = require('../../lib/actions/upsert.js');
 
-describe('Upsert Object test', () => {
+xdescribe('Upsert Object test', () => {
   beforeEach(() => {
     nock(process.env.ELASTICIO_API_URI)
       .get(`/v2/workspaces/${process.env.ELASTICIO_WORKSPACE_ID}/secrets/${testCommon.secretId}`)

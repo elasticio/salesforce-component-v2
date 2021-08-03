@@ -10,7 +10,7 @@ const testCommon = require('../common.js');
 
 const queryObjects = require('../../lib/actions/query.js');
 
-describe('Query module: processAction', () => {
+xdescribe('Query module: processAction', () => {
   const context = { emit: sinon.spy(), logger };
 
   const testReply = {

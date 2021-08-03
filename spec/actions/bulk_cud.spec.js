@@ -1,25 +1,21 @@
 /* eslint-disable guard-for-in,no-restricted-syntax */
-const chai = require('chai');
+const { expect } = require('chai');
 const nock = require('nock');
 
-const testCommon = require('../common.js');
+const {
+  getContext, fetchToken, defaultCfg,
+} = require('../common.js');
 const testData = require('../testData/bulk_cud.json');
 const bulk = require('../../lib/actions/bulk_cud.js');
 
 describe('Salesforce bulk', () => {
-  beforeEach(async () => {
-    nock(process.env.ELASTICIO_API_URI)
-      .get(`/v2/workspaces/${process.env.ELASTICIO_WORKSPACE_ID}/secrets/${testCommon.secretId}`)
-      .reply(200, testCommon.secret);
-  });
-
-  afterEach(() => {
-    nock.cleanAll();
-  });
   it('action create', async () => {
-    const data = testData.bulkInsertCase;
-    data.configuration = { ...testCommon.configuration, ...data.configuration };
-
+    const testApproach = testData.bulkInsertCase;
+    const testCfg = {
+      ...defaultCfg,
+      ...testApproach.configuration,
+    };
+    const msg = { ...testApproach.message };
     const expectedResult = {
       result: [
         { id: '5002o00002E8FIIAA3', success: true, errors: [] },
@@ -28,69 +24,66 @@ describe('Salesforce bulk', () => {
       ],
     };
 
-    const scopes = [];
-    for (const host in data.responses) {
-      for (const path in data.responses[host]) {
-        scopes.push(nock(host)
-          .intercept(path, data.responses[host][path].method)
-          .reply(200, data.responses[host][path].response, data.responses[host][path].header));
+    fetchToken();
+    const requests = [];
+    for (const host in testApproach.responses) {
+      for (const path in testApproach.responses[host]) {
+        requests.push(nock(host)
+          .intercept(path, testApproach.responses[host][path].method)
+          .reply(200, testApproach.responses[host][path].response, testApproach.responses[host][path].header));
       }
     }
 
-    const result = await bulk.process.call(testCommon, data.message, data.configuration);
-
-    chai.expect(result.body).to.deep.equal(expectedResult);
-
-    for (let i = 0; i < scopes.length; i += 1) {
-      scopes[i].done();
-    }
+    const result = await bulk.process.call(getContext(), msg, testCfg);
+    expect(result.body).to.deep.equal(expectedResult);
+    for (let i = 0; i < requests.length; i += 1) requests[i].done();
   });
 
   it('action update', async () => {
-    const data = testData.bulkUpdateCase;
-    data.configuration = { ...testCommon.configuration, ...data.configuration };
-
+    const testApproach = testData.bulkUpdateCase;
+    const testCfg = {
+      ...defaultCfg,
+      ...testApproach.configuration,
+    };
+    const msg = { ...testApproach.message };
     const expectedResult = { result: [{ id: null, success: false, errors: ['ENTITY_IS_DELETED:entity is deleted:--'] }] };
 
-    const scopes = [];
-    for (const host in data.responses) {
-      for (const path in data.responses[host]) {
-        scopes.push(nock(host)
-          .intercept(path, data.responses[host][path].method)
-          .reply(200, data.responses[host][path].response, data.responses[host][path].header));
+    fetchToken();
+    const requests = [];
+    for (const host in testApproach.responses) {
+      for (const path in testApproach.responses[host]) {
+        requests.push(nock(host)
+          .intercept(path, testApproach.responses[host][path].method)
+          .reply(200, testApproach.responses[host][path].response, testApproach.responses[host][path].header));
       }
     }
 
-    const result = await bulk.process.call(testCommon, data.message, data.configuration);
-
-    chai.expect(result.body).to.deep.equal(expectedResult);
-
-    for (let i = 0; i < scopes.length; i += 1) {
-      scopes[i].done();
-    }
+    const result = await bulk.process.call(getContext(), msg, testCfg);
+    expect(result.body).to.deep.equal(expectedResult);
+    for (let i = 0; i < requests.length; i += 1) requests[i].done();
   });
 
   it('action delete', async () => {
-    const data = testData.bulkDeleteCase;
-    data.configuration = { ...testCommon.configuration, ...data.configuration };
-
+    const testApproach = testData.bulkDeleteCase;
+    const testCfg = {
+      ...defaultCfg,
+      ...testApproach.configuration,
+    };
+    const msg = { ...testApproach.message };
     const expectedResult = { result: [{ id: '5002o00002BT0IUAA1', success: true, errors: [] }] };
 
-    const scopes = [];
-    for (const host in data.responses) {
-      for (const path in data.responses[host]) {
-        scopes.push(nock(host)
-          .intercept(path, data.responses[host][path].method)
-          .reply(200, data.responses[host][path].response, data.responses[host][path].header));
+    fetchToken();
+    const requests = [];
+    for (const host in testApproach.responses) {
+      for (const path in testApproach.responses[host]) {
+        requests.push(nock(host)
+          .intercept(path, testApproach.responses[host][path].method)
+          .reply(200, testApproach.responses[host][path].response, testApproach.responses[host][path].header));
       }
     }
 
-    const result = await bulk.process.call(testCommon, data.message, data.configuration);
-
-    chai.expect(result.body).to.deep.equal(expectedResult);
-
-    for (let i = 0; i < scopes.length; i += 1) {
-      scopes[i].done();
-    }
+    const result = await bulk.process.call(getContext(), msg, testCfg);
+    expect(result.body).to.deep.equal(expectedResult);
+    for (let i = 0; i < requests.length; i += 1) requests[i].done();
   });
 });

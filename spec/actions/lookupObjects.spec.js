@@ -953,5 +953,81 @@ describe('Lookup Objects action test', () => {
       describeReq.done();
       queryReq.done();
     });
+    it('Use cache', async () => {
+      const testCfg = {
+        ...defaultCfg,
+        sobject: 'Document',
+        includeDeleted: false,
+        outputMethod: 'emitAll',
+        termNumber: '2',
+        enableCacheUsage: true,
+      };
+      const msg = {
+        body: {
+          limit: 30,
+          sTerm_1: {
+            fieldName: 'Document Name',
+            fieldValue: 'NotVeryImportantDoc',
+            condition: '=',
+          },
+          link_1_2: 'AND',
+          sTerm_2: {
+            fieldName: 'Folder ID',
+            fieldValue: 'Some folder ID',
+            condition: '=',
+          },
+        },
+      };
+      const testReply = {
+        results: [
+          {
+            Id: 'testObjId',
+            FolderId: 'xxxyyyzzz',
+            Name: 'NotVeryImportantDoc',
+            IsPublic: false,
+            Body: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Everest_kalapatthar.jpg/800px-Everest_kalapatthar.jpg',
+            ContentType: 'imagine/noHeaven',
+          },
+          {
+            Id: 'testObjId',
+            FolderId: '123yyyzzz',
+            Name: 'VeryImportantDoc',
+            IsPublic: true,
+            Body: 'wikipedia.org',
+            ContentType: 'imagine/noHell',
+          },
+        ],
+      };
+
+      let expectedQuery = testsCommon.buildSOQL(metaModelDocumentReply,
+        `Name%20%3D%20%27${msg.body.sTerm_1.fieldValue}%27%20`
+        + `${msg.body.link_1_2}%20`
+        + `FolderId%20%3D%20%27${msg.body.sTerm_2.fieldValue}%27%20`
+        + `%20LIMIT%20${msg.body.limit}`);
+      expectedQuery = expectedQuery.replace(/ /g, '%20');
+
+      // first call (result will be set to cache)
+      fetchToken();
+      const describeReq = nock(testsCommon.instanceUrl)
+        .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
+        .reply(200, metaModelDocumentReply);
+      fetchToken();
+      const queryReq = nock(testsCommon.instanceUrl)
+        .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/query?q=${expectedQuery}`)
+        .reply(200, { done: true, totalSize: testReply.results.length, records: testReply.results });
+      // second call (used result from cache)
+      fetchToken();
+      const describeReq2 = nock(testsCommon.instanceUrl)
+        .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
+        .reply(200, metaModelDocumentReply);
+
+      const context = getContext();
+      await lookupObjects.process.call(getContext(), msg, testCfg);
+      await lookupObjects.process.call(context, msg, testCfg);
+      validateEmitEqualsToData(context.emit, testReply);
+      describeReq.done();
+      queryReq.done();
+      describeReq2.done();
+    });
   });
 });
