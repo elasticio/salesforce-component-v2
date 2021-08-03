@@ -35,19 +35,23 @@ describe('attachment helper', () => {
           'Fox.jpeg': {
             'content-type': 'image/jpeg',
             size: 126564,
-            url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Everest_kalapatthar.jpg/800px-Everest_kalapatthar.jpg',
+            url: 'http://img.storage/image.jpg',
           },
         },
       };
 
       fetchToken();
       const describeReq = makeDescribeReq();
+      const downloadReq = nock('http://img.storage')
+        .get('/image.jpg')
+        .reply(200, 'image');
 
       await prepareBinaryData(msg, testCfg, getContext());
       expect(msg.body.Name).to.eql('Attachment');
       expect(msg.body.ContentType).to.eql('image/jpeg');
       expect(Object.prototype.hasOwnProperty.call(msg.body, 'Body')).to.eql(true);
       describeReq.done();
+      downloadReq.done();
     });
 
     it('should discard attachment utilizeAttachment:false', async () => {
