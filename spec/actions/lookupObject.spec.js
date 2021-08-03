@@ -108,7 +108,6 @@ describe('Lookup Object (at most 1) test', () => {
       expect(result).to.be.deep.equal(document_lookupField_id);
       describeReq.done();
     });
-
     it('Retrieves metadata for Account object', async () => {
       const testCfg = {
         ...defaultCfg,
@@ -140,17 +139,19 @@ describe('Lookup Object (at most 1) test', () => {
       allowZeroResults: false,
       passBinaryData: false,
     };
-    const processActionDefaultMsgBody = {
-      Id: 'testObjId',
-      FolderId: 'xxxyyyzzz',
-      Name: 'NotVeryImportantDoc',
-      IsPublic: false,
-      Body: '/Everest_kalapatthar.jpg',
-      ContentType: 'image/jpeg',
+    const msg = {
+      body: {
+        Id: 'testObjId',
+        FolderId: 'xxxyyyzzz',
+        Name: 'NotVeryImportantDoc',
+        IsPublic: false,
+        Body: '/Everest_kalapatthar.jpg',
+        ContentType: 'image/jpeg',
+      },
     };
+
     it('Gets a Document object without its attachment', async () => {
       const testCfg = { ...processActionDefaultCfg };
-      const msg = { body: { ...processActionDefaultMsgBody } };
 
       fetchToken();
       const describeReq = nock(testsCommon.instanceUrl)
@@ -171,13 +172,11 @@ describe('Lookup Object (at most 1) test', () => {
       describeReq.done();
       queryReq.done();
     });
-
     it('Gets a Document object with its attachment', async () => {
       const testCfg = {
         ...processActionDefaultCfg,
         passBinaryData: true,
       };
-      const msg = { body: { ...processActionDefaultMsgBody } };
 
       fetchToken();
       const describeReq = nock(testsCommon.instanceUrl)
@@ -215,28 +214,24 @@ describe('Lookup Object (at most 1) test', () => {
       queryPicture.done();
       queryReq.done();
     });
-
     it('Omitted criteria', async () => {
       const testCfg = {
         ...processActionDefaultCfg,
         lookupField: 'Ids',
         allowCriteriaToBeOmitted: true,
       };
-      const msg = { body: { ...processActionDefaultMsgBody } };
 
       const context = getContext();
       await lookupObject.process.call(context, msg, testCfg);
       const spyEmit = context.emit;
       validateEmitEqualsToData(spyEmit, {});
     });
-
     it('No unique criteria provided', async () => {
       const testCfg = {
         ...processActionDefaultCfg,
         lookupField: 'Ids',
         allowCriteriaToBeOmitted: false,
       };
-      const msg = { body: { ...processActionDefaultMsgBody } };
 
       try {
         await lookupObject.process.call(getContext(), msg, testCfg);
@@ -244,7 +239,6 @@ describe('Lookup Object (at most 1) test', () => {
         expect(err.message).to.deep.equal('No unique criteria provided');
       }
     });
-
     it('Linked objects', async () => {
       const testCfg = {
         ...processActionDefaultCfg,
@@ -252,7 +246,6 @@ describe('Lookup Object (at most 1) test', () => {
         passBinaryData: false,
         linkedObjects: ['uno'],
       };
-      const msg = { body: { ...processActionDefaultMsgBody } };
 
       fetchToken();
       const describeReq = nock(testsCommon.instanceUrl)
@@ -272,7 +265,6 @@ describe('Lookup Object (at most 1) test', () => {
       describeReq.done();
       queryReq.done();
     });
-
     it('Allow zero results', async () => {
       const testCfg = {
         ...processActionDefaultCfg,
@@ -280,7 +272,6 @@ describe('Lookup Object (at most 1) test', () => {
         allowZeroResults: true,
         linkedObjects: [],
       };
-      const msg = { body: { ...processActionDefaultMsgBody } };
 
       fetchToken();
       const describeReq = nock(testsCommon.instanceUrl)
@@ -301,13 +292,11 @@ describe('Lookup Object (at most 1) test', () => {
       describeReq.done();
       queryReq.done();
     });
-
     it('No objects found', async () => {
       const testCfg = {
         ...processActionDefaultCfg,
         allowZeroResults: false,
       };
-      const msg = { body: { ...processActionDefaultMsgBody } };
 
       fetchToken();
       const describeReq = nock(testsCommon.instanceUrl)
@@ -328,7 +317,6 @@ describe('Lookup Object (at most 1) test', () => {
       describeReq.done();
       queryReq.done();
     });
-
     it('More than one object found', async () => {
       const testCfg = {
         ...processActionDefaultCfg,
@@ -336,7 +324,6 @@ describe('Lookup Object (at most 1) test', () => {
         linkedObjects: [],
         type: '',
       };
-      const msg = { body: { ...processActionDefaultMsgBody } };
 
       fetchToken();
       const describeReq = nock(testsCommon.instanceUrl)
@@ -357,12 +344,10 @@ describe('Lookup Object (at most 1) test', () => {
       describeReq.done();
       queryReq.done();
     });
-
     it('Lookup Object error occurred', async () => {
       const testCfg = {
         ...processActionDefaultCfg,
       };
-      const msg = { body: { ...processActionDefaultMsgBody } };
 
       fetchToken();
       const describeReq = nock(testsCommon.instanceUrl)
@@ -383,13 +368,11 @@ describe('Lookup Object (at most 1) test', () => {
       describeReq.done();
       queryReq.done();
     });
-
     it('Use cache', async () => {
       const testCfg = {
         ...processActionDefaultCfg,
         enableCacheUsage: true,
       };
-      const msg = { body: { ...processActionDefaultMsgBody } };
 
       // first call (result will be set to cache)
       fetchToken();

@@ -28,7 +28,6 @@ describe('Delete Object (at most 1) action', () => {
       expect(result).to.be.deep.equal(document_lookupField_id);
       describeReq.done();
     });
-
     it('Retrieves metadata for Account object without lookupField', async () => {
       const testCfg = {
         sobject: 'Account',
