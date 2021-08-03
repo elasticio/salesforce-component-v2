@@ -21,6 +21,7 @@
    * [Lookup Objects](#lookup-objects)
    * [Query Action](#query-action)
    * [Upsert Object](#upsert-object)
+   * [Raw Request](#raw-request)
 * [Known Limitations](#known-limitations)
 
 ## General information
@@ -290,6 +291,16 @@ Empty object will be returned, if query doesn't find any data.
 
 #### Expected input metadata
 * **SOQL Query** - Input field where you should type the SOQL query. E.g. `"SELECT ID, Name from Contact where Name like 'John Smi%'"`
+
+### Raw Request
+
+#### Input Metadata
+* HTTP Verb - Allowed values GET, POST, PUT, PATCH, DELETE, HEAD, Required. HTTP verb to use in the request.
+* Path - String, Required. Path to make request to (without `/services/data/v{SALESFORCE_API_VERSION}`, e.g. to list sobjects - type here not `https://{INSTANCE_NAME}.salesforce.com/services/data/v{SALESFORCE_API_VERSION}/sobjects` but just type `sobjects` instead)
+* Request Body - Object, Optional. Body to attach to the HTTP Request
+
+#### Output Metadata
+* Response Object (Object, optional): HTTP response body
 
 ### Upsert Object
 Creates or Updates Selected Object.
