@@ -20,8 +20,8 @@
    * [Lookup Object (at most 1)](#lookup-object-at-most-1)
    * [Lookup Objects](#lookup-objects)
    * [Query Action](#query-action)
-   * [Upsert Object](#upsert-object)
    * [Raw Request](#raw-request)
+   * [Upsert Object](#upsert-object)
 * [Known Limitations](#known-limitations)
 
 ## General information

@@ -436,6 +436,19 @@
         "out": {}
       }
     },
+    "rawRequest": {
+      "title": "Raw Request",
+      "main": "./lib/actions/rawRequest.js",
+      "order": 91,
+      "help": {
+        "description": "Make Raw Request",
+        "link": "/components/salesforce/actions#make-raw-request"
+      },
+      "metadata": {
+        "in": "./lib/schemas/rawRequest.in.json",
+        "out": "./lib/schemas/rawRequest.out.json"
+      }
+    },
     "upsert": {
       "title": "Upsert Object",
       "main": "./lib/actions/upsert.js",
@@ -464,19 +477,6 @@
           "viewClass": "CheckBoxView",
           "label": "Utilize data attachment from previous step (for objects with a binary field)"
         }
-      }
-    },
-    "rawRequest": {
-      "title": "Make Raw Request",
-      "main": "./lib/actions/rawRequest.js",
-      "order": 91,
-      "help": {
-        "description": "Make Raw Request",
-        "link": "/components/salesforce/actions#make-raw-request"
-      },
-      "metadata": {
-        "in": "./lib/schemas/rawRequest.in.json",
-        "out": "./lib/schemas/rawRequest.out.json"
       }
     }
   }
