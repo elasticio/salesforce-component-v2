@@ -35,6 +35,22 @@
   },
   "out": {
     "type": "object",
-    "properties": {}
+    "properties": {
+      "errors": {
+        "required": true,
+        "title": "Founded errors",
+        "type": "array"
+      },
+      "id": {
+        "required": true,
+        "title": "Unique identifier from CRM",
+        "type": "string"
+      },
+      "success": {
+        "required": true,
+        "title": "Request result",
+        "type": "boolean"
+      }
+    }
   }
 }
