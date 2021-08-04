@@ -302,6 +302,12 @@ Empty object will be returned, if query doesn't find any data.
 #### Output Metadata
 * Response Object (Object, optional): HTTP response body
 
+#### Resources List
+* More information about available resources you can find [here](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_list.htm)
+
+#### Request Examples
+* Examples of using REST API resources can be found [here](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_user_tasks.htm)
+
 ### Upsert Object
 Creates or Updates Selected Object.
 Action creates a single object. 
