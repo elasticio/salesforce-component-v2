@@ -1,0 +1,40 @@
+{
+  "in": {
+    "type": "object",
+    "properties": {
+      "Id": {
+        "type": "string",
+        "title": "lookup by - Id",
+        "required": false
+      },
+      "FolderId": {
+        "type": "string",
+        "required": true,
+        "title": "Folder ID",
+        "default": null
+      },
+      "Name": {
+        "type": "string",
+        "required": true,
+        "title": "Document Name",
+        "default": null
+      },
+      "Body": {
+        "type": "string",
+        "required": false,
+        "title": "Body",
+        "default": null
+      },
+      "Url": {
+        "type": "string",
+        "required": false,
+        "title": "Url",
+        "default": null
+      }
+    }
+  },
+  "out": {
+    "type": "object",
+    "properties": {}
+  }
+}
