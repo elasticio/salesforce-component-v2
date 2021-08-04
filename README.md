@@ -20,7 +20,7 @@
    * [Lookup Object (at most 1)](#lookup-object-at-most-1)
    * [Lookup Objects](#lookup-objects)
    * [Query Action](#query-action)
-   * [Upsert Object](#upsert-object)
+   * [Upsert Object (depreceted)](#upsert-object)
 * [Known Limitations](#known-limitations)
 
 ## General information
@@ -290,8 +290,24 @@ Empty object will be returned, if query doesn't find any data.
 
 #### Expected input metadata
 * **SOQL Query** - Input field where you should type the SOQL query. E.g. `"SELECT ID, Name from Contact where Name like 'John Smi%'"`
-
 ### Upsert Object
+Creates or Updates Selected Object.
+Action creates a single object. 
+
+#### List of Expected Config fields
+* **Object** - Input field where you should choose the object type, which you want to find. E.g. `Account`
+* **Type Of Search** - Dropdown list with two values: `Unique Fields` and `All Fields`.
+* **Lookup by field** - Dropdown list with all fields on the selected object if the *Type Of Search* is `All Fields`. If the *Type Of Search* is `Unique Fields`, the dropdown lists instead all fields on the selected object where `type` is `id` or `unique` is `true`.
+* **Update/fill fields** - Dropdown list with all fields on the selected object that can be updated or fill by creation
+
+#### Expected input metadata
+lookup by - *name of filed selected in 'Lookup by field'*
+Necessary and other fields, that selected in **Update/fill fields**
+
+#### Expected output metadata
+Update or creation result
+
+### Upsert Object (depreceted)
 Creates or Updates Selected Object.
 Action creates a single object. 
 
