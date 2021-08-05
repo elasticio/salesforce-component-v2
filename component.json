@@ -437,7 +437,7 @@
     },
     "upsert": {
       "deprecated": true,
-      "title": "Upsert Object (depreceted)",
+      "title": "Upsert Object",
       "main": "./lib/actions/upsert.js",
       "order": 50,
       "help" : {
