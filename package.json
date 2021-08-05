@@ -6,7 +6,7 @@
   "scripts": {
     "pretest": "eslint lib spec spec-integration verifyCredentials.js --fix",
     "test": "nyc mocha spec NODE_ENV=test --recursive --timeout 50000",
-    "integration-test": "mocha spec-integration/actions/lookupObject.spec.js --recursive --timeout 50000"
+    "integration-test": "mocha --require spec-integration/mochaHooks.js spec-integration/actions/lookupObject.spec.js --recursive --timeout 50000"
   },
   "repository": {
     "type": "git",
@@ -48,7 +48,7 @@
     "eslint-config-airbnb": "18.2.0",
     "eslint-config-airbnb-base": "14.2.0",
     "eslint-plugin-import": "2.22.0",
-    "mocha": "6.2.3",
+    "mocha": "9.0.3",
     "nock": "13.0.4",
     "sinon": "9.0.3"
   }
