@@ -308,6 +308,9 @@ Empty object will be returned, if query doesn't find any data.
 #### Request Examples
 * Examples of using REST API resources can be found [here](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_user_tasks.htm)
 
+#### Known limitations
+For the methods PUT and HEAD you need to specify the whole path (e.g. `services/OpportunityLineItem/00kR0000001WJJAIA4/OpportunityLineItemSchedules`) which have conflicts with `/services/data/v{SALESFORCE_API_VERSION}/{RESOURCE}` path, so Raw Request does not work for these two methods (PUT and HEAD) just for now.
+
 ### Upsert Object
 Creates or Updates Selected Object.
 Action creates a single object. 
