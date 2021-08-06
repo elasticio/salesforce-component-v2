@@ -1,6 +1,6 @@
-## 2.0.5 (Aug 03, 2021)
+## 2.1.0 (August 06, 2021)
 
-* Added Raw Request Action
+* New `Raw Request` Action
 
 ## 2.0.4 (February 12, 2021)
 
