@@ -73,8 +73,8 @@
           "label": "Size of Polling Page",
           "viewClass": "TextFieldView",
           "required": false,
-          "placeholder": "1000",
-          "note": "Please set the size of pages to be fetched (defaults to 1000). Please enter positive integer only, max 10000 objects"
+          "placeholder": "10000",
+          "note": "Please set the size of pages to be fetched (defaults to 10000). Please enter positive integer only, max 10000 objects"
         },
         "singlePagePerInterval": {
           "label": "Process single page per execution",
