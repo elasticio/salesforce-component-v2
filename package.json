@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "@elastic.io/component-commons-library": "1.1.5",
+    "@elastic.io/oih-standard-library": "1.1.4",
     "axios": "0.20.0",
     "elasticio-node": "0.0.9",
     "elasticio-rest-node": "1.2.6",
@@ -39,7 +40,6 @@
   },
   "devDependencies": {
     "@elastic.io/component-logger": "0.0.1",
-    "nyc": "15.1.0",
     "chai": "4.2.0",
     "chai-as-promised": "7.1.1",
     "dotenv": "8.2.0",
@@ -49,6 +49,7 @@
     "eslint-plugin-import": "2.22.0",
     "mocha": "6.2.3",
     "nock": "13.0.4",
+    "nyc": "15.1.0",
     "sinon": "9.0.3"
   }
 }

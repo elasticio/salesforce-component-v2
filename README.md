@@ -21,7 +21,6 @@
    * [Lookup Objects](#lookup-objects)
    * [Query Action](#query-action)
    * [Upsert Object](#upsert-object)
-   * [Upsert Object (depreceted)](#upsert-object-depreceted)
 * [Known Limitations](#known-limitations)
 
 ## General information
@@ -307,27 +306,6 @@ Necessary and other fields, that selected in **Update/fill fields**
 
 #### Expected output metadata
 Update or creation result
-
-### Upsert Object (depreceted)
-Creates or Updates Selected Object.
-Action creates a single object. 
-
-#### List of Expected Config fields
-* **Object** - Input field where you should choose the object type, which you want to find. E.g. `Account`
-* **Optional Upsert field** - Input field where you should specify the ExternalID name field. E.g. `ExtId__c`.
-* **Utilize data attachment from previous step (for objects with a binary field)** - a checkbox, if it is checked and an input message contains an attachment and specified object has a binary field (type of base64) then the input data is put into object's binary field. In this case any data specified for the binary field in the data mapper is discarded.
-
-You should specify **external** or **internal Id** for making some updates in salesforce object.
-If you want to create new Object you should always specify **Optional Upsert field** and value of ExternalId in input body structure.
-
-#### Expected input metadata
-Input metadata is fetched dynamically from your Salesforce account. 
-
-#### Expected output metadata
-Output metadata is the same as input metadata, so you may expect all fields that you mapped as input to be returned as output.
-
-#### Limitations
-When **Utilize data attachment from previous step (for objects with a binary field)** is checked and this action is used with Local Agent error would be thrown: 'getaddrinfo ENOTFOUND steward-service.platform.svc.cluster.local steward-service.platform.svc.cluster.local:8200'
 
 ## Known limitations
 Attachments mechanism does not work with [Local Agent Installation](https://docs.elastic.io/getting-started/local-agent.html)
