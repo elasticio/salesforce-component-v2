@@ -9,7 +9,6 @@ const upsert = require('../../lib/actions/upsert_v2.js')
 const objectTypesReply = require('../testData/sfObjects.json')
 const metaModelDocumentReply = require('../testData/sfDocumentMetadata.json')
 const metaModelDocumentFields = require('../testData/sfDocumentFields.json')
-const metaModelDocumentUpdatableFields = require('../testData/sfDocumentUpdatableFields.json')
 const sfDocumentMetamodel = require('../testData/sfDocumentMetamodel.json')
 
 const { secret, secretId, instanceUrl } = testCommon
@@ -67,16 +66,6 @@ describe('Upsert v2 Object test', () => {
       const configuration = { secretId: 'secretId', sobject: 'Document', typeOfSearch: 'uniqueFields' }
       const result = await upsert.getLookupFieldsModel.call(context, configuration)
       expect(result).to.deep.equal({ Id: 'Document ID (Id)' })
-      scope.done()
-    })
-
-    it('getUpdateFieldsModel', async () => {
-      const scope = nock(instanceUrl)
-        .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
-        .reply(200, metaModelDocumentReply);
-      const configuration = { secretId: 'secretId', sobject: 'Document', typeOfSearch: 'allFields' }
-      const result = await upsert.getUpdateFieldsModel.call(context, configuration)
-      expect(result).to.deep.equal(metaModelDocumentUpdatableFields)
       scope.done()
     })
   })

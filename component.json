@@ -503,15 +503,6 @@
           "model": "getLookupFieldsModel",
           "prompt": "Please select the field which you want to use for lookup",
           "order": 6
-        },
-        "updateFields": {
-          "viewClass": "MultiSelectView",
-          "label": "Update/fill fields",
-          "required": true,
-          "require": ["sobject", "typeOfSearch", "lookupField"],
-          "model": "getUpdateFieldsModel",
-          "prompt": "Please select the field which you want to use for update",
-          "order": 5
         }
       }
     }

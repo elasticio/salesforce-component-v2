@@ -19,6 +19,30 @@
         "title": "Document Name",
         "default": null
       },
+      "DeveloperName": {
+        "type": "string",
+        "required": false,
+        "title": "Document Unique Name",
+        "default": null
+      },
+      "ContentType": {
+        "type": "string",
+        "required": false,
+        "title": "MIME Type",
+        "default": null
+      },
+      "Type": {
+        "type": "string",
+        "required": false,
+        "title": "File Extension",
+        "default": null
+      },
+      "IsPublic": {
+        "type": "boolean",
+        "required": false,
+        "title": "Externally Available",
+        "default": false
+      },
       "Body": {
         "type": "string",
         "required": false,
@@ -30,26 +54,51 @@
         "required": false,
         "title": "Url",
         "default": null
+      },
+      "Description": {
+        "type": "string",
+        "maxLength": 1000,
+        "required": false,
+        "title": "Description",
+        "default": null
+      },
+      "Keywords": {
+        "type": "string",
+        "required": false,
+        "title": "Keywords",
+        "default": null
+      },
+      "IsInternalUseOnly": {
+        "type": "boolean",
+        "required": false,
+        "title": "Internal Use Only",
+        "default": false
+      },
+      "AuthorId": {
+        "type": "string",
+        "required": false,
+        "title": "Author ID",
+        "default": null
       }
     }
   },
   "out": {
     "type": "object",
     "properties": {
-      "errors": {
-        "required": true,
-        "title": "Founded errors",
-        "type": "array"
-      },
       "id": {
+        "type": "string",
         "required": true,
-        "title": "Unique identifier from CRM",
-        "type": "string"
+        "title": "Unique identifier from CRM"
       },
       "success": {
+        "type": "boolean",
         "required": true,
-        "title": "Request result",
-        "type": "boolean"
+        "title": "Request result"
+      },
+      "errors": {
+        "type": "array",
+        "required": true,
+        "title": "Founded errors"
       }
     }
   }
