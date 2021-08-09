@@ -1,3 +1,7 @@
+## 2.1.0 (August 10, 2021)
+
+* New `Raw Request` Action
+
 ## 2.0.4 (February 12, 2021)
 
 * Update sailor version to 2.6.24

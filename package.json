@@ -1,6 +1,5 @@
 {
   "name": "salesforce-component-v2",
-  "version": "2.0.4",
   "description": "elastic.io component that connects to Salesforce API (node.js) v2",
   "main": "index.js",
   "scripts": {
@@ -27,7 +26,9 @@
     "node": ">=12.18.2"
   },
   "dependencies": {
+    "@elastic.io/component-commons-library": "1.1.5",
     "axios": "0.20.0",
+    "dotenv": "8.2.0",
     "elasticio-node": "0.0.9",
     "elasticio-rest-node": "1.2.6",
     "elasticio-sailor-nodejs": "2.6.24",
@@ -40,7 +41,6 @@
     "@elastic.io/component-logger": "0.0.1",
     "chai": "4.2.0",
     "chai-as-promised": "7.1.1",
-    "dotenv": "8.2.0",
     "eslint": "7.9.0",
     "eslint-config-airbnb": "18.2.0",
     "eslint-config-airbnb-base": "14.2.0",
