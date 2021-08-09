@@ -74,8 +74,8 @@ describe('attachment helper', () => {
     });
   });
 
-  describe.skip('getAttachment test', async () => {
-    it('should getAttachment', async () => {
+  describe('getAttachment test', async () => {
+    it.skip('should getAttachment', async () => {
       nock(testCommon.instanceUrl)
         .get('/services/data/v46.0/sobjects/Attachment/00P2R00001DYjNVUA1/Body')
         .reply(200, { hello: 'world' });

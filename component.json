@@ -1,5 +1,6 @@
 {
   "title": "Salesforce v2",
+  "version": "2.1.0",
   "description": "Customer relationship management (CRM) software & cloud computing from the leader in CRM solutions for businesses large & small.",
   "docsUrl": "https://github.com/elasticio/salesforce-component-v2",
   "url": "http://www.salesforce.com/",
@@ -433,6 +434,19 @@
           }
         },
         "out": {}
+      }
+    },
+    "rawRequest": {
+      "title": "Raw Request",
+      "main": "./lib/actions/rawRequest.js",
+      "order": 91,
+      "help": {
+        "description": "Make Raw Request",
+        "link": "/components/salesforce/actions#make-raw-request"
+      },
+      "metadata": {
+        "in": "./lib/schemas/rawRequest.in.json",
+        "out": "./lib/schemas/rawRequest.out.json"
       }
     },
     "upsert": {
