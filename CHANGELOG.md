@@ -1,4 +1,4 @@
-## 2.1.0 (August 06, 2021)
+## 2.1.0 (August 10, 2021)
 
 * New `Raw Request` Action
 
