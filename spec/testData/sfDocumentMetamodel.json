@@ -46,7 +46,7 @@
       "Body": {
         "type": "string",
         "required": false,
-        "title": "Body",
+        "title": "Body - use URL to file",
         "default": null
       },
       "Url": {

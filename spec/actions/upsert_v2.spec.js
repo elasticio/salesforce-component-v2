@@ -97,46 +97,57 @@ describe('Upsert v2 Object test', () => {
       lookupField: 'Id'
     }
 
-    const message = {
-      body: {
-        Id: 1,
-        Url: '😂',
-        Body: '😁'
-      }
+    const body = {
+      Id: 1,
+      Url: '😂'
     }
 
     it('Object found, going to update', async () => {
-      const bodyNoId = { ...message.body }
+      const bodyNoId = { ...body }
       delete bodyNoId.Id
+      bodyNoId.Body = 'YXNkYXNkYXNkcXdlcXdlcXdl'
       const scope = nock(instanceUrl, { encodedQueryParams: true })
-        .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/query?q=${testCommon.buildSOQL(metaModelDocumentReply, { Id: message.body.Id })}`)
-        .reply(200, { done: true, totalSize: 1, records: [message.body] })
-        .patch(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/${message.body.Id}`, bodyNoId)
+        .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
+        .reply(200, metaModelDocumentReply)
+        .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/query?q=${testCommon.buildSOQL(metaModelDocumentReply, { Id: body.Id })}`)
+        .reply(200, { done: true, totalSize: 1, records: [body] })
+        .patch(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/${body.Id}`, bodyNoId)
         .reply(204)
 
-      const result = await upsert.process.call(context, message, configuration)
+      const bodyWithBody = { ...body }
+      bodyWithBody.Body = 'http://test.env.mock/somedata.txt'
+
+      nock('http://test.env.mock')
+        .get('/somedata.txt')
+        .replyWithFile(200, `${__dirname}/../testData/somedata.txt`);
+
+      const result = await upsert.process.call(context, { body: bodyWithBody }, configuration)
       expect(result.body.success).to.eql(true);
       scope.done()
     })
 
     it('Object not found, going to create', async () => {
-      const bodyNoId = { ...message.body }
+      const bodyNoId = { ...body }
       delete bodyNoId.Id
       const scope = nock(instanceUrl, { encodedQueryParams: true })
-        .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/query?q=${testCommon.buildSOQL(metaModelDocumentReply, { Id: message.body.Id })}`)
+        .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
+        .reply(200, metaModelDocumentReply)
+        .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/query?q=${testCommon.buildSOQL(metaModelDocumentReply, { Id: body.Id })}`)
         .reply(200, { done: true, totalSize: 1, records: [] })
         .post(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Document`, bodyNoId)
         .reply(200, { id: 2, success: true, })
 
-      const result = await upsert.process.call(context, message, configuration)
+      const result = await upsert.process.call(context, { body }, configuration)
       expect(result.body.success).to.eql(true);
       scope.done()
     })
 
     it('Object not found - empty Id, going to create', async () => {
-      const bodyNoId = { ...message.body }
+      const bodyNoId = { ...body }
       delete bodyNoId.Id
       const scope = nock(instanceUrl, { encodedQueryParams: true })
+        .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
+        .reply(200, metaModelDocumentReply)
         .post(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Document`, bodyNoId)
         .reply(200, { id: 2, success: true, })
 
@@ -146,14 +157,14 @@ describe('Upsert v2 Object test', () => {
     })
 
     it('Found more then 1 object', async () => {
-      const bodyNoId = { ...message.body }
+      const bodyNoId = { ...body }
       delete bodyNoId.Id
       const scope = nock(instanceUrl, { encodedQueryParams: true })
-        .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/query?q=${testCommon.buildSOQL(metaModelDocumentReply, { Id: message.body.Id })}`)
+        .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/query?q=${testCommon.buildSOQL(metaModelDocumentReply, { Id: body.Id })}`)
         .reply(200, { done: true, totalSize: 1, records: [1, 2] })
 
       try {
-        await upsert.process.call(context, message, configuration)
+        await upsert.process.call(context, { body }, configuration)
       } catch (err) {
         expect(err.message).to.eql('Found more than 1 Object');
       }
