@@ -300,8 +300,8 @@ Action creates a single object.
 * **Lookup by field** - Dropdown list with all fields on the selected object if the *Type Of Search* is `All Fields`. If the *Type Of Search* is `Unique Fields`, the dropdown lists instead all fields on the selected object where `type` is `id` or `unique` is `true`.
 
 #### Expected input metadata
-lookup by - *name of filed selected in 'Lookup by field'*
-other fields, that used by selected **Object**
+* lookup by - *name of filed selected in 'Lookup by field'*
+* other fields, that used by selected **Object**
 
 #### Expected output metadata
 Update or creation result
