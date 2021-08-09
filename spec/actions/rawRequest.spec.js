@@ -1,14 +1,28 @@
 /* eslint-disable camelcase */
+/* eslint-disable no-return-assign,no-unused-expressions */
+const fs = require('fs');
 const chai = require('chai');
 const nock = require('nock');
+const sinon = require('sinon');
+const logger = require('@elastic.io/component-logger')();
 
 const { expect } = chai;
 const common = require('../../lib/common.js');
 const testCommon = require('../common.js');
 const processAction = require('../../lib/actions/rawRequest');
 
+const emitter = {
+  emit: sinon.spy(),
+  logger,
+};
+if (fs.existsSync('.env')) {
+  // eslint-disable-next-line global-require
+  require('dotenv').config();
+}
+
 describe('Raw request test', () => {
   beforeEach(() => {
+    emitter.emit.resetHistory();
     nock(process.env.ELASTICIO_API_URI)
       .get(`/v2/workspaces/${process.env.ELASTICIO_WORKSPACE_ID}/secrets/${testCommon.secretId}`)
       .times(4)
@@ -31,7 +45,7 @@ describe('Raw request test', () => {
       const msg = { body: { method: 'GET', path: 'sobjects' } };
       const cfg = { secretId: testCommon.secretId };
 
-      const result = await processAction.process.call(this, msg, cfg);
+      const result = await processAction.process.call(emitter, msg, cfg);
       expect(result.body).to.have.own.property('sobjects');
 
       scope.done();
@@ -51,7 +65,7 @@ describe('Raw request test', () => {
       const msg = { body: { method: 'GET', path: 'limits' } };
       const cfg = { secretId: testCommon.secretId };
 
-      const result = await processAction.process.call(this, msg, cfg);
+      const result = await processAction.process.call(emitter, msg, cfg);
       expect(result.body).to.have.own.property('ActiveScratchOrgs');
 
       scope.done();
@@ -71,7 +85,7 @@ describe('Raw request test', () => {
       const msg = { body: { method: 'POST', path: 'sobjects/Account/' } };
       const cfg = { secretId: testCommon.secretId };
 
-      const result = await processAction.process.call(this, msg, cfg);
+      const result = await processAction.process.call(emitter, msg, cfg);
       expect(result.body).to.have.own.property('id');
       expect(result.body.success).to.be.deep.eql(true);
 
@@ -85,7 +99,7 @@ describe('Raw request test', () => {
       const cfg = { secretId: testCommon.secretId };
 
       try {
-        await processAction.process.call(context, msg, cfg, () => {
+        await processAction.process.call(emitter, msg, cfg, () => {
           throw new Error('Test case does not expect success response');
         });
       } catch (e) {
