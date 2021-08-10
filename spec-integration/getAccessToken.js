@@ -1,5 +1,5 @@
 /**
- * Note: For this function your need setup credentials for the component first
+ * Note: For this function your need to setup credentials on platform first
  */
 
 /* eslint-disable camelcase, import/no-extraneous-dependencies */
