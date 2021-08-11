@@ -78,7 +78,7 @@ describe('attachment helper', () => {
     });
   });
 
-  xdescribe('getAttachment test', async () => {
+  describe('getAttachment test', async () => {
     it('should getAttachment', async () => {
       const testCfg = {
         ...defaultCfg,
