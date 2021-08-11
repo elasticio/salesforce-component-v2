@@ -1,6 +1,9 @@
 const chai = require('chai');
 const nock = require('nock');
-const _ = require('lodash');
+
+const _ = {
+  cloneDeep: () => {},
+};
 
 const common = require('../../lib/common.js');
 const testCommon = require('../common.js');
