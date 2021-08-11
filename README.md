@@ -325,7 +325,10 @@ Action creates a single object.
 * other fields, that used by selected **Object**
 
 #### Expected output metadata
-Update or creation result
+The result of creating or updating an object
+* **id** - Unic identificator from salesforce
+* **success** - Boolean result of creation/update object
+* **errors** - Arrey of errors if they exist
 
 ## Known limitations
 Attachments mechanism does not work with [Local Agent Installation](https://docs.elastic.io/getting-started/local-agent.html)
