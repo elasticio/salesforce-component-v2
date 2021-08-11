@@ -1,27 +1,16 @@
 /* eslint-disable no-return-assign */
-const fs = require('fs');
-const sinon = require('sinon');
-const logger = require('@elastic.io/component-logger')();
-const chaiAsPromised = require('chai-as-promised');
-const chai = require('chai');
+const { expect } = require('chai');
 const queryTrigger = require('../../lib/triggers/query');
-
-chai.use(chaiAsPromised);
-const { expect } = chai;
+const { SALESFORCE_API_VERSION } = require('../../lib/common.js');
+const { getContext } = require('../../spec/common');
 
 describe('queryTrigger', () => {
   let configuration;
-  const snapshot = {};
-  const message = {};
 
   before(async () => {
-    if (fs.existsSync('.env')) {
-      // eslint-disable-next-line global-require
-      require('dotenv').config();
-    }
-
     configuration = {
-      apiVersion: '39.0',
+      sobject: 'Contact',
+      apiVersion: SALESFORCE_API_VERSION,
       oauth: {
         undefined_params: {
           instance_url: process.env.INSTANCE_URL,
@@ -32,34 +21,39 @@ describe('queryTrigger', () => {
     };
   });
 
-  const emitter = {
-    emit: sinon.spy(),
-    logger,
-  };
-
   it('queryTrigger should succeed with valid query', async () => {
     const query = 'SELECT Id, Name FROM Contact LIMIT 2';
     const outputMethod = 'emitAll';
-    const cfg = {
+    const testCfg = {
       ...configuration,
       query,
       outputMethod,
     };
-    await queryTrigger.process.call(emitter, message, cfg, snapshot);
-    expect(emitter.emit.callCount).to.eql(1);
-    expect(emitter.emit.args[0][0]).to.eql('data');
-    expect(emitter.emit.args[0][1].body.records.length).to.eql(2);
+    const msg = { body: {} };
+
+    const context = getContext();
+    await queryTrigger.process.call(context, msg, testCfg, {});
+    expect(context.emit.callCount).to.eql(1);
+    expect(context.emit.args[0][0]).to.eql('data');
+    expect(context.emit.args[0][1].body.records.length).to.eql(2);
   });
 
   it('queryTrigger should fail with invalid query', async () => {
     const query = 'SELECT Id FROM Contact123';
-    const cfg = {
+    const testCfg = {
       ...configuration,
       query,
     };
-    await expect(queryTrigger.process.call(emitter, message, cfg, snapshot)).be.rejectedWith('^ ERROR at Row:1:Column:16 '
-      + 'sObject type \'Contact123\' is not supported. '
+    const msg = { body: {} };
+
+    try {
+      await queryTrigger.process.call(getContext(), msg, testCfg, {});
+    } catch (err) {
+      expect(err.message).to.be.equal(
+        'INVALID_TYPE: ^ ERROR at Row:1:Column:16 sObject type \'Contact123\' is not supported. '
       + 'If you are attempting to use a custom object, be sure to append the \'__c\' after the entity name. '
-      + 'Please reference your WSDL or the describe call for the appropriate names.');
+      + 'Please reference your WSDL or the describe call for the appropriate names.',
+      );
+    }
   });
 });

@@ -1,67 +1,44 @@
 /* eslint-disable no-return-assign */
-const fs = require('fs');
-const sinon = require('sinon');
-const { messages } = require('elasticio-node');
-const logger = require('@elastic.io/component-logger')();
 const polling = require('../../lib/entry');
+const { SALESFORCE_API_VERSION } = require('../../lib/common.js');
+const { getContext } = require('../../spec/common');
 
 describe('polling', () => {
-  let message;
-  let lastCall;
   let configuration;
-  let snapshot;
-
-  beforeEach(async () => {
-    lastCall.reset();
-  });
 
   before(async () => {
-    if (fs.existsSync('.env')) {
-      // eslint-disable-next-line global-require
-      require('dotenv').config();
-    }
-
-    lastCall = sinon.stub(messages, 'newMessageWithBody')
-      .returns(Promise.resolve());
-
     configuration = {
-      apiVersion: '39.0',
+      sobject: 'Contact',
+      apiVersion: SALESFORCE_API_VERSION,
       oauth: {
-        instance_url: 'https://na38.salesforce.com',
+        undefined_params: {
+          instance_url: process.env.INSTANCE_URL,
+        },
         refresh_token: process.env.REFRESH_TOKEN,
         access_token: process.env.ACCESS_TOKEN,
       },
-      object: 'Account',
     };
-    message = {
-      body: {},
-    };
-    snapshot = {};
   });
-
-  after(async () => {
-    messages.newMessageWithBody.restore();
-  });
-
-  const emitter = {
-    emit: sinon.spy(),
-    logger,
-  };
 
   it('Account polling with empty snapshot', async () => {
-    await polling
-      .process.call(emitter, message, configuration, snapshot);
+    const testCfg = { ...configuration };
+    const msg = { body: {} };
+    await polling.process.call(getContext(), msg, testCfg, {});
   });
 
   it('Account polling with not empty snapshot', async () => {
-    snapshot = '2018-11-12T13:06:01.179Z';
-    await polling
-      .process.call(emitter, message, configuration, snapshot);
+    const testCfg = { ...configuration };
+    const msg = { body: {} };
+    const snapshot = '2018-11-12T13:06:01.179Z';
+
+    await polling.process.call(getContext(), msg, testCfg, snapshot);
   });
 
   it('Account polling with not snapshot.previousLastModified', async () => {
-    snapshot = { previousLastModified: '2018-11-12T13:06:01.179Z' };
-    await polling
-      .process.call(emitter, message, configuration, snapshot);
+    const testCfg = { ...configuration };
+    const msg = { body: {} };
+    const snapshot = { previousLastModified: '2018-11-12T13:06:01.179Z' };
+
+    await polling.process.call(getContext(), msg, testCfg, snapshot);
   });
 });

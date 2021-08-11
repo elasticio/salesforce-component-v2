@@ -6,7 +6,7 @@ const sinon = require('sinon');
 const nock = require('nock');
 const action = require('../../lib/actions/createObject');
 
-describe('creare object action', async () => {
+xdescribe('creare object action', async () => {
   let emitter;
   const secretId = 'secretId';
   let configuration;

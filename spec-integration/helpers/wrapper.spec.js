@@ -1,34 +1,26 @@
 /* eslint-disable no-return-assign */
-const fs = require('fs');
-const logger = require('@elastic.io/component-logger')();
 const { expect } = require('chai');
 const nock = require('nock');
 const { callJSForceMethod } = require('../../lib/helpers/wrapper');
+const { SALESFORCE_API_VERSION } = require('../../lib/common.js');
+const { getContext } = require('../../spec/common');
 
 describe('wrapper helper test', async () => {
   const secretId = 'secretId';
   let configuration;
-  let secret;
   let invalidSecret;
 
   before(async () => {
-    if (fs.existsSync('.env')) {
-      // eslint-disable-next-line global-require
-      require('dotenv').config();
-    }
-    process.env.ELASTICIO_API_URI = 'https://app.example.io';
-    process.env.ELASTICIO_API_USERNAME = 'user';
-    process.env.ELASTICIO_API_KEY = 'apiKey';
-    process.env.ELASTICIO_WORKSPACE_ID = 'workspaceId';
-    secret = {
-      data: {
-        attributes: {
-          credentials: {
-            access_token: process.env.ACCESS_TOKEN,
-            instance_url: process.env.INSTANCE_URL,
-          },
+    configuration = {
+      apiVersion: SALESFORCE_API_VERSION,
+      oauth: {
+        undefined_params: {
+          instance_url: process.env.INSTANCE_URL,
         },
+        refresh_token: process.env.REFRESH_TOKEN,
+        access_token: process.env.ACCESS_TOKEN,
       },
+      sobject: 'Contact',
     };
     invalidSecret = {
       data: {
@@ -40,40 +32,23 @@ describe('wrapper helper test', async () => {
         },
       },
     };
-
-    configuration = {
-      secretId,
-      sobject: 'Contact',
-    };
   });
 
   it('should succeed call describe method, credentials from config', async () => {
-    const cfg = {
-      sobject: 'Contact',
-      oauth: {
-        access_token: process.env.ACCESS_TOKEN,
-        instance_url: process.env.INSTANCE_URL,
-      },
-    };
-    const result = await callJSForceMethod.call({ logger }, cfg, 'describe');
+    const result = await callJSForceMethod.call(getContext(), configuration, 'describe');
     expect(result.name).to.eql('Contact');
   });
 
   it('should succeed call describe method', async () => {
-    nock(process.env.ELASTICIO_API_URI)
-      .get(`/v2/workspaces/${process.env.ELASTICIO_WORKSPACE_ID}/secrets/${secretId}`)
-      .reply(200, secret);
-    const result = await callJSForceMethod.call({ logger }, configuration, 'describe');
+    const result = await callJSForceMethod.call(getContext(), configuration, 'describe');
     expect(result.name).to.eql('Contact');
   });
 
   it('should refresh token and succeed call describe method', async () => {
     nock(process.env.ELASTICIO_API_URI)
       .get(`/v2/workspaces/${process.env.ELASTICIO_WORKSPACE_ID}/secrets/${secretId}`)
-      .reply(200, invalidSecret)
-      .post(`/v2/workspaces/${process.env.ELASTICIO_WORKSPACE_ID}/secrets/${secretId}/refresh`)
-      .reply(200, secret);
-    const result = await callJSForceMethod.call({ logger }, configuration, 'describe');
+      .reply(200, invalidSecret);
+    const result = await callJSForceMethod.call(getContext(), configuration, 'describe');
     expect(result.name).to.eql('Contact');
   });
 });

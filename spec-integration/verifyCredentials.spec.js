@@ -1,19 +1,16 @@
 /* eslint-disable no-return-assign */
-const fs = require('fs');
-const logger = require('@elastic.io/component-logger')();
 const { expect } = require('chai');
 const verify = require('../verifyCredentials');
+const { SALESFORCE_API_VERSION } = require('../lib/common.js');
+const { getContext } = require('../spec/common');
 
 describe('verifyCredentials', async () => {
   let configuration;
 
   before(async () => {
-    if (fs.existsSync('.env')) {
-      // eslint-disable-next-line global-require
-      require('dotenv').config();
-    }
-
     configuration = {
+      sobject: 'Contact',
+      apiVersion: SALESFORCE_API_VERSION,
       oauth: {
         undefined_params: {
           instance_url: process.env.INSTANCE_URL,
@@ -25,7 +22,7 @@ describe('verifyCredentials', async () => {
   });
 
   it('should succeed', async () => {
-    const result = await verify.call({ logger }, configuration);
+    const result = await verify.call(getContext(), configuration);
     expect(result.verified).to.eql(true);
   });
 });
