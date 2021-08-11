@@ -1,81 +1,52 @@
-/* eslint-disable no-return-assign */
-const fs = require('fs');
-const sinon = require('sinon');
-const { messages } = require('elasticio-node');
-const chai = require('chai');
-const logger = require('@elastic.io/component-logger')();
+const { expect } = require('chai');
 const upsert = require('../../lib/actions/upsert');
+const { getContext, testsCommon } = require('../../spec/common');
 
-const { expect } = chai;
+const { getOauth } = testsCommon;
 
-xdescribe('upsert', () => {
-  let message;
-  let lastCall;
-  let configuration;
-
-  beforeEach(async () => {
-    lastCall.reset();
-  });
-
-  before(async () => {
-    if (fs.existsSync('.env')) {
-      // eslint-disable-next-line global-require
-      require('dotenv').config();
-    }
-
-    lastCall = sinon.stub(messages, 'newMessageWithBody')
-      .returns(Promise.resolve());
-
-    configuration = {
-      apiVersion: '39.0',
-      oauth: {
-        instance_url: 'https://na38.salesforce.com',
-        refresh_token: process.env.REFRESH_TOKEN,
-        access_token: process.env.ACCESS_TOKEN,
-      },
+describe('upsert', () => {
+  it('upsert Contact by Id ', async () => {
+    const testCfg = {
+      oauth: getOauth(),
       prodEnv: 'login',
       sobject: 'Contact',
       _account: '5be195b7c99b61001068e1d0',
       lookupField: 'AccountId',
     };
-    message = {
+    const msg = {
       body: {
         Id: '00344000020qT3KAAU',
         MobilePhone: '+3805077777',
         extID__c: '777777777777',
       },
     };
-  });
 
-  after(async () => {
-    messages.newMessageWithBody.restore();
-  });
-
-  const emitter = {
-    emit: sinon.spy(),
-    logger,
-  };
-
-  it('upsert Contact by Id ', async () => {
-    await upsert.process.call(emitter, message, configuration).then(() => {
-      expect(lastCall.lastCall.args[0].MobilePhone)
-        .to
-        .eql(message.body.MobilePhone);
-    });
+    const context = getContext();
+    await upsert.process.call(context, msg, testCfg);
+    expect(context.emit.getCall(0).args[1].body.Id).to.be.equal(msg.body.Id);
+    expect(context.emit.getCall(0).args[1].body.MobilePhone).to.be.equal(msg.body.MobilePhone);
+    expect(context.emit.getCall(0).args[1].body.extID__c).to.be.equal(msg.body.extID__c);
   });
 
   it('upsert Contact by ExternalId ', async () => {
-    message = {
+    const testCfg = {
+      oauth: getOauth(),
+      prodEnv: 'login',
+      sobject: 'Contact',
+      _account: '5be195b7c99b61001068e1d0',
+      lookupField: 'AccountId',
+      extIdField: 'extID__c',
+    };
+    const msg = {
       body: {
         MobilePhone: '+38050888888',
         extID__c: '777777777777',
       },
     };
-    configuration.extIdField = 'extID__c';
-    await upsert.process.call(emitter, message, configuration).then(() => {
-      expect(lastCall.lastCall.args[0].MobilePhone)
-        .to
-        .eql(message.body.MobilePhone);
-    });
+
+    const context = getContext();
+    await upsert.process.call(context, msg, testCfg);
+    expect(context.emit.getCall(0).args[1].body.MobilePhone).to.be.equal(msg.body.MobilePhone);
+    expect(context.emit.getCall(0).args[1].body.extID__c).to.be.equal(msg.body.extID__c);
   });
 });

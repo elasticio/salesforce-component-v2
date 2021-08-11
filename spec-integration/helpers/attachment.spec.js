@@ -1,30 +1,14 @@
 /* eslint-disable no-return-assign */
 const { expect } = require('chai');
 const { prepareBinaryData } = require('../../lib/helpers/attachment');
-const { SALESFORCE_API_VERSION } = require('../../lib/common.js');
-const { defaultCfg, getContext } = require('../../spec/common');
+const { getContext, testsCommon } = require('../../spec/common');
+
+const { getOauth } = testsCommon;
 
 describe('attachment helper test', async () => {
-  let configuration;
-
-  before(async () => {
-    configuration = {
-      apiVersion: SALESFORCE_API_VERSION,
-      oauth: {
-        undefined_params: {
-          instance_url: process.env.INSTANCE_URL,
-        },
-        refresh_token: process.env.REFRESH_TOKEN,
-        access_token: process.env.ACCESS_TOKEN,
-      },
-      sobject: 'Document',
-    };
-  });
   describe('prepareBinaryData test', async () => {
     it('should discard attachment utilizeAttachment:false', async () => {
-      const testCfg = {
-        ...defaultCfg,
-      };
+      const testCfg = { oauth: getOauth(), sobject: 'Document' };
       const msg = {
         body: {
           Name: 'TryTest',
@@ -33,7 +17,7 @@ describe('attachment helper test', async () => {
           'Fox.jpeg': {
             'content-type': 'image/jpeg',
             size: 126564,
-            url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Everest_kalapatthar.jpg/800px-Everest_kalapatthar.jpg',
+            url: 'https://pbs.twimg.com/profile_images/1009094789520904193/raF9oIGa_400x400.jpg',
           },
         },
       };
@@ -45,7 +29,8 @@ describe('attachment helper test', async () => {
 
     it('should upload attachment utilizeAttachment:true', async () => {
       const testCfg = {
-        ...configuration,
+        oauth: getOauth(),
+        sobject: 'Document',
         utilizeAttachment: true,
       };
       const msg = {
@@ -56,7 +41,7 @@ describe('attachment helper test', async () => {
           'Fox.jpeg': {
             'content-type': 'image/jpeg',
             size: 126564,
-            url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Everest_kalapatthar.jpg/800px-Everest_kalapatthar.jpg',
+            url: 'https://pbs.twimg.com/profile_images/1009094789520904193/raF9oIGa_400x400.jpg',
           },
         },
       };

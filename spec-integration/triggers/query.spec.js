@@ -1,31 +1,17 @@
 /* eslint-disable no-return-assign */
 const { expect } = require('chai');
 const queryTrigger = require('../../lib/triggers/query');
-const { SALESFORCE_API_VERSION } = require('../../lib/common.js');
-const { getContext } = require('../../spec/common');
+const { getContext, testsCommon } = require('../../spec/common');
+
+const { getOauth } = testsCommon;
 
 describe('queryTrigger', () => {
-  let configuration;
-
-  before(async () => {
-    configuration = {
-      sobject: 'Contact',
-      apiVersion: SALESFORCE_API_VERSION,
-      oauth: {
-        undefined_params: {
-          instance_url: process.env.INSTANCE_URL,
-        },
-        refresh_token: process.env.REFRESH_TOKEN,
-        access_token: process.env.ACCESS_TOKEN,
-      },
-    };
-  });
-
   it('queryTrigger should succeed with valid query', async () => {
     const query = 'SELECT Id, Name FROM Contact LIMIT 2';
     const outputMethod = 'emitAll';
     const testCfg = {
-      ...configuration,
+      oauth: getOauth(),
+      sobject: 'Contact',
       query,
       outputMethod,
     };
@@ -41,7 +27,8 @@ describe('queryTrigger', () => {
   it('queryTrigger should fail with invalid query', async () => {
     const query = 'SELECT Id FROM Contact123';
     const testCfg = {
-      ...configuration,
+      oauth: getOauth(),
+      sobject: 'Contact',
       query,
     };
     const msg = { body: {} };

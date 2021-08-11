@@ -4,7 +4,7 @@ const verify = require('../verifyCredentials');
 const { SALESFORCE_API_VERSION } = require('../lib/common.js');
 const { getContext } = require('../spec/common');
 
-describe('verifyCredentials', async () => {
+xdescribe('verifyCredentials', async () => {
   let configuration;
 
   before(async () => {

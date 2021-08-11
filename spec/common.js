@@ -53,6 +53,13 @@ module.exports = {
         refresh_token: 'the not less important also unthinkable top secret refresh token',
       },
     },
+    getOauth: () => ({
+      undefined_params: {
+        instance_url: process.env.INSTANCE_URL,
+      },
+      refresh_token: process.env.REFRESH_TOKEN,
+      access_token: process.env.ACCESS_TOKEN,
+    }),
     buildSOQL: (objectMeta, where) => {
       let soql = `SELECT%20${objectMeta.fields[0].name}`;
 
