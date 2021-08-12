@@ -18,7 +18,7 @@ describe('streamPlatformEvents trigger test', async () => {
     });
   });
 
-  xdescribe('process', () => {
+  describe('process', () => {
     before(() => {
       sinon.stub(jsforce, 'Connection').callsFake(() => ({
         streaming: { createClient: () => ({ subscribe: async (_topic, emit) => { emit('some message'); } }) },
