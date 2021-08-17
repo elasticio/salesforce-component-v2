@@ -1,6 +1,6 @@
 {
   "title": "Salesforce v2",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Customer relationship management (CRM) software & cloud computing from the leader in CRM solutions for businesses large & small.",
   "docsUrl": "https://github.com/elasticio/salesforce-component-v2",
   "url": "http://www.salesforce.com/",
@@ -455,8 +455,7 @@
       "main": "./lib/actions/upsert.js",
       "order": 50,
       "help" : {
-        "description": "Create or Update Selected Object",
-        "link": "/components/salesforce/actions#upsert-object-action"
+        "description": "Create or Update Selected Object"
       },
       "dynamicMetadata": true,
       "fields": {
@@ -502,6 +501,7 @@
           "viewClass": "SelectView",
           "label": "Type Of Search",
           "required": true,
+          "require": ["sobject"],
           "model": {
             "uniqueFields": "Unique Fields",
             "allFields": "All Fields"
