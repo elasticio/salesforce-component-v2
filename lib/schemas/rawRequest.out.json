@@ -1,0 +1,9 @@
+{
+  "type": "object",
+  "properties": {
+    "response": {
+      "type": "string",
+      "description": "Response object"
+    }
+  }
+}

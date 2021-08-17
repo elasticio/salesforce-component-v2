@@ -1,0 +1,28 @@
+{
+  "type": "object",
+  "properties": {
+    "method": {
+      "type": "string",
+      "required": true,
+      "title": "HTTP Verb",
+      "enum": [
+        "GET",
+        "POST",
+        "PUT",
+        "PATCH",
+        "DELETE",
+        "HEAD"
+      ]
+    },
+    "path": {
+      "type": "string",
+      "required": true,
+      "title": "Path"
+    },
+    "body": {
+      "type": "object",
+      "title": "Body to attach to the HTTP Request",
+      "properties": {}
+    }
+  }
+}

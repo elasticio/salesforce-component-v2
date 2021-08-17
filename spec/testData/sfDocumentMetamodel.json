@@ -1,0 +1,105 @@
+{
+  "in": {
+    "type": "object",
+    "properties": {
+      "Id": {
+        "type": "string",
+        "title": "lookup by - Id",
+        "required": false
+      },
+      "FolderId": {
+        "type": "string",
+        "required": true,
+        "title": "Folder ID",
+        "default": null
+      },
+      "Name": {
+        "type": "string",
+        "required": true,
+        "title": "Document Name",
+        "default": null
+      },
+      "DeveloperName": {
+        "type": "string",
+        "required": false,
+        "title": "Document Unique Name",
+        "default": null
+      },
+      "ContentType": {
+        "type": "string",
+        "required": false,
+        "title": "MIME Type",
+        "default": null
+      },
+      "Type": {
+        "type": "string",
+        "required": false,
+        "title": "File Extension",
+        "default": null
+      },
+      "IsPublic": {
+        "type": "boolean",
+        "required": false,
+        "title": "Externally Available",
+        "default": false
+      },
+      "Body": {
+        "type": "string",
+        "required": false,
+        "title": "Body - use URL to file",
+        "default": null
+      },
+      "Url": {
+        "type": "string",
+        "required": false,
+        "title": "Url",
+        "default": null
+      },
+      "Description": {
+        "type": "string",
+        "maxLength": 1000,
+        "required": false,
+        "title": "Description",
+        "default": null
+      },
+      "Keywords": {
+        "type": "string",
+        "required": false,
+        "title": "Keywords",
+        "default": null
+      },
+      "IsInternalUseOnly": {
+        "type": "boolean",
+        "required": false,
+        "title": "Internal Use Only",
+        "default": false
+      },
+      "AuthorId": {
+        "type": "string",
+        "required": false,
+        "title": "Author ID",
+        "default": null
+      }
+    }
+  },
+  "out": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string",
+        "required": true,
+        "title": "Unique identifier from CRM"
+      },
+      "success": {
+        "type": "boolean",
+        "required": true,
+        "title": "Request result"
+      },
+      "errors": {
+        "type": "array",
+        "required": true,
+        "title": "Founded errors"
+      }
+    }
+  }
+}
