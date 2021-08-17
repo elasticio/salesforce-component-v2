@@ -1,67 +1,37 @@
-/* eslint-disable no-return-assign */
-const fs = require('fs');
-const sinon = require('sinon');
-const { messages } = require('elasticio-node');
-const chai = require('chai');
-const logger = require('@elastic.io/component-logger')();
+const { expect } = require('chai');
 const lookupObject = require('../../lib/actions/lookupObject');
+const { getContext, testsCommon } = require('../../spec/common');
 
-const { expect } = chai;
+const { getOauth } = testsCommon;
 
 describe('lookupObject', () => {
-  let message;
-  let lastCall;
-  let configuration;
-
-  beforeEach(async () => {
-    lastCall.reset();
-  });
-
-  before(async () => {
-    if (fs.existsSync('.env')) {
-      // eslint-disable-next-line global-require
-      require('dotenv').config();
-    }
-
-    lastCall = sinon.stub(messages, 'newMessageWithBody')
-      .returns(Promise.resolve());
-
-    configuration = {
-      apiVersion: '45.0',
-      oauth: {
-        undefined_params: {
-          instance_url: process.env.INSTANCE_URL,
-        },
-        refresh_token: process.env.REFRESH_TOKEN,
-        access_token: process.env.ACCESS_TOKEN,
-      },
-      sobject: 'Contact',
+  it('looks up Contact Object ', async () => {
+    const testCfg = {
+      oauth: getOauth(),
       lookupField: 'Id',
+      sobject: 'Contact',
       typeOfSearch: 'uniqueFields',
     };
-    message = {
+    const msg = {
       body: {
         Id: '00344000020qT3KAAU',
       },
     };
-  });
 
-  after(async () => {
-    messages.newMessageWithBody.restore();
-  });
-
-  const emitter = {
-    emit: sinon.spy(),
-    logger,
-  };
-
-  it('looks up Contact Object ', async () => {
-    await lookupObject.process.call(emitter, message, configuration);
-    expect(lastCall.lastCall.args[0].attributes.type).to.eql('Contact');
+    const context = getContext();
+    await lookupObject.process.call(context, msg, testCfg);
+    expect(context.emit.getCall(0).args[1].body.attributes.type).to.eql('Contact');
   });
 
   it('Contact Lookup fields ', async () => {
-    const result = await lookupObject.getLookupFieldsModel(configuration);
+    const testCfg = {
+      oauth: getOauth(),
+      lookupField: 'Id',
+      sobject: 'Contact',
+      typeOfSearch: 'uniqueFields',
+    };
+
+    const result = await lookupObject.getLookupFieldsModel.call(getContext(), testCfg);
     expect(result).to.be.deep.eql({
       Demo_Email__c: 'Demo Email (Demo_Email__c)',
       Id: 'Contact ID (Id)',
@@ -70,7 +40,14 @@ describe('lookupObject', () => {
   });
 
   it('Contact linked objects ', async () => {
-    const result = await lookupObject.getLinkedObjectsModel(configuration);
+    const testCfg = {
+      oauth: getOauth(),
+      lookupField: 'Id',
+      sobject: 'Contact',
+      typeOfSearch: 'uniqueFields',
+    };
+
+    const result = await lookupObject.getLinkedObjectsModel.call(getContext(), testCfg);
     expect(result).to.be.deep.eql({
       Account: 'Account (Account)',
       CreatedBy: 'User (CreatedBy)',
@@ -129,12 +106,26 @@ describe('lookupObject', () => {
   });
 
   it('Contact objectTypes ', async () => {
-    const result = await lookupObject.objectTypes.call(emitter, configuration);
+    const testCfg = {
+      oauth: getOauth(),
+      lookupField: 'Id',
+      sobject: 'Contact',
+      typeOfSearch: 'uniqueFields',
+    };
+
+    const result = await lookupObject.objectTypes.call(getContext(), testCfg);
     expect(result.Account).to.be.eql('Account');
   });
 
   it('Contact Lookup Meta', async () => {
-    const result = await lookupObject.getMetaModel.call(emitter, configuration);
+    const testCfg = {
+      oauth: getOauth(),
+      lookupField: 'Id',
+      sobject: 'Contact',
+      typeOfSearch: 'uniqueFields',
+    };
+
+    const result = await lookupObject.getMetaModel.call(getContext(), testCfg);
     expect(result.in).to.be.deep.eql({
       type: 'object',
       properties: {
@@ -149,13 +140,23 @@ describe('lookupObject', () => {
   });
 
   it('throws a special error when a binary field is queried as a linked object', async () => {
+    const testCfg = {
+      oauth: getOauth(),
+      lookupField: 'Id',
+      sobject: 'Contact',
+      typeOfSearch: 'uniqueFields',
+    };
+    const msg = {
+      body: {
+        Id: '00344000020qT3KAAU',
+      },
+    };
+
     try {
-      await lookupObject.process.call(emitter, message,
-        Object.assign(configuration, { linkedObjects: ['!Attachments'] }));
+      await lookupObject.process.call(getContext(), msg,
+        Object.assign(testCfg, { linkedObjects: ['!Attachments'] }));
     } catch (e) {
-      expect(e.message).to.equal('Binary fields cannot be selected in join queries. '
-      + 'Instead of querying objects with binary fields as linked objects '
-      + '(such as children Attachments), try querying them directly.');
+      expect(e.message).to.equal('Binary fields cannot be selected in join queries');
     }
   });
 });

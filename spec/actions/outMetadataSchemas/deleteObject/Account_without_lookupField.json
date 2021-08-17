@@ -1,0 +1,34 @@
+{
+  "in": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "title": "Object ID",
+        "type": "string",
+        "required": true
+      }
+    }
+  },
+  "out": {
+    "type": "object",
+    "properties": {
+      "response": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "title": "id",
+            "type": "string"
+          },
+          "success": {
+            "title": "success",
+            "type": "boolean"
+          },
+          "errors": {
+            "title": "errors",
+            "type": "array"
+          }
+        }
+      }
+    }
+  }
+}

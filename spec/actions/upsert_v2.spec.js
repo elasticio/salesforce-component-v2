@@ -1,90 +1,90 @@
 /* eslint-disable comma-dangle, semi, max-len */
-const sinon = require('sinon')
 const nock = require('nock')
-const { getLogger } = require('@elastic.io/component-commons-library/lib/logger/logger')
 const { expect } = require('chai')
-const testCommon = require('../common.js')
-const common = require('../../lib/common.js')
 const upsert = require('../../lib/actions/upsert_v2.js')
 const objectTypesReply = require('../testData/sfObjects.json')
 const metaModelDocumentReply = require('../testData/sfDocumentMetadata.json')
 const metaModelDocumentFields = require('../testData/sfDocumentFields.json')
 const sfDocumentMetamodel = require('../testData/sfDocumentMetamodel.json')
-
-const { secret, secretId, instanceUrl } = testCommon
-let context
+const { globalConsts } = require('../../lib/common.js');
+const {
+  getContext, fetchToken, defaultCfg, testsCommon,
+} = require('../common.js');
 
 describe('Upsert v2 Object test', () => {
-  before(async () => {
-    context = {
-      logger: getLogger(),
-      emit: sinon.spy()
-    }
-  })
-
-  beforeEach(() => {
-    context.emit.resetHistory()
-    nock(process.env.ELASTICIO_API_URI)
-      .get(`/v2/workspaces/${process.env.ELASTICIO_WORKSPACE_ID}/secrets/${secretId}`)
-      .times(10)
-      .reply(200, secret)
-  })
-
-  afterEach(() => {
-    nock.cleanAll()
-  })
-
   describe('Config fields', () => {
     it('getObjectTypes', async () => {
-      const scope = nock(instanceUrl)
-        .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects`)
-        .reply(200, objectTypesReply)
+      const testCfg = {
+        ...defaultCfg,
+      }
       const expectedResult = {}
       objectTypesReply.sobjects.forEach((object) => {
         if (object.createable && object.updateable) expectedResult[object.name] = object.label
       })
-      const configuration = { secretId: 'secretId' }
-      const result = await upsert.getObjectTypes.call(context, configuration)
+
+      fetchToken()
+      const sobjectsReq = nock(testsCommon.instanceUrl)
+        .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects`)
+        .reply(200, objectTypesReply)
+
+      const result = await upsert.getObjectTypes.call(getContext(), testCfg)
       expect(result).to.deep.equal(expectedResult)
-      scope.done()
+      sobjectsReq.done()
     })
 
     it('getLookupFieldsModel - all Fields', async () => {
-      const scope = nock(instanceUrl)
-        .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
+      const testCfg = {
+        ...defaultCfg,
+        sobject: 'Document',
+        typeOfSearch: 'allFields'
+      }
+
+      fetchToken()
+      const describeReq = nock(testsCommon.instanceUrl)
+        .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
         .reply(200, metaModelDocumentReply);
-      const configuration = { secretId: 'secretId', sobject: 'Document', typeOfSearch: 'allFields' }
-      const result = await upsert.getLookupFieldsModel.call(context, configuration)
+
+      const result = await upsert.getLookupFieldsModel.call(getContext(), testCfg)
       expect(result).to.deep.equal(metaModelDocumentFields)
-      scope.done()
+      describeReq.done()
     })
 
     it('getLookupFieldsModel - unique Fields', async () => {
-      const scope = nock(instanceUrl)
-        .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
+      const testCfg = {
+        ...defaultCfg,
+        sobject: 'Document',
+        typeOfSearch: 'uniqueFields'
+      }
+
+      fetchToken()
+      const describeReq = nock(testsCommon.instanceUrl)
+        .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
         .reply(200, metaModelDocumentReply);
-      const configuration = { secretId: 'secretId', sobject: 'Document', typeOfSearch: 'uniqueFields' }
-      const result = await upsert.getLookupFieldsModel.call(context, configuration)
+
+      const result = await upsert.getLookupFieldsModel.call(getContext(), testCfg)
       expect(result).to.deep.equal({ Id: 'Document ID (Id)' })
-      scope.done()
+      describeReq.done()
     })
   })
 
   describe('Meta model', () => {
     it('Retrieves the list of createable/updateable sobjects', async () => {
-      const scope = nock(instanceUrl)
-        .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
-        .reply(200, metaModelDocumentReply);
-      const configuration = {
-        secretId: 'secretId',
+      const testCfg = {
+        ...defaultCfg,
         sobject: 'Document',
         typeOfSearch: 'allFields',
         updateFields: ['Url', 'Body'],
         lookupField: 'Id'
       }
-      const result = await upsert.getMetaModel.call(context, configuration)
+
+      fetchToken()
+      const describeReq = nock(testsCommon.instanceUrl)
+        .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
+        .reply(200, metaModelDocumentReply);
+
+      const result = await upsert.getMetaModel.call(getContext(), testCfg)
       expect(result).to.deep.equal(sfDocumentMetamodel)
-      scope.done()
+      describeReq.done()
     })
   })
 
@@ -97,74 +97,122 @@ describe('Upsert v2 Object test', () => {
       lookupField: 'Id'
     }
 
-    const body = {
-      Id: 1,
-      Url: '😂'
-    }
-
     it('Object found, going to update', async () => {
-      const bodyNoId = { ...body }
-      delete bodyNoId.Id
-      bodyNoId.Body = 'YXNkYXNkYXNkcXdlcXdlcXdl'
-      const scope = nock(instanceUrl, { encodedQueryParams: true })
-        .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
+      const testCfg = {
+        ...configuration
+      }
+      const msg = {
+        body: {
+          Id: 1,
+          Url: '😂',
+          Body: 'http://test.env.mock/somedata.txt'
+        }
+      }
+
+      fetchToken()
+      const describeReq = nock(testsCommon.instanceUrl)
+        .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
         .reply(200, metaModelDocumentReply)
-        .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/query?q=${testCommon.buildSOQL(metaModelDocumentReply, { Id: body.Id })}`)
-        .reply(200, { done: true, totalSize: 1, records: [body] })
-        .patch(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/${body.Id}`, bodyNoId)
+      fetchToken()
+      const queryReq = nock(testsCommon.instanceUrl)
+        .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/query?q=${
+          testsCommon.buildSOQL(metaModelDocumentReply, { Id: 1 })
+        }`)
+        .reply(200, { done: true, totalSize: 1, records: [{ Id: 1, Url: '😂' }] })
+      fetchToken();
+      const patchDocReq = nock(testsCommon.instanceUrl)
+        .patch(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/1`, { Url: '😂', Body: 'YXNkYXNkYXNkcXdlcXdlcXdl' })
         .reply(204)
-
-      const bodyWithBody = { ...body }
-      bodyWithBody.Body = 'http://test.env.mock/somedata.txt'
-
-      nock('http://test.env.mock')
+      const getTxtReq = nock('http://test.env.mock')
         .get('/somedata.txt')
         .replyWithFile(200, `${__dirname}/../testData/somedata.txt`);
 
-      const result = await upsert.process.call(context, { body: bodyWithBody }, configuration)
+      const result = await upsert.process.call(getContext(), msg, testCfg)
       expect(result.body.success).to.eql(true);
-      scope.done()
+      describeReq.done()
+      queryReq.done()
+      patchDocReq.done()
+      getTxtReq.done()
     })
 
     it('Object not found, going to create', async () => {
-      const bodyNoId = { ...body }
-      delete bodyNoId.Id
-      const scope = nock(instanceUrl, { encodedQueryParams: true })
-        .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
+      const testCfg = {
+        ...configuration
+      }
+      const msg = {
+        body: {
+          Id: 1,
+          Url: '😂',
+        }
+      }
+
+      fetchToken()
+      const describeReq = nock(testsCommon.instanceUrl)
+        .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
         .reply(200, metaModelDocumentReply)
-        .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/query?q=${testCommon.buildSOQL(metaModelDocumentReply, { Id: body.Id })}`)
+      fetchToken()
+      const queryReq = nock(testsCommon.instanceUrl)
+        .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/query?q=${
+          testsCommon.buildSOQL(metaModelDocumentReply, { Id: 1 })
+        }`)
         .reply(200, { done: true, totalSize: 1, records: [] })
-        .post(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Document`, bodyNoId)
+      fetchToken()
+      const postDocReq = nock(testsCommon.instanceUrl)
+        .post(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/Document`, { Url: '😂' })
         .reply(200, { id: 2, success: true, })
 
-      const result = await upsert.process.call(context, { body }, configuration)
+      const result = await upsert.process.call(getContext(), msg, testCfg)
       expect(result.body.success).to.eql(true);
-      scope.done()
+      describeReq.done()
+      queryReq.done()
+      postDocReq.done()
     })
 
     it('Object not found - empty Id, going to create', async () => {
-      const bodyNoId = { ...body }
-      delete bodyNoId.Id
-      const scope = nock(instanceUrl, { encodedQueryParams: true })
-        .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
+      const testCfg = {
+        ...configuration
+      }
+      const msg = {
+        body: {
+          Url: '😂',
+        }
+      }
+
+      fetchToken()
+      const describeReq = nock(testsCommon.instanceUrl)
+        .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
         .reply(200, metaModelDocumentReply)
-        .post(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Document`, bodyNoId)
+      fetchToken()
+      const createDocReq = nock(testsCommon.instanceUrl)
+        .post(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/Document`, msg.body)
         .reply(200, { id: 2, success: true, })
 
-      const result = await upsert.process.call(context, { body: bodyNoId }, configuration)
+      const result = await upsert.process.call(getContext(), msg, testCfg)
       expect(result.body.success).to.eql(true);
-      scope.done()
+      describeReq.done()
+      createDocReq.done()
     })
 
     it('Found more then 1 object', async () => {
-      const bodyNoId = { ...body }
-      delete bodyNoId.Id
-      const scope = nock(instanceUrl, { encodedQueryParams: true })
-        .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/query?q=${testCommon.buildSOQL(metaModelDocumentReply, { Id: body.Id })}`)
+      const testCfg = {
+        ...configuration
+      }
+      const msg = {
+        body: {
+          Id: 1,
+          Url: '😂',
+        }
+      }
+
+      fetchToken()
+      const scope = nock(testsCommon.instanceUrl)
+        .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/query?q=${
+          testsCommon.buildSOQL(metaModelDocumentReply, { Id: 1 })
+        }`)
         .reply(200, { done: true, totalSize: 1, records: [1, 2] })
 
       try {
-        await upsert.process.call(context, { body }, configuration)
+        await upsert.process.call(getContext(), msg, testCfg)
       } catch (err) {
         expect(err.message).to.eql('Found more than 1 Object');
       }

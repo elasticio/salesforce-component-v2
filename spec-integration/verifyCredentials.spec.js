@@ -1,31 +1,18 @@
 /* eslint-disable no-return-assign */
-const fs = require('fs');
-const logger = require('@elastic.io/component-logger')();
 const { expect } = require('chai');
 const verify = require('../verifyCredentials');
+const { getContext, testsCommon } = require('../spec/common');
+
+const { getOauth } = testsCommon;
 
 describe('verifyCredentials', async () => {
-  let configuration;
-
-  before(async () => {
-    if (fs.existsSync('.env')) {
-      // eslint-disable-next-line global-require
-      require('dotenv').config();
-    }
-
-    configuration = {
-      oauth: {
-        undefined_params: {
-          instance_url: process.env.INSTANCE_URL,
-        },
-        refresh_token: process.env.REFRESH_TOKEN,
-        access_token: process.env.ACCESS_TOKEN,
-      },
-    };
-  });
-
   it('should succeed', async () => {
-    const result = await verify.call({ logger }, configuration);
+    const testCfg = {
+      oauth: getOauth(),
+      sobject: 'Contact',
+    };
+
+    const result = await verify.call(getContext(), testCfg);
     expect(result.verified).to.eql(true);
   });
 });

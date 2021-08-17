@@ -1,4 +1,4 @@
-const chai = require('chai');
+const { expect } = require('chai');
 
 process.env.HASH_LIMIT_TIME = 1000;
 const { lookupCache } = require('../../lib/helpers/lookupCache.js');
@@ -19,7 +19,7 @@ describe('Lookup Cache unit tests', () => {
 
     it('getMap', async () => {
       const map = lookupCache.getMap();
-      chai.expect(map).to.equal(lookupCache.requestCache);
+      expect(map).to.equal(lookupCache.requestCache);
     });
 
     it('hasKey', async () => {
@@ -29,10 +29,10 @@ describe('Lookup Cache unit tests', () => {
       map.set('b', { letter: 'b' });
       map.set('c', { letter: 'c' });
 
-      chai.expect(lookupCache.hasKey('a')).to.equal(true);
-      chai.expect(lookupCache.hasKey('b')).to.equal(true);
-      chai.expect(lookupCache.hasKey('c')).to.equal(true);
-      chai.expect(lookupCache.hasKey('d')).to.equal(false);
+      expect(lookupCache.hasKey('a')).to.equal(true);
+      expect(lookupCache.hasKey('b')).to.equal(true);
+      expect(lookupCache.hasKey('c')).to.equal(true);
+      expect(lookupCache.hasKey('d')).to.equal(false);
     });
 
     it('addRequestResponsePair', async () => {
@@ -42,13 +42,13 @@ describe('Lookup Cache unit tests', () => {
 
       const map = lookupCache.getMap();
 
-      chai.expect(map.zeroNode.nextNode.key).to.equal('c');
-      chai.expect(map.zeroNode.nextNode.value.letter).to.equal('c');
-      chai.expect(map.zeroNode.nextNode.nextNode.key).to.equal('b');
-      chai.expect(map.zeroNode.nextNode.nextNode.value.letter).to.equal('b');
-      chai.expect(map.zeroNode.nextNode.nextNode.nextNode.key).to.equal('a');
-      chai.expect(map.zeroNode.nextNode.nextNode.nextNode.value.letter).to.equal('a');
-      chai.expect(map.size).to.equal(3);
+      expect(map.zeroNode.nextNode.key).to.equal('c');
+      expect(map.zeroNode.nextNode.value.letter).to.equal('c');
+      expect(map.zeroNode.nextNode.nextNode.key).to.equal('b');
+      expect(map.zeroNode.nextNode.nextNode.value.letter).to.equal('b');
+      expect(map.zeroNode.nextNode.nextNode.nextNode.key).to.equal('a');
+      expect(map.zeroNode.nextNode.nextNode.nextNode.value.letter).to.equal('a');
+      expect(map.size).to.equal(3);
     });
 
     it('addRequestResponsePair limit check', async () => {
@@ -66,14 +66,14 @@ describe('Lookup Cache unit tests', () => {
       lookupCache.addRequestResponsePair('l', { letter: 'l' });
 
       const map = lookupCache.getMap();
-      chai.expect(map.size).to.equal(10);
-      chai.expect(map.zeroNode.nextNode.key).to.equal('l');
-      chai.expect(map.zeroNode.nextNode.value.letter).to.equal('l');
+      expect(map.size).to.equal(10);
+      expect(map.zeroNode.nextNode.key).to.equal('l');
+      expect(map.zeroNode.nextNode.value.letter).to.equal('l');
 
-      chai.expect(lookupCache.hasKey('a')).to.equal(false);
-      chai.expect(lookupCache.hasKey('b')).to.equal(false);
-      chai.expect(lookupCache.hasKey('c')).to.equal(true);
-      chai.expect(lookupCache.hasKey('d')).to.equal(true);
+      expect(lookupCache.hasKey('a')).to.equal(false);
+      expect(lookupCache.hasKey('b')).to.equal(false);
+      expect(lookupCache.hasKey('c')).to.equal(true);
+      expect(lookupCache.hasKey('d')).to.equal(true);
     });
 
     it('getResponse', async () => {
@@ -83,16 +83,16 @@ describe('Lookup Cache unit tests', () => {
 
       const result = lookupCache.getResponse('b');
 
-      chai.expect(result).to.deep.equal({ letter: 'b' });
+      expect(result).to.deep.equal({ letter: 'b' });
 
       const map = lookupCache.getMap();
-      chai.expect(map.zeroNode.nextNode.key).to.equal('b');
-      chai.expect(map.zeroNode.nextNode.value.letter).to.equal('b');
-      chai.expect(map.zeroNode.nextNode.nextNode.key).to.equal('c');
-      chai.expect(map.zeroNode.nextNode.nextNode.value.letter).to.equal('c');
-      chai.expect(map.zeroNode.nextNode.nextNode.nextNode.key).to.equal('a');
-      chai.expect(map.zeroNode.nextNode.nextNode.nextNode.value.letter).to.equal('a');
-      chai.expect(map.size).to.equal(3);
+      expect(map.zeroNode.nextNode.key).to.equal('b');
+      expect(map.zeroNode.nextNode.value.letter).to.equal('b');
+      expect(map.zeroNode.nextNode.nextNode.key).to.equal('c');
+      expect(map.zeroNode.nextNode.nextNode.value.letter).to.equal('c');
+      expect(map.zeroNode.nextNode.nextNode.nextNode.key).to.equal('a');
+      expect(map.zeroNode.nextNode.nextNode.nextNode.value.letter).to.equal('a');
+      expect(map.size).to.equal(3);
     });
 
     it('clear', async () => {
@@ -102,15 +102,15 @@ describe('Lookup Cache unit tests', () => {
 
       lookupCache.clear();
 
-      chai.expect(lookupCache.getResponse('a')).to.equal(undefined);
-      chai.expect(lookupCache.getResponse('b')).to.equal(undefined);
-      chai.expect(lookupCache.getResponse('c')).to.equal(undefined);
-      chai.expect(lookupCache.getMap().size).to.equal(0);
+      expect(lookupCache.getResponse('a')).to.equal(undefined);
+      expect(lookupCache.getResponse('b')).to.equal(undefined);
+      expect(lookupCache.getResponse('c')).to.equal(undefined);
+      expect(lookupCache.getMap().size).to.equal(0);
     });
 
     it('generateKeyFromDataArray', async () => {
       const result = lookupCache.generateKeyFromDataArray('a', 1, -5, true, ['1', 'a', 5]);
-      chai.expect(result).to.equal('a1-5true1,a,5');
+      expect(result).to.equal('a1-5true1,a,5');
     });
   });
 
@@ -132,18 +132,18 @@ describe('Lookup Cache unit tests', () => {
 
       map.delete('b');
 
-      chai.expect(map.zeroNode.nextNode.key).to.equal('c');
-      chai.expect(map.zeroNode.nextNode.value.letter).to.equal('c');
-      chai.expect(map.zeroNode.nextNode.nextNode.key).to.equal('a');
-      chai.expect(map.zeroNode.nextNode.nextNode.value.letter).to.equal('a');
-      chai.expect(map.size).to.equal(2);
+      expect(map.zeroNode.nextNode.key).to.equal('c');
+      expect(map.zeroNode.nextNode.value.letter).to.equal('c');
+      expect(map.zeroNode.nextNode.nextNode.key).to.equal('a');
+      expect(map.zeroNode.nextNode.nextNode.value.letter).to.equal('a');
+      expect(map.size).to.equal(2);
 
       map.delete('c');
 
-      chai.expect(map.zeroNode.nextNode.key).to.equal('a');
-      chai.expect(map.zeroNode.nextNode.value.letter).to.equal('a');
+      expect(map.zeroNode.nextNode.key).to.equal('a');
+      expect(map.zeroNode.nextNode.value.letter).to.equal('a');
 
-      chai.expect(map.size).to.equal(1);
+      expect(map.size).to.equal(1);
     });
   });
 });

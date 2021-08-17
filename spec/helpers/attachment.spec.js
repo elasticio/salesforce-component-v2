@@ -1,42 +1,32 @@
 const { expect } = require('chai');
 const nock = require('nock');
-const logger = require('@elastic.io/component-logger')();
-const common = require('../../lib/common.js');
-const testCommon = require('../common.js');
+const { globalConsts } = require('../../lib/common.js');
 const { prepareBinaryData, getAttachment } = require('../../lib/helpers/attachment');
+const {
+  getContext, fetchToken, defaultCfg, testsCommon,
+} = require('../common.js');
 
 describe('attachment helper', () => {
-  beforeEach(() => {
-    nock(testCommon.instanceUrl, { encodedQueryParams: true })
-      .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
-      .reply(200, {
-        fields: [
-          {
-            name: 'Body',
-            type: 'base64',
-          },
-          {
-            name: 'ContentType',
-          },
-        ],
-      });
-    nock(process.env.ELASTICIO_API_URI)
-      .get(`/v2/workspaces/${process.env.ELASTICIO_WORKSPACE_ID}/secrets/${testCommon.secretId}`)
-      .times(2)
-      .reply(200, testCommon.secret);
-  });
-
-  afterEach(() => {
-    nock.cleanAll();
-  });
-
-  const configuration = {
-    secretId: testCommon.secretId,
-    sobject: 'Document',
-  };
-
+  const makeDescribeReq = () => nock(testsCommon.instanceUrl)
+    .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
+    .reply(200, {
+      fields: [
+        {
+          name: 'Body',
+          type: 'base64',
+        },
+        {
+          name: 'ContentType',
+        },
+      ],
+    });
   describe('prepareBinaryData test', () => {
-    xit('should upload attachment utilizeAttachment:true', async () => {
+    it('should upload attachment utilizeAttachment:true', async () => {
+      const testCfg = {
+        ...defaultCfg,
+        sobject: 'Document',
+        utilizeAttachment: true,
+      };
       const msg = {
         body: {
           Name: 'Attachment',
@@ -45,17 +35,30 @@ describe('attachment helper', () => {
           'Fox.jpeg': {
             'content-type': 'image/jpeg',
             size: 126564,
-            url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Everest_kalapatthar.jpg/800px-Everest_kalapatthar.jpg',
+            url: 'http://img.storage/image.jpg',
           },
         },
       };
-      await prepareBinaryData(msg, { ...configuration, utilizeAttachment: true }, { logger });
+
+      fetchToken();
+      const describeReq = makeDescribeReq();
+      const downloadReq = nock('http://img.storage')
+        .get('/image.jpg')
+        .reply(200, 'image');
+
+      await prepareBinaryData(msg, testCfg, getContext());
       expect(msg.body.Name).to.eql('Attachment');
       expect(msg.body.ContentType).to.eql('image/jpeg');
       expect(Object.prototype.hasOwnProperty.call(msg.body, 'Body')).to.eql(true);
+      describeReq.done();
+      downloadReq.done();
     });
 
     it('should discard attachment utilizeAttachment:false', async () => {
+      const testCfg = {
+        ...defaultCfg,
+        sobject: 'Document',
+      };
       const msg = {
         body: {
           Name: 'Without Attachment',
@@ -68,26 +71,36 @@ describe('attachment helper', () => {
           },
         },
       };
-      await prepareBinaryData(msg, configuration, { logger });
+
+      await prepareBinaryData(msg, testCfg, getContext());
       expect(msg.body.Name).to.eql('Without Attachment');
       expect(Object.prototype.hasOwnProperty.call(msg.body, 'Body')).to.eql(false);
     });
   });
 
   describe('getAttachment test', async () => {
-    it.skip('should getAttachment', async () => {
-      nock(testCommon.instanceUrl)
-        .get('/services/data/v46.0/sobjects/Attachment/00P2R00001DYjNVUA1/Body')
-        .reply(200, { hello: 'world' });
+    it('should getAttachment', async () => {
+      const testCfg = {
+        ...defaultCfg,
+        sobject: 'Document',
+      };
       const objectContent = {
         Body: '/services/data/v46.0/sobjects/Attachment/00P2R00001DYjNVUA1/Body',
       };
-      const result = await getAttachment(configuration, objectContent, { logger });
-      expect(result).to.eql({
-        attachment: {
-          url: 'http://file.storage.server',
-        },
-      });
+
+      fetchToken();
+      const describeReq = makeDescribeReq();
+      fetchToken();
+      const queryPicture = nock(testsCommon.instanceUrl)
+        .get(objectContent.Body)
+        .reply(200, { hello: 'world' });
+      fetchToken();
+      nock(testsCommon.EXT_FILE_STORAGE).put('/', { hello: 'world' }).reply(200);
+
+      const result = await getAttachment(testCfg, objectContent, getContext());
+      expect(result).to.deep.equal({ attachment: { url: 'http://file.storage.server' } });
+      describeReq.done();
+      queryPicture.done();
     });
   });
 });

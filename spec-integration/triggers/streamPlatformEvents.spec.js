@@ -1,67 +1,42 @@
 /* eslint-disable no-return-assign */
-const fs = require('fs');
-const logger = require('@elastic.io/component-logger')();
 const { expect } = require('chai');
+const jsforce = require('jsforce');
 const sinon = require('sinon');
-const nock = require('nock');
 const trigger = require('../../lib/triggers/streamPlatformEvents');
+const { getContext, testsCommon } = require('../../spec/common');
+
+const { getOauth } = testsCommon;
 
 describe('streamPlatformEvents trigger test', async () => {
-  let emitter;
-  const secretId = 'secretId';
-  let configuration;
-  let secret;
-
-  before(async () => {
-    emitter = {
-      emit: sinon.spy(),
-      logger,
-    };
-    if (fs.existsSync('.env')) {
-      // eslint-disable-next-line global-require
-      require('dotenv').config();
-    }
-    process.env.ELASTICIO_API_URI = 'https://app.example.io';
-    process.env.ELASTICIO_API_USERNAME = 'user';
-    process.env.ELASTICIO_API_KEY = 'apiKey';
-    process.env.ELASTICIO_WORKSPACE_ID = 'workspaceId';
-    secret = {
-      data: {
-        attributes: {
-          credentials: {
-            access_token: process.env.ACCESS_TOKEN,
-            undefined_params: {
-              instance_url: process.env.INSTANCE_URL,
-            },
-          },
-        },
-      },
-    };
-
-    configuration = {
-      secretId,
-      object: 'Test__e',
-    };
-
-    nock(process.env.ELASTICIO_API_URI)
-      .get(`/v2/workspaces/${process.env.ELASTICIO_WORKSPACE_ID}/secrets/${secretId}`)
-      .times(10)
-      .reply(200, secret);
-  });
-  afterEach(() => {
-    emitter.emit.resetHistory();
-  });
-
   it('should succeed selectModel objectTypes', async () => {
-    const result = await trigger.objectTypes.call(emitter, configuration);
+    const testCfg = { oauth: getOauth(), sobject: 'Contact' };
+
+    const result = await trigger.objectTypes.call(getContext(), testCfg);
     expect(result).to.eql({
       Test__e: 'Integration Test event',
       UserCreateAcknowledge__e: 'UserCreateAcknowledge',
     });
   });
 
-  it('should succeed process trigger', async () => {
-    await trigger.process.call(emitter, {}, configuration);
-    expect(emitter.emit.callCount).to.eql(0);
+  describe('process', () => {
+    before(() => {
+      sinon.stub(jsforce, 'Connection').callsFake(() => ({
+        streaming: { createClient: () => ({ subscribe: async (_topic, emit) => { emit('some message'); } }) },
+        StreamingExtension: { Replay: () => {}, AuthFailure: () => {} },
+      }));
+    });
+    after(() => {
+      sinon.reset();
+    });
+    it('should succeed process trigger', async () => {
+      const secretId = process.env.AUTH_SECRET_ID;
+      const testCfg = { oauth: getOauth(), secretId };
+      const msg = { body: {} };
+
+      const context = getContext();
+      await trigger.process.call(context, msg, testCfg);
+      expect(context.emit.callCount).to.eql(1);
+      expect(context.emit.getCall(0).args[1].body).to.equal('some message');
+    });
   });
 });

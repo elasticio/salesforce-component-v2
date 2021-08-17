@@ -1,74 +1,65 @@
 const { expect } = require('chai');
 const nock = require('nock');
-const logger = require('@elastic.io/component-logger')();
-const common = require('../../lib/common.js');
-const testCommon = require('../common.js');
+const { globalConsts } = require('../../lib/common.js');
+const {
+  getContext, fetchToken, defaultCfg, testsCommon,
+} = require('../common.js');
 const { callJSForceMethod } = require('../../lib/helpers/wrapper');
 
 describe('wrapper helper', () => {
-  afterEach(() => {
-    nock.cleanAll();
-  });
   it('should succeed call describe method', async () => {
-    const cfg = {
-      secretId: testCommon.secretId,
+    const testCfg = {
+      ...defaultCfg,
       sobject: 'Contact',
     };
-    nock(process.env.ELASTICIO_API_URI)
-      .get(`/v2/workspaces/${process.env.ELASTICIO_WORKSPACE_ID}/secrets/${testCommon.secretId}`)
-      .reply(200, testCommon.secret);
-    nock(testCommon.instanceUrl, { encodedQueryParams: true })
-      .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Contact/describe`)
+
+    fetchToken();
+    const describeReq = nock(testsCommon.instanceUrl)
+      .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/Contact/describe`)
       .reply(200, { name: 'Contact' });
-    const result = await callJSForceMethod.call({ logger }, cfg, 'describe');
+
+    const result = await callJSForceMethod.call(getContext(), testCfg, 'describe');
     expect(result.name).to.eql('Contact');
+    describeReq.done();
   });
 
   it('should succeed call describe method, credentials from config', async () => {
-    const cfg = {
+    const testCfg = {
       sobject: 'Contact',
-      oauth: {
-        access_token: 'access_token',
-        undefined_params: {
-          instance_url: testCommon.instanceUrl,
-        },
-      },
+      oauth: testsCommon.secret.data.attributes.credentials,
     };
-    nock(testCommon.instanceUrl, { encodedQueryParams: true })
-      .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Contact/describe`)
+
+    fetchToken();
+    const describeReq = nock(testsCommon.instanceUrl)
+      .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/Contact/describe`)
       .reply(200, { name: 'Contact' });
-    const result = await callJSForceMethod.call({ logger }, cfg, 'describe');
+
+    const result = await callJSForceMethod.call(getContext(), testCfg, 'describe');
     expect(result.name).to.eql('Contact');
+    describeReq.done();
   });
 
   it('should refresh token and succeed call describe method', async () => {
-    nock(process.env.ELASTICIO_API_URI)
-      .get(`/v2/workspaces/${process.env.ELASTICIO_WORKSPACE_ID}/secrets/${testCommon.secretId}`)
-      .reply(200, {
-        data: {
-          attributes: {
-            credentials: {
-              access_token: 'oldAccessToken',
-              undefined_params: {
-                instance_url: testCommon.instanceUrl,
-              },
-            },
-          },
-        },
-      })
-      .post(`/v2/workspaces/${process.env.ELASTICIO_WORKSPACE_ID}/secrets/${testCommon.secretId}/refresh`)
-      .reply(200, testCommon.secret);
     const cfg = {
-      secretId: testCommon.secretId,
+      ...defaultCfg,
       sobject: 'Contact',
     };
-    nock(testCommon.instanceUrl, { reqheaders: { authorization: 'Bearer oldAccessToken' } })
-      .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Contact/describe`)
+
+    fetchToken();
+    const reqWithTokenFailed = nock(testsCommon.instanceUrl)
+      .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/Contact/describe`)
       .replyWithError({ name: 'INVALID_SESSION_ID' });
-    nock(testCommon.instanceUrl, { reqheaders: { authorization: 'Bearer accessToken' } })
-      .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Contact/describe`)
+    const refreshTokenReq = nock(process.env.ELASTICIO_API_URI)
+      .post(`/v2/workspaces/${process.env.ELASTICIO_WORKSPACE_ID}/secrets/${testsCommon.secretId}/refresh`)
+      .reply(200, testsCommon.secret);
+    const validDescribeReq = nock(testsCommon.instanceUrl)
+      .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/Contact/describe`)
       .reply(200, { name: 'Contact' });
-    const result = await callJSForceMethod.call({ logger }, cfg, 'describe');
+
+    const result = await callJSForceMethod.call(getContext(), cfg, 'describe');
     expect(result.name).to.eql('Contact');
+    reqWithTokenFailed.done();
+    refreshTokenReq.done();
+    validDescribeReq.done();
   });
 });
