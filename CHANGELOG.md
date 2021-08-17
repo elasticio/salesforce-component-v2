@@ -3,6 +3,7 @@
 * New `Upsert Object` action
 * Old `Upsert Object` action is deprecated
 * `Get New and Updated Objects Polling` trigger default size of pages to be fetched changed from 1000 to 10000
+* Delete restriction ```maxFetch should be maximum 10000 objects``` for `Get New and Updated Objects Polling`
 
 ## 2.1.0 (August 10, 2021)
 
