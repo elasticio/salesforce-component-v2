@@ -1,0 +1,856 @@
+{
+  "in": {
+    "type": "object",
+    "properties": {
+      "Name": {
+        "type": "string",
+        "required": true,
+        "title": "Account Name",
+        "default": null
+      },
+      "Type": {
+        "type": "string",
+        "enum": [
+          "Prospect",
+          "Customer - Direct",
+          "Customer - Channel",
+          "Channel Partner / Reseller",
+          "Installation Partner",
+          "Technology Partner",
+          "Other"
+        ],
+        "required": false,
+        "title": "Account Type",
+        "default": null
+      },
+      "ParentId": {
+        "type": "string",
+        "required": false,
+        "title": "Parent Account ID",
+        "default": null
+      },
+      "BillingStreet": {
+        "type": "string",
+        "maxLength": 1000,
+        "required": false,
+        "title": "Billing Street",
+        "default": null
+      },
+      "BillingCity": {
+        "type": "string",
+        "required": false,
+        "title": "Billing City",
+        "default": null
+      },
+      "BillingState": {
+        "type": "string",
+        "required": false,
+        "title": "Billing State/Province",
+        "default": null
+      },
+      "BillingPostalCode": {
+        "type": "string",
+        "required": false,
+        "title": "Billing Zip/Postal Code",
+        "default": null
+      },
+      "BillingCountry": {
+        "type": "string",
+        "required": false,
+        "title": "Billing Country",
+        "default": null
+      },
+      "BillingLatitude": {
+        "type": "number",
+        "required": false,
+        "title": "Billing Latitude",
+        "default": null
+      },
+      "BillingLongitude": {
+        "type": "number",
+        "required": false,
+        "title": "Billing Longitude",
+        "default": null
+      },
+      "BillingGeocodeAccuracy": {
+        "type": "string",
+        "enum": [
+          "Address",
+          "NearAddress",
+          "Block",
+          "Street",
+          "ExtendedZip",
+          "Zip",
+          "Neighborhood",
+          "City",
+          "County",
+          "State",
+          "Unknown"
+        ],
+        "required": false,
+        "title": "Billing Geocode Accuracy",
+        "default": null
+      },
+      "ShippingStreet": {
+        "type": "string",
+        "maxLength": 1000,
+        "required": false,
+        "title": "Shipping Street",
+        "default": null
+      },
+      "ShippingCity": {
+        "type": "string",
+        "required": false,
+        "title": "Shipping City",
+        "default": null
+      },
+      "ShippingState": {
+        "type": "string",
+        "required": false,
+        "title": "Shipping State/Province",
+        "default": null
+      },
+      "ShippingPostalCode": {
+        "type": "string",
+        "required": false,
+        "title": "Shipping Zip/Postal Code",
+        "default": null
+      },
+      "ShippingCountry": {
+        "type": "string",
+        "required": false,
+        "title": "Shipping Country",
+        "default": null
+      },
+      "ShippingLatitude": {
+        "type": "number",
+        "required": false,
+        "title": "Shipping Latitude",
+        "default": null
+      },
+      "ShippingLongitude": {
+        "type": "number",
+        "required": false,
+        "title": "Shipping Longitude",
+        "default": null
+      },
+      "ShippingGeocodeAccuracy": {
+        "type": "string",
+        "enum": [
+          "Address",
+          "NearAddress",
+          "Block",
+          "Street",
+          "ExtendedZip",
+          "Zip",
+          "Neighborhood",
+          "City",
+          "County",
+          "State",
+          "Unknown"
+        ],
+        "required": false,
+        "title": "Shipping Geocode Accuracy",
+        "default": null
+      },
+      "Phone": {
+        "type": "string",
+        "required": false,
+        "title": "Account Phone",
+        "default": null
+      },
+      "Fax": {
+        "type": "string",
+        "required": false,
+        "title": "Account Fax",
+        "default": null
+      },
+      "AccountNumber": {
+        "type": "string",
+        "required": false,
+        "title": "Account Number",
+        "default": null
+      },
+      "Website": {
+        "type": "string",
+        "required": false,
+        "title": "Website",
+        "default": null
+      },
+      "Sic": {
+        "type": "string",
+        "required": false,
+        "title": "SIC Code",
+        "default": null
+      },
+      "Industry": {
+        "type": "string",
+        "enum": [
+          "Agriculture",
+          "Apparel",
+          "Banking",
+          "Biotechnology",
+          "Chemicals",
+          "Communications",
+          "Construction",
+          "Consulting",
+          "Education",
+          "Electronics",
+          "Energy",
+          "Engineering",
+          "Entertainment",
+          "Environmental",
+          "Finance",
+          "Food & Beverage",
+          "Government",
+          "Healthcare",
+          "Hospitality",
+          "Insurance",
+          "Machinery",
+          "Manufacturing",
+          "Media",
+          "Not For Profit",
+          "Recreation",
+          "Retail",
+          "Shipping",
+          "Technology",
+          "Telecommunications",
+          "Transportation",
+          "Utilities",
+          "Other"
+        ],
+        "required": false,
+        "title": "Industry",
+        "default": null
+      },
+      "AnnualRevenue": {
+        "type": "number",
+        "required": false,
+        "title": "Annual Revenue",
+        "default": null
+      },
+      "NumberOfEmployees": {
+        "type": "number",
+        "required": false,
+        "title": "Employees",
+        "default": null
+      },
+      "Ownership": {
+        "type": "string",
+        "enum": [
+          "Public",
+          "Private",
+          "Subsidiary",
+          "Other"
+        ],
+        "required": false,
+        "title": "Ownership",
+        "default": null
+      },
+      "TickerSymbol": {
+        "type": "string",
+        "required": false,
+        "title": "Ticker Symbol",
+        "default": null
+      },
+      "Description": {
+        "type": "string",
+        "maxLength": 1000,
+        "required": false,
+        "title": "Account Description",
+        "default": null
+      },
+      "Rating": {
+        "type": "string",
+        "enum": [
+          "Hot",
+          "Warm",
+          "Cold"
+        ],
+        "required": false,
+        "title": "Account Rating",
+        "default": null
+      },
+      "Site": {
+        "type": "string",
+        "required": false,
+        "title": "Account Site",
+        "default": null
+      },
+      "OwnerId": {
+        "type": "string",
+        "required": false,
+        "title": "Owner ID",
+        "default": null
+      },
+      "Jigsaw": {
+        "type": "string",
+        "required": false,
+        "title": "Data.com Key",
+        "default": null
+      },
+      "CleanStatus": {
+        "type": "string",
+        "enum": [
+          "Matched",
+          "Different",
+          "Acknowledged",
+          "NotFound",
+          "Inactive",
+          "Pending",
+          "SelectMatch",
+          "Skipped"
+        ],
+        "required": false,
+        "title": "Clean Status",
+        "default": null
+      },
+      "AccountSource": {
+        "type": "string",
+        "enum": [
+          "Web",
+          "Phone Inquiry",
+          "Partner Referral",
+          "Purchased List",
+          "Other"
+        ],
+        "required": false,
+        "title": "Account Source",
+        "default": null
+      },
+      "DunsNumber": {
+        "type": "string",
+        "required": false,
+        "title": "D-U-N-S Number",
+        "default": null
+      },
+      "Tradestyle": {
+        "type": "string",
+        "required": false,
+        "title": "Tradestyle",
+        "default": null
+      },
+      "NaicsCode": {
+        "type": "string",
+        "required": false,
+        "title": "NAICS Code",
+        "default": null
+      },
+      "NaicsDesc": {
+        "type": "string",
+        "required": false,
+        "title": "NAICS Description",
+        "default": null
+      },
+      "YearStarted": {
+        "type": "string",
+        "required": false,
+        "title": "Year Started",
+        "default": null
+      },
+      "SicDesc": {
+        "type": "string",
+        "required": false,
+        "title": "SIC Description",
+        "default": null
+      },
+      "DandbCompanyId": {
+        "type": "string",
+        "required": false,
+        "title": "D&B Company ID",
+        "default": null
+      },
+      "CustomerPriority__c": {
+        "type": "string",
+        "enum": [
+          "High",
+          "Low",
+          "Medium"
+        ],
+        "required": false,
+        "title": "Customer Priority",
+        "default": null
+      },
+      "SLA__c": {
+        "type": "string",
+        "enum": [
+          "Gold",
+          "Silver",
+          "Platinum",
+          "Bronze"
+        ],
+        "required": false,
+        "title": "SLA",
+        "default": null
+      },
+      "Active__c": {
+        "type": "string",
+        "enum": [
+          "No",
+          "Yes"
+        ],
+        "required": false,
+        "title": "Active",
+        "default": null
+      },
+      "NumberofLocations__c": {
+        "type": "number",
+        "required": false,
+        "title": "Number of Locations",
+        "default": null
+      },
+      "UpsellOpportunity__c": {
+        "type": "string",
+        "enum": [
+          "Maybe",
+          "No",
+          "Yes"
+        ],
+        "required": false,
+        "title": "Upsell Opportunity",
+        "default": null
+      },
+      "SLASerialNumber__c": {
+        "type": "string",
+        "required": false,
+        "title": "SLA Serial Number",
+        "default": null
+      },
+      "SLAExpirationDate__c": {
+        "type": "string",
+        "required": false,
+        "title": "SLA Expiration Date",
+        "default": null
+      }
+    }
+  },
+  "out": {
+    "type": "object",
+    "properties": {
+      "Name": {
+        "type": "string",
+        "required": true,
+        "title": "Account Name",
+        "default": null
+      },
+      "Type": {
+        "type": "string",
+        "enum": [
+          "Prospect",
+          "Customer - Direct",
+          "Customer - Channel",
+          "Channel Partner / Reseller",
+          "Installation Partner",
+          "Technology Partner",
+          "Other"
+        ],
+        "required": false,
+        "title": "Account Type",
+        "default": null
+      },
+      "ParentId": {
+        "type": "string",
+        "required": false,
+        "title": "Parent Account ID",
+        "default": null
+      },
+      "BillingStreet": {
+        "type": "string",
+        "maxLength": 1000,
+        "required": false,
+        "title": "Billing Street",
+        "default": null
+      },
+      "BillingCity": {
+        "type": "string",
+        "required": false,
+        "title": "Billing City",
+        "default": null
+      },
+      "BillingState": {
+        "type": "string",
+        "required": false,
+        "title": "Billing State/Province",
+        "default": null
+      },
+      "BillingPostalCode": {
+        "type": "string",
+        "required": false,
+        "title": "Billing Zip/Postal Code",
+        "default": null
+      },
+      "BillingCountry": {
+        "type": "string",
+        "required": false,
+        "title": "Billing Country",
+        "default": null
+      },
+      "BillingLatitude": {
+        "type": "number",
+        "required": false,
+        "title": "Billing Latitude",
+        "default": null
+      },
+      "BillingLongitude": {
+        "type": "number",
+        "required": false,
+        "title": "Billing Longitude",
+        "default": null
+      },
+      "BillingGeocodeAccuracy": {
+        "type": "string",
+        "enum": [
+          "Address",
+          "NearAddress",
+          "Block",
+          "Street",
+          "ExtendedZip",
+          "Zip",
+          "Neighborhood",
+          "City",
+          "County",
+          "State",
+          "Unknown"
+        ],
+        "required": false,
+        "title": "Billing Geocode Accuracy",
+        "default": null
+      },
+      "ShippingStreet": {
+        "type": "string",
+        "maxLength": 1000,
+        "required": false,
+        "title": "Shipping Street",
+        "default": null
+      },
+      "ShippingCity": {
+        "type": "string",
+        "required": false,
+        "title": "Shipping City",
+        "default": null
+      },
+      "ShippingState": {
+        "type": "string",
+        "required": false,
+        "title": "Shipping State/Province",
+        "default": null
+      },
+      "ShippingPostalCode": {
+        "type": "string",
+        "required": false,
+        "title": "Shipping Zip/Postal Code",
+        "default": null
+      },
+      "ShippingCountry": {
+        "type": "string",
+        "required": false,
+        "title": "Shipping Country",
+        "default": null
+      },
+      "ShippingLatitude": {
+        "type": "number",
+        "required": false,
+        "title": "Shipping Latitude",
+        "default": null
+      },
+      "ShippingLongitude": {
+        "type": "number",
+        "required": false,
+        "title": "Shipping Longitude",
+        "default": null
+      },
+      "ShippingGeocodeAccuracy": {
+        "type": "string",
+        "enum": [
+          "Address",
+          "NearAddress",
+          "Block",
+          "Street",
+          "ExtendedZip",
+          "Zip",
+          "Neighborhood",
+          "City",
+          "County",
+          "State",
+          "Unknown"
+        ],
+        "required": false,
+        "title": "Shipping Geocode Accuracy",
+        "default": null
+      },
+      "Phone": {
+        "type": "string",
+        "required": false,
+        "title": "Account Phone",
+        "default": null
+      },
+      "Fax": {
+        "type": "string",
+        "required": false,
+        "title": "Account Fax",
+        "default": null
+      },
+      "AccountNumber": {
+        "type": "string",
+        "required": false,
+        "title": "Account Number",
+        "default": null
+      },
+      "Website": {
+        "type": "string",
+        "required": false,
+        "title": "Website",
+        "default": null
+      },
+      "Sic": {
+        "type": "string",
+        "required": false,
+        "title": "SIC Code",
+        "default": null
+      },
+      "Industry": {
+        "type": "string",
+        "enum": [
+          "Agriculture",
+          "Apparel",
+          "Banking",
+          "Biotechnology",
+          "Chemicals",
+          "Communications",
+          "Construction",
+          "Consulting",
+          "Education",
+          "Electronics",
+          "Energy",
+          "Engineering",
+          "Entertainment",
+          "Environmental",
+          "Finance",
+          "Food & Beverage",
+          "Government",
+          "Healthcare",
+          "Hospitality",
+          "Insurance",
+          "Machinery",
+          "Manufacturing",
+          "Media",
+          "Not For Profit",
+          "Recreation",
+          "Retail",
+          "Shipping",
+          "Technology",
+          "Telecommunications",
+          "Transportation",
+          "Utilities",
+          "Other"
+        ],
+        "required": false,
+        "title": "Industry",
+        "default": null
+      },
+      "AnnualRevenue": {
+        "type": "number",
+        "required": false,
+        "title": "Annual Revenue",
+        "default": null
+      },
+      "NumberOfEmployees": {
+        "type": "number",
+        "required": false,
+        "title": "Employees",
+        "default": null
+      },
+      "Ownership": {
+        "type": "string",
+        "enum": [
+          "Public",
+          "Private",
+          "Subsidiary",
+          "Other"
+        ],
+        "required": false,
+        "title": "Ownership",
+        "default": null
+      },
+      "TickerSymbol": {
+        "type": "string",
+        "required": false,
+        "title": "Ticker Symbol",
+        "default": null
+      },
+      "Description": {
+        "type": "string",
+        "maxLength": 1000,
+        "required": false,
+        "title": "Account Description",
+        "default": null
+      },
+      "Rating": {
+        "type": "string",
+        "enum": [
+          "Hot",
+          "Warm",
+          "Cold"
+        ],
+        "required": false,
+        "title": "Account Rating",
+        "default": null
+      },
+      "Site": {
+        "type": "string",
+        "required": false,
+        "title": "Account Site",
+        "default": null
+      },
+      "OwnerId": {
+        "type": "string",
+        "required": false,
+        "title": "Owner ID",
+        "default": null
+      },
+      "Jigsaw": {
+        "type": "string",
+        "required": false,
+        "title": "Data.com Key",
+        "default": null
+      },
+      "CleanStatus": {
+        "type": "string",
+        "enum": [
+          "Matched",
+          "Different",
+          "Acknowledged",
+          "NotFound",
+          "Inactive",
+          "Pending",
+          "SelectMatch",
+          "Skipped"
+        ],
+        "required": false,
+        "title": "Clean Status",
+        "default": null
+      },
+      "AccountSource": {
+        "type": "string",
+        "enum": [
+          "Web",
+          "Phone Inquiry",
+          "Partner Referral",
+          "Purchased List",
+          "Other"
+        ],
+        "required": false,
+        "title": "Account Source",
+        "default": null
+      },
+      "DunsNumber": {
+        "type": "string",
+        "required": false,
+        "title": "D-U-N-S Number",
+        "default": null
+      },
+      "Tradestyle": {
+        "type": "string",
+        "required": false,
+        "title": "Tradestyle",
+        "default": null
+      },
+      "NaicsCode": {
+        "type": "string",
+        "required": false,
+        "title": "NAICS Code",
+        "default": null
+      },
+      "NaicsDesc": {
+        "type": "string",
+        "required": false,
+        "title": "NAICS Description",
+        "default": null
+      },
+      "YearStarted": {
+        "type": "string",
+        "required": false,
+        "title": "Year Started",
+        "default": null
+      },
+      "SicDesc": {
+        "type": "string",
+        "required": false,
+        "title": "SIC Description",
+        "default": null
+      },
+      "DandbCompanyId": {
+        "type": "string",
+        "required": false,
+        "title": "D&B Company ID",
+        "default": null
+      },
+      "CustomerPriority__c": {
+        "type": "string",
+        "enum": [
+          "High",
+          "Low",
+          "Medium"
+        ],
+        "required": false,
+        "title": "Customer Priority",
+        "default": null
+      },
+      "SLA__c": {
+        "type": "string",
+        "enum": [
+          "Gold",
+          "Silver",
+          "Platinum",
+          "Bronze"
+        ],
+        "required": false,
+        "title": "SLA",
+        "default": null
+      },
+      "Active__c": {
+        "type": "string",
+        "enum": [
+          "No",
+          "Yes"
+        ],
+        "required": false,
+        "title": "Active",
+        "default": null
+      },
+      "NumberofLocations__c": {
+        "type": "number",
+        "required": false,
+        "title": "Number of Locations",
+        "default": null
+      },
+      "UpsellOpportunity__c": {
+        "type": "string",
+        "enum": [
+          "Maybe",
+          "No",
+          "Yes"
+        ],
+        "required": false,
+        "title": "Upsell Opportunity",
+        "default": null
+      },
+      "SLASerialNumber__c": {
+        "type": "string",
+        "required": false,
+        "title": "SLA Serial Number",
+        "default": null
+      },
+      "SLAExpirationDate__c": {
+        "type": "string",
+        "required": false,
+        "title": "SLA Expiration Date",
+        "default": null
+      },
+      "id": {
+        "type": "string",
+        "required": true
+      }
+    }
+  }
+}

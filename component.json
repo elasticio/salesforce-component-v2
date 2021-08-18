@@ -1,6 +1,6 @@
 {
   "title": "Salesforce v2",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Customer relationship management (CRM) software & cloud computing from the leader in CRM solutions for businesses large & small.",
   "docsUrl": "https://github.com/elasticio/salesforce-component-v2",
   "url": "http://www.salesforce.com/",
@@ -74,8 +74,8 @@
           "label": "Size of Polling Page",
           "viewClass": "TextFieldView",
           "required": false,
-          "placeholder": "1000",
-          "note": "Please set the size of pages to be fetched (defaults to 1000). Please enter positive integer only, max 10000 objects"
+          "placeholder": "10000",
+          "note": "Please set the size of pages to be fetched (defaults to 10000). Please enter positive integer only, max 10000 objects"
         },
         "singlePagePerInterval": {
           "label": "Process single page per execution",
@@ -450,12 +450,12 @@
       }
     },
     "upsert": {
+      "deprecated": true,
       "title": "Upsert Object",
       "main": "./lib/actions/upsert.js",
-      "order": 92,
+      "order": 50,
       "help" : {
-        "description": "Create or Update Selected Object",
-        "link": "/components/salesforce/actions#upsert-object-action"
+        "description": "Create or Update Selected Object"
       },
       "dynamicMetadata": true,
       "fields": {
@@ -476,6 +476,47 @@
         "utilizeAttachment": {
           "viewClass": "CheckBoxView",
           "label": "Utilize data attachment from previous step (for objects with a binary field)"
+        }
+      }
+    },
+    "upsert_v2": {
+      "title": "Upsert Object",
+      "main": "./lib/actions/upsert_v2.js",
+      "order": 90,
+      "help" : {
+        "description": "Create or Update seleced Object",
+        "link": "/components/salesforce/actions#upsert-object-action"
+      },
+      "dynamicMetadata": true,
+      "fields": {
+        "sobject": {
+          "viewClass": "SelectView",
+          "label": "Object",
+          "required": true,
+          "model": "getObjectTypes",
+          "prompt": "Please select a Salesforce Object",
+          "order": 8
+        },
+        "typeOfSearch": {
+          "viewClass": "SelectView",
+          "label": "Type Of Search",
+          "required": true,
+          "require": ["sobject"],
+          "model": {
+            "uniqueFields": "Unique Fields",
+            "allFields": "All Fields"
+          },
+          "prompt": "Please select a type of search",
+          "order": 7
+        },
+        "lookupField": {
+          "viewClass": "SelectView",
+          "label": "Lookup by field",
+          "required": true,
+          "require": ["sobject", "typeOfSearch"],
+          "model": "getLookupFieldsModel",
+          "prompt": "Please select the field which you want to use for lookup",
+          "order": 6
         }
       }
     }

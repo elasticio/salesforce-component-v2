@@ -1,223 +1,264 @@
-const _ = require('lodash');
-const chai = require('chai');
+/* eslint-disable camelcase */
+const { expect } = require('chai');
 const nock = require('nock');
 
-const { expect } = chai;
-const common = require('../../lib/common.js');
-const testCommon = require('../common.js');
+const { globalConsts } = require('../../lib/common.js');
+const {
+  getContext, fetchToken, defaultCfg, testsCommon,
+} = require('../common.js');
+const deleteObject = require('../../lib/actions/deleteObject.js');
 
-const deleteObjectAction = require('../../lib/actions/deleteObject.js');
 const metaModelDocumentReply = require('../testData/sfDocumentMetadata.json');
-const metaModelAccountReply = require('../testData/sfAccountMetadata.json');
+const document_lookupField_id = require('./outMetadataSchemas/deleteObject/Document_lookupField_id.json');
+const account_without_lookupField = require('./outMetadataSchemas/deleteObject/Account_without_lookupField.json');
 
 describe('Delete Object (at most 1) action', () => {
-  before(() => {
-    nock(process.env.ELASTICIO_API_URI)
-      .get(`/v2/workspaces/${process.env.ELASTICIO_WORKSPACE_ID}/secrets/${testCommon.secretId}`)
-      .times(10)
-      .reply(200, testCommon.secret);
-  });
   describe('Delete Object (at most 1) module: getMetaModel', () => {
-    async function testMetaData(configuration, getMetaModelReply) {
-      const sfScope = nock(testCommon.instanceUrl)
-        .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/${configuration.sobject}/describe`)
-        .reply(200, getMetaModelReply);
-
-      const expectedResult = {
-        in: {
-          type: 'object',
-          properties: {},
-        },
-        out: {
-          type: 'object',
-          properties: {
-            response: {
-              type: 'object',
-              properties: {
-                id: {
-                  title: 'id',
-                  type: 'string',
-                },
-                success: {
-                  title: 'success',
-                  type: 'boolean',
-                },
-                errors: {
-                  title: 'errors',
-                  type: 'array',
-                },
-              },
-            },
-          },
-        },
-      };
-
-      if (configuration.lookupField) {
-        getMetaModelReply.fields.forEach((field) => {
-          const fieldDescriptor = {
-            title: field.label,
-            default: field.defaultValue,
-            type: (() => {
-              switch (field.soapType) {
-                case 'xsd:boolean':
-                  return 'boolean';
-                case 'xsd:double':
-                  return 'number';
-                case 'xsd:int':
-                  return 'number';
-                case 'urn:address':
-                  return 'object';
-                default:
-                  return 'string';
-              }
-            })(),
-            required: !field.nillable && !field.defaultedOnCreate,
-          };
-
-          if (field.soapType === 'urn:address') {
-            fieldDescriptor.properties = {
-              city: { type: 'string' },
-              country: { type: 'string' },
-              postalCode: { type: 'string' },
-              state: { type: 'string' },
-              street: { type: 'string' },
-            };
-          }
-
-          if (field.type === 'textarea') fieldDescriptor.maxLength = 1000;
-
-          if (field.picklistValues !== undefined && field.picklistValues.length !== 0) {
-            fieldDescriptor.enum = [];
-            field.picklistValues.forEach((pick) => {
-              fieldDescriptor.enum.push(pick.value);
-            });
-          }
-
-          if (configuration.lookupField === field.name) {
-            expectedResult.in.properties[field.name] = { ...fieldDescriptor, required: true };
-          }
-        });
-      } else {
-        expectedResult.in.properties = {
-          id: {
-            title: 'Object ID',
-            type: 'string',
-            required: true,
-          },
-        };
-      }
-
-      const data = await deleteObjectAction.getMetaModel.call(testCommon, configuration);
-      expect(data).to.deep.equal(expectedResult);
-      if (configuration.lookupField) {
-        sfScope.done();
-      }
-    }
-
     it('Retrieves metadata for Document object', async () => {
-      await testMetaData({
-        ...testCommon.configuration,
+      const testCfg = {
         sobject: 'Document',
         lookupField: 'Id',
-      },
-      metaModelDocumentReply);
-    });
+      };
+      fetchToken();
+      const describeReq = nock(testsCommon.instanceUrl)
+        .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/${testCfg.sobject}/describe`)
+        .reply(200, metaModelDocumentReply);
 
+      const result = await deleteObject.getMetaModel.call(getContext(), { ...defaultCfg, ...testCfg });
+      expect(result).to.be.deep.equal(document_lookupField_id);
+      describeReq.done();
+    });
     it('Retrieves metadata for Account object without lookupField', async () => {
-      await testMetaData({
-        ...testCommon.configuration,
+      const testCfg = {
         sobject: 'Account',
-      },
-      metaModelAccountReply);
-    });
-  });
-
-  describe('Delete Object (at most 1) module: process', () => {
-    it('Deletes a document object without an attachment', async () => {
-      testCommon.configuration.sobject = 'Document';
-      testCommon.configuration.lookupField = 'Id';
-
-      const message = {
-        body: {
-          Id: 'testObjId',
-          FolderId: 'xxxyyyzzz',
-          Name: 'NotVeryImportantDoc',
-          IsPublic: false,
-          Body: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Everest_kalapatthar.jpg/800px-Everest_kalapatthar.jpg',
-          ContentType: 'image/jpeg',
-        },
       };
-
-      const scope = nock(testCommon.instanceUrl, { encodedQueryParams: true })
-        .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
-        .reply(200, metaModelDocumentReply)
-        .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/query?q=${testCommon.buildSOQL(metaModelDocumentReply,
-          { Id: message.body.Id })}`)
-        .reply(200, { done: true, totalSize: 1, records: [message.body] })
-        .delete(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/testObjId`)
-        .reply(200, { id: 'deletedId' });
-
-      const result = await deleteObjectAction.process.call(testCommon, _.cloneDeep(message), testCommon.configuration);
-      expect(result.body).to.deep.equal({ response: { id: 'deletedId' } });
-      scope.done();
-    });
-
-    it('Deletes a document object with an attachment', async () => {
-      testCommon.configuration.sobject = 'Document';
-      testCommon.configuration.lookupField = 'Id';
-
-      const message = {
-        body: {
-          Id: 'testObjId',
-          FolderId: 'xxxyyyzzz',
-          Name: 'NotVeryImportantDoc',
-          IsPublic: false,
-          Body: '/upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Everest_kalapatthar.jpg/800px-Everest_kalapatthar.jpg',
-          ContentType: 'image/jpeg',
-        },
-      };
-
-      const scope = nock(testCommon.instanceUrl, { encodedQueryParams: true })
-        .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
-        .reply(200, metaModelDocumentReply)
-        .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/query?q=${testCommon.buildSOQL(metaModelDocumentReply,
-          { Id: message.body.Id })}`)
-        .reply(200, { done: true, totalSize: 1, records: [message.body] })
-        .delete(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/testObjId`)
-        .reply(200, { id: 'deletedId' });
-
-      nock(testCommon.EXT_FILE_STORAGE).put('/', JSON.stringify(message)).reply(200);
-
-      const result = await deleteObjectAction.process.call(testCommon, _.cloneDeep(message), testCommon.configuration);
-      expect(result.body).to.deep.equal({ response: { id: 'deletedId' } });
-      scope.done();
+      const result = await deleteObject.getMetaModel.call(getContext(), { ...defaultCfg, ...testCfg });
+      expect(result).to.be.deep.equal(account_without_lookupField);
     });
   });
 
   describe('Delete Object (at most 1) module: getLookupFieldsModel', () => {
-    async function testUniqueFields(object, getMetaModelReply) {
-      const sfScope = nock(testCommon.instanceUrl)
-        .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/sobjects/${object}/describe`)
-        .reply(200, getMetaModelReply);
-
+    it('Retrieves the list of unique fields of specified sobject', async () => {
+      const testCfg = {
+        sobject: 'Document',
+        typeOfSearch: 'uniqueFields',
+      };
       const expectedResult = {};
-      getMetaModelReply.fields.forEach((field) => {
+      metaModelDocumentReply.fields.forEach((field) => {
         if (field.type === 'id' || field.unique) expectedResult[field.name] = `${field.label} (${field.name})`;
       });
 
-      testCommon.configuration.typeOfSearch = 'uniqueFields';
-      testCommon.configuration.sobject = object;
+      fetchToken();
+      const describeReq = nock(testsCommon.instanceUrl)
+        .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/${testCfg.sobject}/describe`)
+        .reply(200, metaModelDocumentReply);
+      const result = await deleteObject.getLookupFieldsModel.call(getContext(), { ...defaultCfg, ...testCfg });
+      expect(result).to.deep.equal(expectedResult);
+      describeReq.done();
+    });
+  });
 
-      const result = await deleteObjectAction.getLookupFieldsModel.call(
-        testCommon, testCommon.configuration,
-      );
+  describe('Delete Object (at most 1) module: process', () => {
+    describe('valid input', () => {
+      it('Deletes a document object without an attachment', async () => {
+        const testCfg = {
+          sobject: 'Document',
+          lookupField: 'Id',
+        };
+        const msg = {
+          body: {
+            Id: 'testObjId',
+            FolderId: 'xxxyyyzzz',
+            Name: 'NotVeryImportantDoc',
+            IsPublic: false,
+            Body: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Everest_kalapatthar.jpg/800px-Everest_kalapatthar.jpg',
+            ContentType: 'image/jpeg',
+          },
+        };
 
-      chai.expect(result).to.deep.equal(expectedResult);
-      sfScope.done();
-    }
+        fetchToken();
+        const describeReq = nock(testsCommon.instanceUrl)
+          .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
+          .reply(200, metaModelDocumentReply);
+        fetchToken();
+        const queryReq = nock(testsCommon.instanceUrl)
+          .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/query?q=${
+            testsCommon.buildSOQL(metaModelDocumentReply, { Id: msg.body.Id })
+          }`)
+          .reply(200, { done: true, totalSize: 1, records: [msg.body] });
+        fetchToken();
+        const deleteReq = nock(testsCommon.instanceUrl)
+          .delete(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/testObjId`)
+          .reply(200, { id: 'deletedId' });
 
-    it('Retrieves the list of unique fields of specified sobject', async () => {
-      await testUniqueFields.bind(null, 'Document', metaModelDocumentReply);
+        const result = await deleteObject.process.call(getContext(), msg, { ...defaultCfg, ...testCfg });
+        expect(result.body).to.deep.equal({ response: { id: 'deletedId' } });
+        describeReq.done();
+        queryReq.done();
+        deleteReq.done();
+      });
+      it('Deletes a document object with an attachment', async () => {
+        const testCfg = {
+          sobject: 'Document',
+          lookupField: 'Id',
+        };
+        const msg = {
+          body: {
+            Id: 'testObjId',
+            FolderId: 'xxxyyyzzz',
+            Name: 'NotVeryImportantDoc',
+            IsPublic: false,
+            Body: '/upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Everest_kalapatthar.jpg/800px-Everest_kalapatthar.jpg',
+            ContentType: 'image/jpeg',
+          },
+        };
+
+        fetchToken();
+        const describeReq = nock(testsCommon.instanceUrl)
+          .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
+          .reply(200, metaModelDocumentReply);
+        fetchToken();
+        const queryReq = nock(testsCommon.instanceUrl)
+          .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/query?q=${testsCommon.buildSOQL(metaModelDocumentReply,
+            { Id: msg.body.Id })}`)
+          .reply(200, { done: true, totalSize: 1, records: [msg.body] });
+        fetchToken();
+        const deleteReq = nock(testsCommon.instanceUrl)
+          .delete(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/testObjId`)
+          .reply(200, { id: 'deletedId' });
+        // nock(testsCommon.EXT_FILE_STORAGE).put('/', JSON.stringify(msg)).reply(200); IDK
+
+        const result = await deleteObject.process.call(getContext(), msg, { ...defaultCfg, ...testCfg });
+        expect(result.body).to.deep.equal({ response: { id: 'deletedId' } });
+        describeReq.done();
+        queryReq.done();
+        deleteReq.done();
+      });
+      it('Should delete object by id (lookupField was not provided)', async () => {
+        const testCfg = {
+          sobject: 'Document',
+        };
+        const msg = {
+          body: {
+            id: 'testObjId',
+          },
+        };
+
+        fetchToken();
+        const deleteReq = nock(testsCommon.instanceUrl)
+          .delete(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/testObjId`)
+          .reply(200, { id: 'deletedId' });
+
+        const result = await deleteObject.process.call(getContext(), msg, { ...defaultCfg, ...testCfg });
+        expect(result.body).to.deep.equal({ response: { id: 'deletedId' } });
+        deleteReq.done();
+      });
+      it('Should emit empty message (no objects found by criteria)', async () => {
+        const testCfg = {
+          sobject: 'Document',
+          lookupField: 'Id',
+        };
+        const msg = {
+          body: {
+            Id: 'testObjId',
+          },
+        };
+
+        fetchToken();
+        const describeReq = nock(testsCommon.instanceUrl)
+          .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
+          .reply(200, metaModelDocumentReply);
+        fetchToken();
+        const queryReq = nock(testsCommon.instanceUrl)
+          .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/query?q=${testsCommon.buildSOQL(metaModelDocumentReply,
+            { Id: msg.body.Id })}`)
+          .reply(200, { done: true, totalSize: 0, records: [] });
+
+        const result = await deleteObject.process.call(getContext(), msg, { ...defaultCfg, ...testCfg });
+        expect(result.body).to.deep.equal({});
+        describeReq.done();
+        queryReq.done();
+      });
+      it('Should throw an error (more then 1 object can`t be deleted)', async () => {
+        const testCfg = {
+          sobject: 'Document',
+          lookupField: 'Id',
+        };
+        const msg = {
+          body: {
+            Id: 'testObjId',
+          },
+        };
+
+        fetchToken();
+        const describeReq = nock(testsCommon.instanceUrl)
+          .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
+          .reply(200, metaModelDocumentReply);
+        fetchToken();
+        const queryReq = nock(testsCommon.instanceUrl)
+          .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/query?q=${testsCommon.buildSOQL(metaModelDocumentReply,
+            { Id: msg.body.Id })}`)
+          .reply(200, { done: true, totalSize: 0, records: [msg.body, msg.body] });
+
+        try {
+          await deleteObject.process.call(getContext(), msg, { ...defaultCfg, ...testCfg });
+        } catch (error) {
+          expect(error.message).to.be.equal('More than one object found, can only delete 1');
+        }
+        describeReq.done();
+        queryReq.done();
+      });
+      it('Should emit empty message (Error occurred)', async () => {
+        const testCfg = {
+          sobject: 'Document',
+          lookupField: 'Id',
+        };
+        const msg = {
+          body: {
+            Id: 'testObjId',
+            FolderId: 'xxxyyyzzz',
+            Name: 'NotVeryImportantDoc',
+            IsPublic: false,
+            Body: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Everest_kalapatthar.jpg/800px-Everest_kalapatthar.jpg',
+            ContentType: 'image/jpeg',
+          },
+        };
+
+        fetchToken();
+        const describeReq = nock(testsCommon.instanceUrl)
+          .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
+          .reply(200, metaModelDocumentReply);
+        fetchToken();
+        const queryReq = nock(testsCommon.instanceUrl)
+          .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/query?q=${
+            testsCommon.buildSOQL(metaModelDocumentReply, { Id: msg.body.Id })
+          }`)
+          .reply(200, { done: true, totalSize: 1, records: [msg.body] });
+        fetchToken();
+        const deleteReq = nock(testsCommon.instanceUrl)
+          .delete(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/testObjId`)
+          .replyWithError('some error');
+
+        let result;
+        try {
+          result = await deleteObject.process.call(getContext(), msg, { ...defaultCfg, ...testCfg });
+        } catch (error) {
+          expect(error.message).to.be.equal('some error');
+        }
+        expect(result.body).to.be.deep.equal({});
+        describeReq.done();
+        queryReq.done();
+        deleteReq.done();
+      });
+    });
+    describe('invalid input', () => {
+      it('Should emit empty message', async () => {
+        const testCfg = { };
+        const msg = { body: {} };
+
+        const result = await deleteObject.process.call(getContext(), msg, { ...defaultCfg, ...testCfg });
+        expect(result.body).to.deep.equal({});
+      });
     });
   });
 });

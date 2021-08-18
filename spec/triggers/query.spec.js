@@ -1,18 +1,14 @@
-const chai = require('chai');
+const { expect } = require('chai');
 const nock = require('nock');
-const sinon = require('sinon');
-const logger = require('@elastic.io/component-logger')();
 
-const { expect } = chai;
-
-const common = require('../../lib/common.js');
-const testCommon = require('../common.js');
+const { globalConsts } = require('../../lib/common.js');
+const {
+  fetchToken, getContext, defaultCfg, testsCommon, validateEmitEqualsToData,
+} = require('../common.js');
 
 const queryObjects = require('../../lib/triggers/query.js');
 
 describe('Query module: processTrigger', () => {
-  const context = { emit: sinon.spy(), logger };
-  testCommon.configuration.query = 'select name, id from account where name = \'testtest\'';
   const testReply = {
     result: [
       {
@@ -34,30 +30,114 @@ describe('Query module: processTrigger', () => {
     ],
   };
   const expectedQuery = 'select%20name%2C%20id%20from%20account%20where%20name%20%3D%20%27testtest%27';
-  beforeEach(() => {
-    nock(process.env.ELASTICIO_API_URI)
-      .get(`/v2/workspaces/${process.env.ELASTICIO_WORKSPACE_ID}/secrets/${testCommon.secretId}`)
-      .times(5)
-      .reply(200, testCommon.secret);
-    nock(testCommon.instanceUrl, { encodedQueryParams: true })
-      .get(`/services/data/v${common.globalConsts.SALESFORCE_API_VERSION}/query?q=${expectedQuery}`)
-      .reply(200, { done: true, totalSize: testReply.result.length, records: testReply.result });
-  });
 
-  afterEach(() => {
-    nock.cleanAll();
-    context.emit.resetHistory();
-  });
+  describe('valid input', () => {
+    it('Gets objects emitAll', async () => {
+      const testCfg = {
+        ...defaultCfg,
+        query: 'select name, id from account where name = \'testtest\'',
+        outputMethod: 'emitAll',
+      };
 
-  it('Gets objects emitAll', async () => {
-    testCommon.configuration.outputMethod = 'emitAll';
-    await queryObjects.process.call(context, {}, testCommon.configuration);
-    expect(context.emit.getCall(0).lastArg.body.records).to.deep.equal(testReply.result);
-  });
+      fetchToken();
+      const queryReq = nock(testsCommon.instanceUrl)
+        .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/query?q=${expectedQuery}`)
+        .reply(200, { done: true, totalSize: testReply.result.length, records: testReply.result });
 
-  it('Gets objects emitIndividually', async () => {
-    testCommon.configuration.outputMethod = 'emitIndividually';
-    await queryObjects.process.call(context, {}, testCommon.configuration);
-    expect(context.emit.getCall(0).lastArg.body).to.deep.equal(testReply.result[0]);
+      const context = getContext();
+      await queryObjects.process.call(context, {}, testCfg);
+      validateEmitEqualsToData(context.emit, { records: testReply.result });
+      queryReq.done();
+    });
+    it('Gets objects emitIndividually', async () => {
+      const testCfg = {
+        ...defaultCfg,
+        query: 'select name, id from account where name = \'testtest\'',
+        outputMethod: 'emitIndividually',
+      };
+
+      fetchToken();
+      const queryReq = nock(testsCommon.instanceUrl)
+        .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/query?q=${expectedQuery}`)
+        .reply(200, { done: true, totalSize: testReply.result.length, records: testReply.result });
+
+      const context = getContext();
+      await queryObjects.process.call(context, {}, testCfg);
+      expect(context.emit.callCount).to.be.equal(2);
+      expect(context.emit.getCall(0).args[0]).to.be.equal('data');
+      expect(context.emit.getCall(1).args[0]).to.be.equal('data');
+      expect(context.emit.getCall(0).args[1].body).to.deep.equal(testReply.result[0]);
+      expect(context.emit.getCall(1).args[1].body).to.deep.equal(testReply.result[1]);
+      queryReq.done();
+    });
+    it('Gets objects emitIndividually (emit empty message)', async () => {
+      const testCfg = {
+        ...defaultCfg,
+        query: 'select name, id from account where name = \'testtest\'',
+      };
+
+      fetchToken();
+      const queryReq = nock(testsCommon.instanceUrl)
+        .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/query?q=${expectedQuery}`)
+        .reply(200, { done: true, totalSize: 0, records: [] });
+
+      const context = getContext();
+      await queryObjects.process.call(context, {}, testCfg);
+      validateEmitEqualsToData(context.emit, {});
+      queryReq.done();
+    });
+    it('error occurred', async () => {
+      const testCfg = {
+        ...defaultCfg,
+        query: 'select name, id from account where name = \'testtest\'',
+        outputMethod: 'emitIndividually',
+      };
+
+      fetchToken();
+      const queryReq = nock(testsCommon.instanceUrl)
+        .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/query?q=${expectedQuery}`)
+        .replyWithError('some error');
+
+      try {
+        await queryObjects.process.call(getContext(), {}, testCfg);
+      } catch (err) {
+        expect(err.message).to.be.equal('Error: some error');
+      }
+      queryReq.done();
+    });
+    it('error occurred', async () => {
+      const testCfg = {
+        ...defaultCfg,
+        query: 'select name, id from account where name = \'testtest\'',
+        outputMethod: 'emitIndividually',
+      };
+
+      fetchToken();
+      const queryReq = nock(testsCommon.instanceUrl)
+        .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/query?q=${expectedQuery}`)
+        .replyWithError('');
+
+      try {
+        await queryObjects.process.call(getContext(), {}, testCfg);
+      } catch (err) {
+        expect(err.message).to.be.equal('Error: Error occurred during query execution');
+      }
+      queryReq.done();
+    });
+    describe('invalid input', () => {
+      it('Gets objects emitAll', async () => {
+        const testCfg = {
+          ...defaultCfg,
+          query: 'select name, id from account where name = \'testtest\'',
+          outputMethod: 'invalid method',
+        };
+
+        try {
+          await queryObjects.process.call(getContext(), {}, testCfg);
+        } catch (err) {
+          expect(err.message).to.be.equal('Unsupported Output method');
+        }
+      });
+    });
   });
 });

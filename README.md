@@ -317,20 +317,18 @@ Action creates a single object.
 
 #### List of Expected Config fields
 * **Object** - Input field where you should choose the object type, which you want to find. E.g. `Account`
-* **Optional Upsert field** - Input field where you should specify the ExternalID name field. E.g. `ExtId__c`.
-* **Utilize data attachment from previous step (for objects with a binary field)** - a checkbox, if it is checked and an input message contains an attachment and specified object has a binary field (type of base64) then the input data is put into object's binary field. In this case any data specified for the binary field in the data mapper is discarded.
-
-You should specify **external** or **internal Id** for making some updates in salesforce object.
-If you want to create new Object you should always specify **Optional Upsert field** and value of ExternalId in input body structure.
+* **Type Of Search** - Dropdown list with two values: `Unique Fields` and `All Fields`.
+* **Lookup by field** - Dropdown list with all fields on the selected object if the *Type Of Search* is `All Fields`. If the *Type Of Search* is `Unique Fields`, the dropdown lists instead all fields on the selected object where `type` is `id` or `unique` is `true`.
 
 #### Expected input metadata
-Input metadata is fetched dynamically from your Salesforce account. 
+* lookup by - *name of filed selected in 'Lookup by field'*
+* other fields, that used by selected **Object**
 
 #### Expected output metadata
-Output metadata is the same as input metadata, so you may expect all fields that you mapped as input to be returned as output.
-
-#### Limitations
-When **Utilize data attachment from previous step (for objects with a binary field)** is checked and this action is used with Local Agent error would be thrown: 'getaddrinfo ENOTFOUND steward-service.platform.svc.cluster.local steward-service.platform.svc.cluster.local:8200'
+The result of creating or updating an object
+* **id** - Unic identificator from salesforce
+* **success** - Boolean result of creation/update object
+* **errors** - Arrey of errors if they exist
 
 ## Known limitations
 Attachments mechanism does not work with [Local Agent Installation](https://docs.elastic.io/getting-started/local-agent.html)

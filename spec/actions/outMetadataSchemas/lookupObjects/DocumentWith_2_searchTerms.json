@@ -1,0 +1,297 @@
+{
+  "in": {
+    "type": "object",
+    "properties": {
+      "limit": {
+        "title": "Maximum number of records",
+        "type": "number",
+        "required": false
+      },
+      "sTerm_1": {
+        "title": "Search term 1",
+        "type": "object",
+        "required": true,
+        "properties": {
+          "fieldName": {
+            "title": "Field name",
+            "type": "string",
+            "required": true,
+            "enum": [
+              "Author ID",
+              "Body Length",
+              "Created By ID",
+              "Created Date",
+              "Deleted",
+              "Description",
+              "Document Content Searchable",
+              "Document ID",
+              "Document Name",
+              "Document Unique Name",
+              "Externally Available",
+              "File Extension",
+              "Folder ID",
+              "Internal Use Only",
+              "Keywords",
+              "Last Modified By ID",
+              "Last Modified Date",
+              "Last Referenced Date",
+              "Last Viewed Date",
+              "MIME Type",
+              "Namespace Prefix",
+              "System Modstamp",
+              "Url"
+            ]
+          },
+          "condition": {
+            "title": "Condition",
+            "type": "string",
+            "required": true,
+            "enum": [
+              "=",
+              "!=",
+              "<",
+              "<=",
+              ">",
+              ">=",
+              "LIKE",
+              "IN",
+              "NOT IN",
+              "INCLUDES",
+              "EXCLUDES"
+            ]
+          },
+          "fieldValue": {
+            "title": "Field value",
+            "type": "string",
+            "required": true
+          }
+        }
+      },
+      "link_1_2": {
+        "title": "Logical operator",
+        "type": "string",
+        "required": true,
+        "enum": [
+          "AND",
+          "OR"
+        ]
+      },
+      "sTerm_2": {
+        "title": "Search term 2",
+        "type": "object",
+        "required": true,
+        "properties": {
+          "fieldName": {
+            "title": "Field name",
+            "type": "string",
+            "required": true,
+            "enum": [
+              "Author ID",
+              "Body Length",
+              "Created By ID",
+              "Created Date",
+              "Deleted",
+              "Description",
+              "Document Content Searchable",
+              "Document ID",
+              "Document Name",
+              "Document Unique Name",
+              "Externally Available",
+              "File Extension",
+              "Folder ID",
+              "Internal Use Only",
+              "Keywords",
+              "Last Modified By ID",
+              "Last Modified Date",
+              "Last Referenced Date",
+              "Last Viewed Date",
+              "MIME Type",
+              "Namespace Prefix",
+              "System Modstamp",
+              "Url"
+            ]
+          },
+          "condition": {
+            "title": "Condition",
+            "type": "string",
+            "required": true,
+            "enum": [
+              "=",
+              "!=",
+              "<",
+              "<=",
+              ">",
+              ">=",
+              "LIKE",
+              "IN",
+              "NOT IN",
+              "INCLUDES",
+              "EXCLUDES"
+            ]
+          },
+          "fieldValue": {
+            "title": "Field value",
+            "type": "string",
+            "required": true
+          }
+        }
+      }
+    }
+  },
+  "out": {
+    "type": "object",
+    "properties": {
+      "results": {
+        "type": "array",
+        "required": true,
+        "properties": {
+          "Id": {
+            "type": "string",
+            "required": false,
+            "title": "Document ID",
+            "default": null
+          },
+          "FolderId": {
+            "type": "string",
+            "required": true,
+            "title": "Folder ID",
+            "default": null
+          },
+          "IsDeleted": {
+            "type": "boolean",
+            "required": false,
+            "title": "Deleted",
+            "default": false
+          },
+          "Name": {
+            "type": "string",
+            "required": true,
+            "title": "Document Name",
+            "default": null
+          },
+          "DeveloperName": {
+            "type": "string",
+            "required": false,
+            "title": "Document Unique Name",
+            "default": null
+          },
+          "NamespacePrefix": {
+            "type": "string",
+            "required": false,
+            "title": "Namespace Prefix",
+            "default": null
+          },
+          "ContentType": {
+            "type": "string",
+            "required": false,
+            "title": "MIME Type",
+            "default": null
+          },
+          "Type": {
+            "type": "string",
+            "required": false,
+            "title": "File Extension",
+            "default": null
+          },
+          "IsPublic": {
+            "type": "boolean",
+            "required": false,
+            "title": "Externally Available",
+            "default": false
+          },
+          "BodyLength": {
+            "type": "number",
+            "required": true,
+            "title": "Body Length",
+            "default": null
+          },
+          "Body": {
+            "type": "string",
+            "required": false,
+            "title": "Body",
+            "default": null
+          },
+          "Url": {
+            "type": "string",
+            "required": false,
+            "title": "Url",
+            "default": null
+          },
+          "Description": {
+            "type": "string",
+            "maxLength": 1000,
+            "required": false,
+            "title": "Description",
+            "default": null
+          },
+          "Keywords": {
+            "type": "string",
+            "required": false,
+            "title": "Keywords",
+            "default": null
+          },
+          "IsInternalUseOnly": {
+            "type": "boolean",
+            "required": false,
+            "title": "Internal Use Only",
+            "default": false
+          },
+          "AuthorId": {
+            "type": "string",
+            "required": false,
+            "title": "Author ID",
+            "default": null
+          },
+          "CreatedDate": {
+            "type": "string",
+            "required": false,
+            "title": "Created Date",
+            "default": null
+          },
+          "CreatedById": {
+            "type": "string",
+            "required": false,
+            "title": "Created By ID",
+            "default": null
+          },
+          "LastModifiedDate": {
+            "type": "string",
+            "required": false,
+            "title": "Last Modified Date",
+            "default": null
+          },
+          "LastModifiedById": {
+            "type": "string",
+            "required": false,
+            "title": "Last Modified By ID",
+            "default": null
+          },
+          "SystemModstamp": {
+            "type": "string",
+            "required": false,
+            "title": "System Modstamp",
+            "default": null
+          },
+          "IsBodySearchable": {
+            "type": "boolean",
+            "required": false,
+            "title": "Document Content Searchable",
+            "default": false
+          },
+          "LastViewedDate": {
+            "type": "string",
+            "required": false,
+            "title": "Last Viewed Date",
+            "default": null
+          },
+          "LastReferencedDate": {
+            "type": "string",
+            "required": false,
+            "title": "Last Referenced Date",
+            "default": null
+          }
+        }
+      }
+    }
+  }
+}
