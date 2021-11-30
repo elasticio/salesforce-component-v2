@@ -1,5 +1,7 @@
 ## 2.2.1 (December 1, 2021)
 
+* Upgrade sailor version to 2.6.26
+* Reduced the size of component icon file
 * Fix output metadata for `Get New and Updated Objects Polling` trigger
 
 ## 2.2.0 (August 20, 2021)
