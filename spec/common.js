@@ -1,8 +1,16 @@
 require('elasticio-rest-node');
 const { getLogger } = require('@elastic.io/component-commons-library/lib/logger/logger');
 const nock = require('nock');
+const { config } = require('dotenv');
+const fs = require('fs');
 const sinon = require('sinon');
 const { expect } = require('chai');
+
+if (fs.existsSync('.env')) {
+  config();
+} else {
+  throw new Error('Please, provide environment variables to .env');
+}
 
 process.env.OAUTH_CLIENT_ID = 'asd';
 process.env.OAUTH_CLIENT_SECRET = 'sdc';
