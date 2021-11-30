@@ -8,8 +8,6 @@ const { expect } = require('chai');
 
 if (fs.existsSync('.env')) {
   config();
-} else {
-  throw new Error('Please, provide environment variables to .env');
 }
 
 process.env.OAUTH_CLIENT_ID = 'asd';

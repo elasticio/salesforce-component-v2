@@ -1,3 +1,7 @@
+## 2.2.1 (December 1, 2021)
+
+* Fix output metadata for `Get New and Updated Objects Polling` trigger
+
 ## 2.2.0 (August 20, 2021)
 
 * New `Upsert Object` action
