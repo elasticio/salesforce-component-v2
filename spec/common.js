@@ -1,5 +1,5 @@
 require('elasticio-rest-node');
-const { getLogger } = require('@elastic.io/component-commons-library/lib/logger/logger');
+const { getLogger } = require('@elastic.io/component-commons-library');
 const nock = require('nock');
 const { config } = require('dotenv');
 const fs = require('fs');

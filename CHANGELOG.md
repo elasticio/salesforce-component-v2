@@ -1,3 +1,11 @@
+## 2.2.2 (April 08, 2022)
+
+* Update Sailor version to 2.6.27
+* Update component-commons-library version to 2.0.1-dev.14
+* Update oih-standard-library version to 2.0.2
+* Get rid of vulnerabilities in dependencies
+* Add component pusher job to Circle.ci config
+
 ## 2.2.1 (December 1, 2021)
 
 * Upgrade sailor version to 2.6.26
