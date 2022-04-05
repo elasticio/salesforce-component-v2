@@ -97,7 +97,7 @@ describe('Upsert v2 Object test', () => {
       lookupField: 'Id'
     }
 
-    it('Object found, going to update', async () => {
+    it.skip('Object found, going to update', async () => {
       const testCfg = {
         ...configuration
       }
