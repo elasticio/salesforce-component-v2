@@ -96,6 +96,7 @@ describe('Query module: processTrigger', () => {
       fetchToken();
       const queryReq = nock(testsCommon.instanceUrl)
         .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/query?q=${expectedQuery}`)
+        .times(2)
         .replyWithError('some error');
 
       try {
@@ -115,6 +116,7 @@ describe('Query module: processTrigger', () => {
       fetchToken();
       const queryReq = nock(testsCommon.instanceUrl)
         .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/query?q=${expectedQuery}`)
+        .times(2)
         .replyWithError('');
 
       try {

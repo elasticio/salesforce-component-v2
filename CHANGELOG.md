@@ -1,3 +1,6 @@
+## 2.2.2 (April 08, 2022)
+* Implemented reconnect logic on errors
+
 ## 2.2.1 (December 1, 2021)
 
 * Upgrade sailor version to 2.6.26
