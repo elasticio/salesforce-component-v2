@@ -104,7 +104,7 @@ describe('Upsert v2 Object test', () => {
       const msg = {
         body: {
           Id: 1,
-          Url: '😂',
+          Url: 'lulyakamartin',
           Body: 'http://test.env.mock/somedata.txt'
         }
       }
@@ -118,10 +118,10 @@ describe('Upsert v2 Object test', () => {
         .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/query?q=${
           testsCommon.buildSOQL(metaModelDocumentReply, { Id: 1 })
         }`)
-        .reply(200, { done: true, totalSize: 1, records: [{ Id: 1, Url: '😂' }] })
+        .reply(200, { done: true, totalSize: 1, records: [{ Id: 1, Url: 'lulyakamartin' }] })
       fetchToken();
       const patchDocReq = nock(testsCommon.instanceUrl)
-        .patch(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/1`, { Url: '😂', Body: 'YXNkYXNkYXNkcXdlcXdlcXdl' })
+        .patch(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/1`, { Url: 'lulyakamartin', Body: 'YXNkYXNkYXNkcXdlcXdlcXdl' })
         .reply(204)
       const getTxtReq = nock('http://test.env.mock')
         .get('/somedata.txt')
