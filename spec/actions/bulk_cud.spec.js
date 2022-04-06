@@ -15,9 +15,9 @@ const defaultObjectTypes = require('./outMetadataSchemas/bulk_cud/defaultObjectT
 const upsertMetaModel = require('./outMetadataSchemas/bulk_cud/upsertMetaModel.json');
 const defaultMetaModel = require('./outMetadataSchemas/bulk_cud/defaultMetaModel.json');
 
-describe('Salesforce bulk', () => {
-  describe('bulk_cud module: getMetaModel', () => {
-    it('Retrieves metadata for Document object', async () => {
+describe.only('Salesforce bulk', () => {
+  describe.only('bulk_cud module: getMetaModel', () => {
+    it.only('Retrieves metadata for Document object', async () => {
       const testCfg = {
         ...defaultCfg,
         operation: 'upsert',
