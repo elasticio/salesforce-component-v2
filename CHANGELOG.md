@@ -1,5 +1,9 @@
 ## 2.2.2 (April 08, 2022)
 * Implemented reconnect logic on errors
+* Update Sailor version to 2.6.27
+* Get rid of vulnerabilities in dependencies
+* Add component pusher job to Circle.ci config
+
 
 ## 2.2.1 (December 1, 2021)
 
