@@ -4,6 +4,7 @@
   "docsUrl": "https://github.com/elasticio/salesforce-component-v2",
   "url": "http://www.salesforce.com/",
   "buildType": "docker",
+  "version": "2.2.2",
   "authClientTypes": ["oauth2"],
   "envVars": {
     "SALESFORCE_API_VERSION": {
