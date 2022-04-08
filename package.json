@@ -26,7 +26,7 @@
     "node": "14"
   },
   "dependencies": {
-    "@elastic.io/component-commons-library": "2.0.1-dev.14",
+    "@elastic.io/component-commons-library": "2.0.1",
     "@elastic.io/oih-standard-library": "2.0.2",
     "axios": "0.26.1",
     "dotenv": "8.2.0",
