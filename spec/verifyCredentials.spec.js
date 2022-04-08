@@ -52,6 +52,7 @@ describe('Verify Credentials', () => {
     fetchToken();
     const sobjectsReq = nock(testsCommon.instanceUrl)
       .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects`)
+      .times(2)
       .replyWithError('some error');
 
     try {
