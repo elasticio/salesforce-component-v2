@@ -1,3 +1,6 @@
+## 2.2.3 (April 14, 2022)
+* Bump dependencies
+
 ## 2.2.2 (April 08, 2022)
 * Implemented reconnect logic on errors
 * Update Sailor version to 2.6.27
