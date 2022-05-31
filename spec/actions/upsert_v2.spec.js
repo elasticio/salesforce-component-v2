@@ -122,15 +122,11 @@ describe('Upsert v2 Object test', () => {
       const patchDocReq = nock(testsCommon.instanceUrl)
         .patch(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/1`, { Url: '😂', Body: 'YXNkYXNkYXNkcXdlcXdlcXdl' })
         .reply(204)
-      // const getTxtReq = nock('http://test.env.mock')
-      //   .get('/somedata.txt')
-      //   .replyWithFile(200, `${__dirname}/../testData/somedata.txt`);
 
       const result = await upsert.process.call(getContext(), msg, testCfg)
       expect(result.body.success).to.eql(true);
       queryReq.done()
       patchDocReq.done()
-      // getTxtReq.done()
     })
 
     it('Object not found, going to create', async () => {
