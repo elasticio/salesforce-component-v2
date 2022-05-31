@@ -1,4 +1,4 @@
-## 2.2.4 (April 14, 2022)
+## 2.2.4 (June 03, 2022)
 * Added timeout for `Upsert Object` action
 
 ## 2.2.3 (April 14, 2022)
