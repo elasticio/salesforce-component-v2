@@ -4,8 +4,8 @@
   "main": "index.js",
   "scripts": {
     "pretest": "eslint lib spec spec-integration verifyCredentials.js --fix",
-    "test": "nyc mocha spec NODE_ENV=test --recursive --timeout 50000",
-    "integration-test": "nyc mocha --require spec-integration/mochaHooks.js spec-integration --recursive --timeout 50000"
+    "test": "mocha spec NODE_ENV=test --recursive --timeout 50000",
+    "integration-test": "nyc mocha --require spec-integration/mochaHooks.js spec-integration --recursive --timeout 5000000"
   },
   "repository": {
     "type": "git",

@@ -43,6 +43,7 @@ Name|Mandatory|Description|Values|
 |REFRESH_TOKEN_RETRIES| false | Determines how many retries to refresh token should be done before throwing an error | Default: `10` |
 |HASH_LIMIT_TIME| false | Hash expiration time in ms  | Default: `600000` |
 |HASH_LIMIT_ELEMENTS| false | Hash size number limit  | Default: `10` |
+|UPSERT_TIME_OUT| false | Time out for `Upsert Object` action in ms | Default: `120000` (2min) |
 
 ## Credentials
 Authentication occurs via OAuth 2.0.

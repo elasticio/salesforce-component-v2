@@ -8,7 +8,7 @@ const metaModelDocumentFields = require('../testData/sfDocumentFields.json')
 const sfDocumentMetamodel = require('../testData/sfDocumentMetamodel.json')
 const { globalConsts } = require('../../lib/common.js');
 const {
-  getContext, fetchToken, defaultCfg, testsCommon,
+  getContext, fetchToken, describeDocReq, defaultCfg, testsCommon,
 } = require('../common.js');
 
 describe('Upsert v2 Object test', () => {
@@ -90,6 +90,7 @@ describe('Upsert v2 Object test', () => {
 
   describe('Main process', () => {
     const configuration = {
+      ...defaultCfg,
       secretId: 'secretId',
       sobject: 'Document',
       typeOfSearch: 'allFields',
@@ -97,7 +98,7 @@ describe('Upsert v2 Object test', () => {
       lookupField: 'Id'
     }
 
-    it.skip('Object found, going to update', async () => {
+    it('Object found, going to update', async () => {
       const testCfg = {
         ...configuration
       }
@@ -105,34 +106,31 @@ describe('Upsert v2 Object test', () => {
         body: {
           Id: 1,
           Url: '😂',
-          Body: 'http://test.env.mock/somedata.txt'
+          Body: 'YXNkYXNkYXNkcXdlcXdlcXdl'
         }
       }
-
       fetchToken()
-      const describeReq = nock(testsCommon.instanceUrl)
-        .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
-        .reply(200, metaModelDocumentReply)
+      describeDocReq(globalConsts.SALESFORCE_API_VERSION, metaModelDocumentReply)
+      fetchToken()
+      describeDocReq(globalConsts.SALESFORCE_API_VERSION, metaModelDocumentReply)
       fetchToken()
       const queryReq = nock(testsCommon.instanceUrl)
-        .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/query?q=${
-          testsCommon.buildSOQL(metaModelDocumentReply, { Id: 1 })
+        .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/query?q=${testsCommon.buildSOQL(metaModelDocumentReply, { Id: 1 })
         }`)
         .reply(200, { done: true, totalSize: 1, records: [{ Id: 1, Url: '😂' }] })
       fetchToken();
       const patchDocReq = nock(testsCommon.instanceUrl)
         .patch(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/1`, { Url: '😂', Body: 'YXNkYXNkYXNkcXdlcXdlcXdl' })
         .reply(204)
-      const getTxtReq = nock('http://test.env.mock')
-        .get('/somedata.txt')
-        .replyWithFile(200, `${__dirname}/../testData/somedata.txt`);
+      // const getTxtReq = nock('http://test.env.mock')
+      //   .get('/somedata.txt')
+      //   .replyWithFile(200, `${__dirname}/../testData/somedata.txt`);
 
       const result = await upsert.process.call(getContext(), msg, testCfg)
       expect(result.body.success).to.eql(true);
-      describeReq.done()
       queryReq.done()
       patchDocReq.done()
-      getTxtReq.done()
+      // getTxtReq.done()
     })
 
     it('Object not found, going to create', async () => {
@@ -147,13 +145,12 @@ describe('Upsert v2 Object test', () => {
       }
 
       fetchToken()
-      const describeReq = nock(testsCommon.instanceUrl)
-        .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
-        .reply(200, metaModelDocumentReply)
+      describeDocReq(globalConsts.SALESFORCE_API_VERSION, metaModelDocumentReply)
+      fetchToken()
+      describeDocReq(globalConsts.SALESFORCE_API_VERSION, metaModelDocumentReply)
       fetchToken()
       const queryReq = nock(testsCommon.instanceUrl)
-        .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/query?q=${
-          testsCommon.buildSOQL(metaModelDocumentReply, { Id: 1 })
+        .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/query?q=${testsCommon.buildSOQL(metaModelDocumentReply, { Id: 1 })
         }`)
         .reply(200, { done: true, totalSize: 1, records: [] })
       fetchToken()
@@ -163,7 +160,6 @@ describe('Upsert v2 Object test', () => {
 
       const result = await upsert.process.call(getContext(), msg, testCfg)
       expect(result.body.success).to.eql(true);
-      describeReq.done()
       queryReq.done()
       postDocReq.done()
     })
@@ -179,9 +175,7 @@ describe('Upsert v2 Object test', () => {
       }
 
       fetchToken()
-      const describeReq = nock(testsCommon.instanceUrl)
-        .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
-        .reply(200, metaModelDocumentReply)
+      describeDocReq(globalConsts.SALESFORCE_API_VERSION, metaModelDocumentReply)
       fetchToken()
       const createDocReq = nock(testsCommon.instanceUrl)
         .post(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/Document`, msg.body)
@@ -189,7 +183,6 @@ describe('Upsert v2 Object test', () => {
 
       const result = await upsert.process.call(getContext(), msg, testCfg)
       expect(result.body.success).to.eql(true);
-      describeReq.done()
       createDocReq.done()
     })
 
@@ -205,9 +198,12 @@ describe('Upsert v2 Object test', () => {
       }
 
       fetchToken()
+      const describeReq = nock(testsCommon.instanceUrl)
+        .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
+        .reply(200, metaModelDocumentReply)
+      fetchToken()
       const scope = nock(testsCommon.instanceUrl)
-        .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/query?q=${
-          testsCommon.buildSOQL(metaModelDocumentReply, { Id: 1 })
+        .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/query?q=${testsCommon.buildSOQL(metaModelDocumentReply, { Id: 1 })
         }`)
         .reply(200, { done: true, totalSize: 1, records: [1, 2] })
 
@@ -217,6 +213,7 @@ describe('Upsert v2 Object test', () => {
         expect(err.message).to.eql('Found more than 1 Object');
       }
       scope.done()
+      describeReq.done()
     })
   })
 })
