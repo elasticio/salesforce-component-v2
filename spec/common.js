@@ -76,7 +76,7 @@ module.exports = {
       if (typeof (where) === 'string') {
         soql += where;
       } else {
-      // eslint-disable-next-line guard-for-in,no-restricted-syntax
+        // eslint-disable-next-line guard-for-in,no-restricted-syntax
         for (const key in where) {
           soql += `${key}%20%3D%20`;
           const field = objectMeta.fields.find((f) => f.name === key);
@@ -105,6 +105,11 @@ module.exports = {
     nock(process.env.ELASTICIO_API_URI)
       .get(`/v2/workspaces/${process.env.ELASTICIO_WORKSPACE_ID}/secrets/${secretId}`)
       .reply(200, secret);
+  },
+  describeDocReq: (api, meta) => {
+    nock(instanceUrl)
+      .get(`/services/data/v${api}/sobjects/Document/describe`)
+      .reply(200, meta);
   },
   validateEmitEqualsToData: (emit, data) => {
     expect(emit.callCount).to.be.equal(1);
