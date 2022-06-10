@@ -335,7 +335,7 @@ The result of creating or updating an object
 * **errors** - Arrey of errors if they exist
 
 #### Known limitations
-If you add new field to object in Salesforce, you should restart flow to let them appear inside input metadata
+If you add a new field to an object in Salesforce, you must restart the flow to re-generate metadata
 
 ## Known limitations
 Attachments mechanism does not work with [Local Agent Installation](https://docs.elastic.io/getting-started/local-agent.html)
