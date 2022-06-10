@@ -331,5 +331,8 @@ The result of creating or updating an object
 * **success** - Boolean result of creation/update object
 * **errors** - Arrey of errors if they exist
 
+#### Known limitations
+If you add new field to object in Salesforce, you should restart flow to let them appear inside input metadata
+
 ## Known limitations
 Attachments mechanism does not work with [Local Agent Installation](https://docs.elastic.io/getting-started/local-agent.html)

@@ -1,3 +1,6 @@
+## 2.2.5 (June 17, 2022)
+* Improved processing speed in `Upsert Object` action - removed additional request if `Id` is provided in input metadata
+
 ## 2.2.4 (June 03, 2022)
 * Added timeout for `Upsert Object` action
 
