@@ -1,3 +1,8 @@
+## 2.3.0 (June 17, 2022)
+* Added new `Type Of Search` - `External IDs` to `Upsert Object` action
+* Implemented caching for metadata in `Upsert Object` action (metadata needs to find fields that contain attachment)
+* Small fixes
+
 ## 2.2.4 (June 03, 2022)
 * Added timeout for `Upsert Object` action
 

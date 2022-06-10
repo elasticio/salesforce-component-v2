@@ -109,23 +109,22 @@ describe('Upsert v2 Object test', () => {
           Body: 'YXNkYXNkYXNkcXdlcXdlcXdl'
         }
       }
+
       fetchToken()
       describeDocReq(globalConsts.SALESFORCE_API_VERSION, metaModelDocumentReply)
-      fetchToken()
-      describeDocReq(globalConsts.SALESFORCE_API_VERSION, metaModelDocumentReply)
-      fetchToken()
-      const queryReq = nock(testsCommon.instanceUrl)
-        .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/query?q=${testsCommon.buildSOQL(metaModelDocumentReply, { Id: 1 })
-        }`)
-        .reply(200, { done: true, totalSize: 1, records: [{ Id: 1, Url: '😂' }] })
+      fetchToken();
+      nock(testsCommon.instanceUrl)
+        .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/query?q=${testsCommon.buildSOQL(metaModelDocumentReply, { Id: msg.body.Id })}`)
+        .reply(200, { done: true, totalSize: 1, records: [msg.body] });
       fetchToken();
       const patchDocReq = nock(testsCommon.instanceUrl)
         .patch(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/1`, { Url: '😂', Body: 'YXNkYXNkYXNkcXdlcXdlcXdl' })
         .reply(204)
 
+      describeDocReq(globalConsts.SALESFORCE_API_VERSION, metaModelDocumentReply)
+
       const result = await upsert.process.call(getContext(), msg, testCfg)
       expect(result.body.success).to.eql(true);
-      queryReq.done()
       patchDocReq.done()
     })
 
@@ -141,14 +140,9 @@ describe('Upsert v2 Object test', () => {
       }
 
       fetchToken()
-      describeDocReq(globalConsts.SALESFORCE_API_VERSION, metaModelDocumentReply)
-      fetchToken()
-      describeDocReq(globalConsts.SALESFORCE_API_VERSION, metaModelDocumentReply)
-      fetchToken()
-      const queryReq = nock(testsCommon.instanceUrl)
-        .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/query?q=${testsCommon.buildSOQL(metaModelDocumentReply, { Id: 1 })
-        }`)
-        .reply(200, { done: true, totalSize: 1, records: [] })
+      nock(testsCommon.instanceUrl)
+        .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/query?q=${testsCommon.buildSOQL(metaModelDocumentReply, { Id: msg.body.Id })}`)
+        .reply(200, { done: true, totalSize: 0, records: [] });
       fetchToken()
       const postDocReq = nock(testsCommon.instanceUrl)
         .post(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/Document`, { Url: '😂' })
@@ -156,7 +150,6 @@ describe('Upsert v2 Object test', () => {
 
       const result = await upsert.process.call(getContext(), msg, testCfg)
       expect(result.body.success).to.eql(true);
-      queryReq.done()
       postDocReq.done()
     })
 
@@ -171,8 +164,6 @@ describe('Upsert v2 Object test', () => {
       }
 
       fetchToken()
-      describeDocReq(globalConsts.SALESFORCE_API_VERSION, metaModelDocumentReply)
-      fetchToken()
       const createDocReq = nock(testsCommon.instanceUrl)
         .post(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/Document`, msg.body)
         .reply(200, { id: 2, success: true, })
@@ -180,36 +171,6 @@ describe('Upsert v2 Object test', () => {
       const result = await upsert.process.call(getContext(), msg, testCfg)
       expect(result.body.success).to.eql(true);
       createDocReq.done()
-    })
-
-    it('Found more then 1 object', async () => {
-      const testCfg = {
-        ...configuration
-      }
-      const msg = {
-        body: {
-          Id: 1,
-          Url: '😂',
-        }
-      }
-
-      fetchToken()
-      const describeReq = nock(testsCommon.instanceUrl)
-        .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
-        .reply(200, metaModelDocumentReply)
-      fetchToken()
-      const scope = nock(testsCommon.instanceUrl)
-        .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/query?q=${testsCommon.buildSOQL(metaModelDocumentReply, { Id: 1 })
-        }`)
-        .reply(200, { done: true, totalSize: 1, records: [1, 2] })
-
-      try {
-        await upsert.process.call(getContext(), msg, testCfg)
-      } catch (err) {
-        expect(err.message).to.eql('Found more than 1 Object');
-      }
-      scope.done()
-      describeReq.done()
     })
   })
 })
