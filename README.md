@@ -321,7 +321,9 @@ Action creates a single object.
 * **Type Of Search** - Dropdown list with values: `Unique Fields`, `All Fields` and `External IDs`
   * `All Fields` - all available fields in the object
   * `Unique Fields` - fields where `type` is `id` or `unique` is `true`
-  * `External IDs` - fields where `externalId` is `true`, this option uses built-in salesforce method [upsert](https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_calls_upsert.htm). It works as following:
+  * `External IDs` - fields where `externalId` is `true`, this option uses built-in salesforce method [upsert](https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_calls_upsert.htm).
+
+It works as following:
     * If there is no value in the lookup field - a new object will be created
     * If a lookup value is specified and `External IDs` selected as a Type Of Search - it is the most efficient (fast) way to go. In this case an object will be upserted directly on the Salesforce side. When this field has an attribute `Unique` it would guarantee that no errors are emitted.
     * If a lookup value is specified and one of `Unique Fields` or `All Fields` selected - then an action will first lookup for an existing object in Salesforce:
