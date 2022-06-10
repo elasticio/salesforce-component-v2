@@ -318,8 +318,11 @@ Action creates a single object.
 
 #### List of Expected Config fields
 * **Object** - Input field where you should choose the object type, which you want to find. E.g. `Account`
-* **Type Of Search** - Dropdown list with two values: `Unique Fields` and `All Fields`.
-* **Lookup by field** - Dropdown list with all fields on the selected object if the *Type Of Search* is `All Fields`. If the *Type Of Search* is `Unique Fields`, the dropdown lists instead all fields on the selected object where `type` is `id` or `unique` is `true`.
+* **Type Of Search** - Dropdown list with values: `Unique Fields`, `All Fields` and `External IDs`
+* **Lookup by field** - Dropdown list with fields on the selected object, depending on the *Type Of Search*:
+  * `All Fields` - all available fields in the object
+  * `Unique Fields` - fields where `type` is `id` or `unique` is `true`
+  * `External IDs` - fields where `externalId` is `true`, this option use build in salesforce method [upsert](https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_calls_upsert.htm) and works faster then two previous if lookup value provided 
 
 #### Expected input metadata
 * lookup by - *name of filed selected in 'Lookup by field'*

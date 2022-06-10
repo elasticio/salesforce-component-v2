@@ -1,5 +1,7 @@
 ## 2.2.5 (June 17, 2022)
-* Improved processing speed in `Upsert Object` action - removed additional request if `Id` is provided in input metadata
+* Added new `Type Of Search` - `External IDs` in `Upsert Object` action
+* implemented caching for metadata in `Upsert Object` action (metadata needs to find fields that contain attachment)
+* Small fixes
 
 ## 2.2.4 (June 03, 2022)
 * Added timeout for `Upsert Object` action
