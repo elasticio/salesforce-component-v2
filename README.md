@@ -328,7 +328,7 @@ Action creates a single object.
       * If no objects found - a new one will be created
       * If 1 object found - it will be updated
       * If more than 1 object found - ar error `Found more than 1 Object` will be thrown
-* **Lookup by field** - Dropdown list with fields on the selected object, depending on the *Type Of Search*:
+* **Lookup by field** - Dropdown list with fields on the selected object, depending on the *Type Of Search*
 
 #### Expected input metadata
 * lookup by - *name of filed selected in 'Lookup by field'*
