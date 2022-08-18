@@ -1,3 +1,9 @@
+## 2.3.1 (August 26, 2022)
+
+* Update Sailor version to 2.6.29
+* Get rid of vulnerabilities in dependencies
+* Update component-commons-library version to 3.0.2
+
 ## 2.3.0 (June 17, 2022)
 * Added new `Type Of Search` - `External IDs` to `Upsert Object` action
 * Implemented caching for metadata in `Upsert Object` action (metadata needs to find fields that contain attachment)
