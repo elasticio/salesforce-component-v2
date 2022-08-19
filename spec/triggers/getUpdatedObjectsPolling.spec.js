@@ -6,7 +6,7 @@ const { callJSForceMethod } = require('../../lib/helpers/wrapper');
 const { process } = require('../../lib/triggers/getUpdatedObjectsPolling');
 const records = require('../testData/trigger.results.json');
 
-describe.only('getUpdatedObjectsPolling trigger', () => {
+describe('getUpdatedObjectsPolling trigger', () => {
   let execRequest;
   describe('succeed', () => {
     beforeEach(() => {
