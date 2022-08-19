@@ -3,7 +3,7 @@
   "description": "Customer relationship management (CRM) software & cloud computing from the leader in CRM solutions for businesses large & small.",
   "docsUrl": "https://github.com/elasticio/salesforce-component-v2",
   "url": "http://www.salesforce.com/",
-  "version": "2.3.1-dev.1",
+  "version": "2.4.0-dev.8",
   "authClientTypes": [
     "oauth2"
   ],
@@ -31,9 +31,82 @@
     }
   },
   "triggers": {
+    "getUpdatedObjectsPolling": {
+      "main": "./lib/triggers/getUpdatedObjectsPolling.js",
+      "title": "Get Updated Objects Polling",
+      "type": "polling",
+      "help": {
+        "description": "Poll for updated objects",
+        "link": "/test-component/#get-updated-objects-polling"
+      },
+      "fields": {
+        "sobject": {
+          "viewClass": "SelectView",
+          "label": "Object Type",
+          "order": 20,
+          "required": true,
+          "model": "objectTypes",
+          "prompt": "Please select a Salesforce Object"
+        },
+        "linkedObjects": {
+          "label": "Include linked objects",
+          "viewClass": "MultiSelectView",
+          "order": 15,
+          "required": false,
+          "require": [
+            "sobject"
+          ],
+          "model": "linkedObjectTypes",
+          "prompt": "Please select any linked objects that should be included in the query"
+        },
+        "emitBehavior": {
+          "viewClass": "SelectView",
+          "order": 12,
+          "required": false,
+          "label": "Emit Behavior",
+          "prompt": "Select an output method. Defaults to: Emit individually",
+          "model": {
+            "emitIndividually": "Emit individually",
+            "fetchPage": "Emit page"
+          }
+        },
+        "startTime": {
+          "viewClass": "TextFieldView",
+          "label": "Start Time",
+          "order": 10,
+          "required": false,
+          "placeholder": "1970-01-01T00:00:00.000Z",
+          "note": "Indicates the beginning time to start polling from, default 1970-01-01T00:00:00.000Z"
+        },
+        "endTime": {
+          "viewClass": "TextFieldView",
+          "label": "End Time",
+          "order": 8,
+          "required": false,
+          "placeholder": "3000-01-01T00:00:00.000Z",
+          "note": "If provided, do not fetch records modified after this time (defaults to execution time)"
+        },
+        "pageSize": {
+          "required": false,
+          "viewClass": "TextFieldView",
+          "order": 7,
+          "label": "Size of Polling Page",
+          "placeholder": "10000",
+          "note": "Number of records to be fetched (defaults to 10000). Positive integer only, max 10000 objects"
+        },
+        "singlePagePerInterval": {
+          "viewClass": "CheckBoxView",
+          "order": 4,
+          "label": "Process Single Page Per Execution",
+          "note": "Indicates that if the number of changed records exceeds the maximum number of results in a page, instead of fetching the next page immediately, wait until the next flow start to fetch the next page."
+        }
+      },
+      "dynamicMetadata": true
+    },
     "entry": {
       "title": "Get New and Updated Objects Polling",
       "main": "./lib/entry.js",
+      "deprecated": true,
       "order": 99,
       "help": {
         "description": "Will poll for existing and updated objects where you can select any custom or build-in object for your Salesforce instance",

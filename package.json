@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "pretest": "eslint lib spec spec-integration verifyCredentials.js --fix",
-    "test": "nyc mocha spec NODE_ENV=test --recursive --timeout 50000",
+    "test": "mocha spec NODE_ENV=test --recursive --timeout 50000",
     "integration-test": "nyc mocha --require spec-integration/mochaHooks.js spec-integration --recursive --timeout 50000"
   },
   "repository": {
@@ -40,6 +40,7 @@
   },
   "devDependencies": {
     "@elastic.io/component-logger": "0.0.1",
+    "babel-eslint": "10.1.0",
     "chai": "4.2.0",
     "eslint": "7.9.0",
     "eslint-config-airbnb": "18.2.0",
