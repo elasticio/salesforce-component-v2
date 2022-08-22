@@ -3,7 +3,7 @@
   "description": "Customer relationship management (CRM) software & cloud computing from the leader in CRM solutions for businesses large & small.",
   "docsUrl": "https://github.com/elasticio/salesforce-component-v2",
   "url": "http://www.salesforce.com/",
-  "version": "2.4.0-dev.9",
+  "version": "2.4.0-dev.11",
   "authClientTypes": [
     "oauth2"
   ],
@@ -56,8 +56,10 @@
           "require": [
             "sobject"
           ],
-          "model": "linkedObjectTypes",
-          "prompt": "Please select any linked objects that should be included in the query"
+          "help": {
+            "description": "Linked objects that you can query at once - beyond two or three, depending on the number of fields in the linked objects."
+          },
+          "model": "linkedObjectTypes"
         },
         "emitBehavior": {
           "viewClass": "SelectView",
