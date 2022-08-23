@@ -26,7 +26,7 @@
     "node": "16.x"
   },
   "dependencies": {
-    "@elastic.io/component-commons-library": "3.0.2-dev.1",
+    "@elastic.io/component-commons-library": "3.0.2",
     "axios": "0.26.1",
     "dotenv": "8.2.0",
     "elasticio-node": "0.0.9",
