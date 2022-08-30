@@ -4,11 +4,12 @@ module.exports = {
     es6: true,
     mocha: true,
   },
-  extends: [
-    'airbnb-base',
-  ],
+  extends: 'airbnb-base',
+  parser: 'babel-eslint',
   rules: {
     'no-await-in-loop': 0,
-    'max-len': ['error', { code: 150 }],
+    'max-len': 0,
+    'no-restricted-syntax': 0,
+    'no-plusplus': 0,
   },
 };

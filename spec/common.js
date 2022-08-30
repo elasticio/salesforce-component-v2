@@ -1,3 +1,5 @@
+process.env.LOG_LEVEL = 'TRACE';
+process.env.LOG_OUTPUT_MODE = 'short';
 require('elasticio-rest-node');
 const { getLogger } = require('@elastic.io/component-commons-library');
 const nock = require('nock');
