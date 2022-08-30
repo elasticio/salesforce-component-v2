@@ -1,4 +1,4 @@
-## 2.4.0 (August 26, 2022)
+## 2.4.0 (August 30, 2022)
 * New `Get New and Updated Objects Polling` trigger, old one set to deprecated
 * Update Sailor version to 2.6.29
 * Get rid of vulnerabilities in dependencies
