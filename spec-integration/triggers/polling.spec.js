@@ -13,10 +13,14 @@ describe('polling', () => {
       sobject: 'Contact',
       emitBehavior: 'fetchPage',
       pageSize: 500,
+      singlePagePerInterval: true,
+    };
+    const snapshot = {
+      lastElementId: '0032R00002La0YtQAJ',
     };
     const msg = { body: {} };
     const context = getContext();
-    await polling.process.call(context, msg, testCfg, {});
+    await polling.process.call(context, msg, testCfg, snapshot);
     expect(context).to.deep.equal(enrtyMetaModel);
   });
 
