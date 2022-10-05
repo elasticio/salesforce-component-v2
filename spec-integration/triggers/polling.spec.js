@@ -1,16 +1,23 @@
 /* eslint-disable no-return-assign */
 const { expect } = require('chai');
-const polling = require('../../lib/entry');
+const polling = require('../../lib/triggers/getUpdatedObjectsPolling');
 const { getContext, testsCommon } = require('../../spec/common');
+const enrtyMetaModel = require('../../spec/triggers/outMetadataSchemas/entryObjectTypes.json');
 
 const { getOauth } = testsCommon;
 
 describe('polling', () => {
   it('Account polling with empty snapshot', async () => {
-    const testCfg = { oauth: getOauth(), sobject: 'Contact' };
+    const testCfg = {
+      oauth: getOauth(),
+      sobject: 'Contact',
+      emitBehavior: 'fetchPage',
+      pageSize: 500,
+    };
     const msg = { body: {} };
-
-    await polling.process.call(getContext(), msg, testCfg, {});
+    const context = getContext();
+    await polling.process.call(context, msg, testCfg, {});
+    expect(context).to.deep.equal(enrtyMetaModel);
   });
 
   it('Account polling with not empty snapshot', async () => {
