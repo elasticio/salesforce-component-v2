@@ -139,5 +139,78 @@ describe('getUpdatedObjectsPolling trigger', () => {
       });
       expect(context.emit.callCount).to.be.equal(2);
     });
+
+    it('fetchPage sizePage = 10 000, singlePagePerInterval = false with duplicate', async () => {
+      const lastModifiedDate = '2050-01-01T10:00:00.000+0000';
+      const records10000 = [];
+      for (let i = 0; i < 371; i++) {
+        if (i !== 370) records10000.push(...duplicateRecords);
+        else {
+          for (let j = 0; j < 10; j++) {
+            records10000.push({
+              Id: `0032R00002La0hgQAB${j}`,
+              LastModifiedDate: lastModifiedDate,
+              name: `lastObject${j}`,
+            });
+          }
+        }
+      }
+      execRequest = sinon.stub(callJSForceMethod, 'call').returns(records10000);
+      const cfg = {
+        sobject: 'Document',
+        pageSize: 9990,
+        linkedObjects: [],
+        emitBehavior: 'fetchPage',
+        singlePagePerInterval: false,
+      };
+      const snapshot = {};
+      const msg = {};
+      const context = getContext();
+      await process.call(context, msg, cfg, snapshot);
+      expect(context.emit.callCount).to.be.equal(3);
+      expect(context.emit.getCall(0).firstArg).to.be.equal('data');
+      expect(context.emit.getCall(0).lastArg.body.results.length).to.be.equal(9990);
+      expect(context.emit.getCall(1).firstArg).to.be.equal('snapshot');
+      expect(context.emit.getCall(1).lastArg).to.deep.equal({
+        nextStartTime: lastModifiedDate,
+      });
+      expect(context.emit.getCall(2).firstArg).to.be.equal('end');
+      expect(execRequest.callCount).to.be.equal(1);
+    });
+
+    it('fetchPage sizePage = 10 000, singlePagePerInterval = false without duplicate', async () => {
+      const records10000 = [];
+      for (let i = 0; i < 371; i++) {
+        if (i !== 370) records10000.push(...duplicateRecords);
+        else {
+          for (let j = 0; j < 10; j++) {
+            records10000.push({
+              Id: `0032R00002La0hgQAB${j}`,
+              LastModifiedDate: `2050-01-01T10:00:0${j}.000+0000`,
+              name: `lastObject${j}`,
+            });
+          }
+        }
+      }
+      execRequest = sinon.stub(callJSForceMethod, 'call').returns(records10000);
+      const cfg = {
+        sobject: 'Document',
+        linkedObjects: [],
+        emitBehavior: 'fetchPage',
+        singlePagePerInterval: false,
+      };
+      const snapshot = {};
+      const msg = {};
+      const context = getContext();
+      await process.call(context, msg, cfg, snapshot);
+      expect(context.emit.callCount).to.be.equal(2);
+      expect(context.emit.getCall(0).firstArg).to.be.equal('data');
+      expect(context.emit.getCall(0).lastArg.body.results.length).to.be.equal(9999);
+      expect(context.emit.getCall(1).firstArg).to.be.equal('snapshot');
+      expect(context.emit.getCall(1).lastArg).to.deep.equal({
+        nextStartTime: '2050-01-01T10:00:09.000+0000',
+      });
+      expect(execRequest.callCount).to.be.equal(1);
+    });
   });
 });
