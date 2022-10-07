@@ -1,3 +1,7 @@
+## 2.4.1 (October 07, 2022)
+* Fixed loop issue when records equal to `Size of Polling Page` and have same `LastModifiedDate` in `Get Updated Objects Polling` trigger
+* Update Sailor version to 2.7.0
+
 ## 2.4.0 (August 30, 2022)
 * New `Get New and Updated Objects Polling` trigger, old one set to deprecated
 * Update Sailor version to 2.6.29
