@@ -3,6 +3,7 @@
   "description": "elastic.io component that connects to Salesforce API (node.js) v2",
   "main": "index.js",
   "scripts": {
+    "audit": "better-npm-audit audit --level high --production",
     "pretest": "eslint lib spec spec-integration verifyCredentials.js --fix",
     "test": "mocha spec NODE_ENV=test --recursive --timeout 50000",
     "integration-test": "nyc mocha --require spec-integration/mochaHooks.js spec-integration --recursive --timeout 50000"
@@ -26,12 +27,12 @@
     "node": "16.x"
   },
   "dependencies": {
-    "@elastic.io/component-commons-library": "3.0.2",
+    "@elastic.io/component-commons-library": "3.1.5",
     "axios": "0.26.1",
     "dotenv": "8.2.0",
     "elasticio-node": "0.0.9",
     "elasticio-rest-node": "1.2.7",
-    "elasticio-sailor-nodejs": "2.7.0",
+    "elasticio-sailor-nodejs": "2.7.1",
     "jsforce": "1.10.0",
     "mime-types": "2.1.27",
     "nyc": "15.1.0",
@@ -41,6 +42,7 @@
   "devDependencies": {
     "@elastic.io/component-logger": "0.0.1",
     "babel-eslint": "10.1.0",
+    "better-npm-audit": "3.7.3",
     "chai": "4.2.0",
     "eslint": "7.9.0",
     "eslint-config-airbnb": "18.2.0",
