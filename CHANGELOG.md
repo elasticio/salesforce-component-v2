@@ -1,3 +1,9 @@
+## 2.5.0 (January 13, 2023)
+* Fixed issue with attachments in `Bulk Create/Update/Delete/Upsert` action
+* Added ability to directly provide url to csv file in `Bulk Create/Update/Delete/Upsert` action
+* Update Sailor version to 2.7.1
+* Update component-commons-library version to 3.1.5
+
 ## 2.4.2 (November 18, 2022)
 * Improved error handling in `Lookup Objects` action
 

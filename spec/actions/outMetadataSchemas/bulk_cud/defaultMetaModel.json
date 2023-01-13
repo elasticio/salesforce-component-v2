@@ -1,7 +1,13 @@
 {
   "in": {
     "type": "object",
-    "properties": {}
+    "properties": {
+      "attachmentUrl": {
+        "type": "string",
+        "required": false,
+        "title": "Attachment Url"
+      }
+    }
   },
   "out": {
     "type": "object",

@@ -6,6 +6,11 @@
         "type": "string",
         "required": true,
         "title": "External ID Field"
+      },
+      "attachmentUrl": {
+        "type": "string",
+        "required": false,
+        "title": "Attachment Url"
       }
     }
   },
