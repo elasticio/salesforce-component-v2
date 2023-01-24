@@ -3,7 +3,7 @@
   "description": "Customer relationship management (CRM) software & cloud computing from the leader in CRM solutions for businesses large & small.",
   "docsUrl": "https://github.com/elasticio/salesforce-component-v2",
   "url": "http://www.salesforce.com/",
-  "version": "2.5.0",
+  "version": "2.5.1-dev.1",
   "authClientTypes": [
     "oauth2"
   ],
@@ -47,6 +47,19 @@
           "required": true,
           "model": "objectTypes",
           "prompt": "Please select a Salesforce Object"
+        },
+        "selectedFields": {
+          "label": "Selected Fields",
+          "viewClass": "MultiSelectView",
+          "order": 17,
+          "required": false,
+          "require": [
+            "sobject"
+          ],
+          "help": {
+            "description": "Select fields that will be returned"
+          },
+          "model": "getObjectFields"
         },
         "linkedObjects": {
           "label": "Include linked objects",
