@@ -31,6 +31,27 @@ describe('getUpdatedObjectsPolling trigger', () => {
       expect(context.emit.getCall(0).lastArg.body).to.deep.equal(duplicateRecords[0]);
     });
 
+    it('emitIndividually with selected fields', async () => {
+      execRequest = sinon.stub(callJSForceMethod, 'call').returns(duplicateRecords);
+      const cfg = {
+        sobject: 'Document',
+        pageSize: 10,
+        linkedObjects: [],
+        selectedFields: ['Id', 'Name'],
+        emitBehavior: 'emitIndividually',
+        singlePagePerInterval: false,
+      };
+      const snapshot = {};
+      const msg = {};
+      const context = getContext();
+      await process.call(context, msg, cfg, snapshot);
+      expect(execRequest.firstCall.args[3].selectedObjects).to.be.equal('Id,Name');
+      expect(context.emit.callCount).to.be.equal(28);
+      expect(context.emit.getCall(27).firstArg).to.be.equal('snapshot');
+      expect(execRequest.callCount).to.be.equal(1);
+      expect(context.emit.getCall(0).lastArg.body).to.deep.equal(duplicateRecords[0]);
+    });
+
     it('fetchPage sizePage = 10, singlePagePerInterval = false', async () => {
       execRequest = sinon.stub(callJSForceMethod, 'call').returns(duplicateRecords);
       const cfg = {

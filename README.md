@@ -38,13 +38,13 @@
 The component uses Salesforce - API Version 46.0 by defaults but can be overwritten by the environment variable `SALESFORCE_API_VERSION`
 
 ### Environment variables
-Name|Mandatory|Description|Values|
-|----|---------|-----------|------|
-|SALESFORCE_API_VERSION| false | Determines API version of Salesforce to use | Default: `46.0` |
-|REFRESH_TOKEN_RETRIES| false | Determines how many retries to refresh token should be done before throwing an error | Default: `10` |
-|HASH_LIMIT_TIME| false | Hash expiration time in ms  | Default: `600000` |
-|HASH_LIMIT_ELEMENTS| false | Hash size number limit  | Default: `10` |
-|UPSERT_TIME_OUT| false | Time out for `Upsert Object` action in ms | Default: `120000` (2min) |
+| Name                   | Mandatory | Description                                                                          | Values                   |
+|------------------------|-----------|--------------------------------------------------------------------------------------|--------------------------|
+| SALESFORCE_API_VERSION | false     | Determines API version of Salesforce to use                                          | Default: `46.0`          |
+| REFRESH_TOKEN_RETRIES  | false     | Determines how many retries to refresh token should be done before throwing an error | Default: `10`            |
+| HASH_LIMIT_TIME        | false     | Hash expiration time in ms                                                           | Default: `600000`        |
+| HASH_LIMIT_ELEMENTS    | false     | Hash size number limit                                                               | Default: `10`            |
+| UPSERT_TIME_OUT        | false     | Time out for `Upsert Object` action in ms                                            | Default: `120000` (2min) |
 
 ## Credentials
 Authentication occurs via OAuth 2.0.
@@ -56,13 +56,13 @@ During credentials creation you would need to:
 - select existing Auth Client from drop-down list ``Choose Auth Client`` or create the new one. 
 For creating Auth Client you should specify following fields:
 
-Field name|Mandatory|Description|
-|----|---------|-----------|
-|Name| true | your Auth Client's name |
-|Client ID| true | your OAuth client key |
-|Client Secret| true | your OAuth client secret |
-|Authorization Endpoint| true | your OAuth authorization endpoint. For production use `https://login.salesforce.com/services/oauth2/authorize`, for sandbox - `https://test.salesforce.com/services/oauth2/authorize`|
-|Token Endpoint| true | your OAuth Token endpoint for refreshing access token. For production use `https://login.salesforce.com/services/oauth2/token`, for sandbox - `https://test.salesforce.com/services/oauth2/token`|
+| Field name             | Mandatory | Description                                                                                                                                                                                       |
+|------------------------|-----------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Name                   | true      | your Auth Client's name                                                                                                                                                                           |
+| Client ID              | true      | your OAuth client key                                                                                                                                                                             |
+| Client Secret          | true      | your OAuth client secret                                                                                                                                                                          |
+| Authorization Endpoint | true      | your OAuth authorization endpoint. For production use `https://login.salesforce.com/services/oauth2/authorize`, for sandbox - `https://test.salesforce.com/services/oauth2/authorize`             |
+| Token Endpoint         | true      | your OAuth Token endpoint for refreshing access token. For production use `https://login.salesforce.com/services/oauth2/token`, for sandbox - `https://test.salesforce.com/services/oauth2/token` |
 
 - fill field ``Name Your Credential``
 - click on ``Authenticate`` button - if you have not logged in Salesforce before then log in by entering data in the login window that appears
@@ -74,6 +74,7 @@ Field name|Mandatory|Description|
 ### Get Updated Objects Polling
 ### Config Fields
  * **Object Type** Dropdown: Indicates Object Type to be fetched
+ * **Selected Fields** Multiselect dropdown: list with all Object Fields. Select fields, which will be returned in response. That can prevent [431 and 414 Errors](https://developer.salesforce.com/docs/atlas.en-us.salesforce_app_limits_cheatsheet.meta/salesforce_app_limits_cheatsheet/salesforce_app_limits_platform_api.htm).
  * **Include linked objects** Multiselect dropdown: list with all the related child and parent objects of the selected object type. List entries are given as `Object Name/Reference To (Relationship Name)`. Select one or more related objects, which will be join queried and included in the response from your Salesforce Organization. Please see the **Limitations** section below for use case advisories.
  * **Emit behavior** Dropdown: Indicates emit objects individually or emit by page
  * **Start Time** - TextField (string, optional): Indicates the beginning time to start retrieving events from in ISO 8601 Date time utc format - YYYY-MM-DDThh:mm:ssZ
