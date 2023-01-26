@@ -1,4 +1,5 @@
 /* eslint-disable no-return-assign */
+process.env.ELASTICIO_FLOW_TYPE = 'debug';
 const { expect } = require('chai');
 const polling = require('../../lib/triggers/getUpdatedObjectsPolling');
 const { getContext, testsCommon } = require('../../spec/common');
@@ -58,7 +59,12 @@ describe('polling', () => {
   });
 
   it('Get metadata', async () => {
-    const testCfg = { oauth: getOauth(), sobject: 'Contact', outputMethod: 'emitAll' };
+    const testCfg = {
+      oauth: getOauth(),
+      sobject: 'Contact',
+      outputMethod: 'emitAll',
+      selectedFields: ['Id', 'LastName'],
+    };
 
     const result = await polling.getMetaModel.call(getContext(), testCfg);
     expect(result).to.be.equal(true);
