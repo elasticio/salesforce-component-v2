@@ -45,7 +45,7 @@ describe('getUpdatedObjectsPolling trigger', () => {
       const msg = {};
       const context = getContext();
       await process.call(context, msg, cfg, snapshot);
-      expect(execRequest.firstCall.args[3].selectedObjects).to.be.equal('Id,Name');
+      expect(execRequest.firstCall.args[3].selectedObjects).to.be.equal('Id,Name,LastModifiedDate');
       expect(context.emit.callCount).to.be.equal(28);
       expect(context.emit.getCall(27).firstArg).to.be.equal('snapshot');
       expect(execRequest.callCount).to.be.equal(1);
