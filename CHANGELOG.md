@@ -1,4 +1,4 @@
-## 2.5.1 (January 27, 2023)
+## 2.5.1 (January 31, 2023)
 * Fixed [issue](https://github.com/elasticio/salesforce-component-v2/issues/59) with 431 and 414 errors in `Get Updated Objects Polling` trigger: new configuration field `Selected Fields` added
 
 ## 2.5.0 (January 13, 2023)
