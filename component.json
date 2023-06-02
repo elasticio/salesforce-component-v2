@@ -3,7 +3,7 @@
   "description": "Customer relationship management (CRM) software & cloud computing from the leader in CRM solutions for businesses large & small.",
   "docsUrl": "https://github.com/elasticio/salesforce-component-v2",
   "url": "http://www.salesforce.com/",
-  "version": "2.5.1",
+  "version": "2.6.0-dev.1",
   "authClientTypes": [
     "oauth2"
   ],
@@ -224,6 +224,14 @@
             "emitIndividually": "Emit individually"
           },
           "prompt": "Please select an output method. Defaults to: Emit individually"
+        },
+        "dontEmitOnEmptyResults": {
+          "viewClass": "CheckBoxView",
+          "label": "Don't emit on empty results",
+          "required": false,
+          "help": {
+            "description": "If selected, component will not produce empty messages when result is empty."
+          }
         }
       }
     },

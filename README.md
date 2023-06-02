@@ -102,6 +102,7 @@ This trigger allows you to interact with your data using SOQL.
 
 * **SOQL Query** - Input field for your SOQL Query
 * **Output method** - dropdown list with options: `Emit all` - all found records will be emitted in one array `records`, and `Emit individually` - each found object will be emitted individual. Optional field, defaults to: `Emit individually`.
+* **Don't emit on empty results** - checkbox, optional. If selected, component will not produce empty messages when result is empty.
 
 ### Subscribe to platform events (REALTIME FLOWS ONLY)
 This trigger will subscribe for any platform Event using Salesforce streaming API.

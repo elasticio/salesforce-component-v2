@@ -1,3 +1,6 @@
+## 2.6.0 (June 02, 2023)
+Added `Don't emit on empty results` checkbox in `Query` trigger
+
 ## 2.5.1 (January 31, 2023)
 * Fixed [issue](https://github.com/elasticio/salesforce-component-v2/issues/59) with 431 and 414 errors in `Get Updated Objects Polling` trigger: new configuration field `Selected Fields` added
 
