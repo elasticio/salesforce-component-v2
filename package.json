@@ -5,7 +5,7 @@
   "scripts": {
     "audit": "better-npm-audit audit --level high --production",
     "pretest": "eslint lib spec spec-integration verifyCredentials.js --fix",
-    "test": "mocha spec NODE_ENV=test --recursive --timeout 50000",
+    "test": "mocha spec NODE_ENV=test --recursive --timeout 50000 --exit",
     "integration-test": "nyc mocha --require spec-integration/mochaHooks.js spec-integration --recursive --timeout 50000"
   },
   "repository": {
