@@ -1,4 +1,4 @@
-## 2.6.0 (June 02, 2023)
+## 2.6.0 (June 09, 2023)
 Added `Don't emit on empty results` checkbox in `Query` trigger
 
 ## 2.5.1 (January 31, 2023)
