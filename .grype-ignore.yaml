@@ -1,10 +1,10 @@
 ignore:
-  - vulnerability: CVE-2022-3996
+  - vulnerability: CVE-2023-2650
     package:
       name: libssl3
-      version: 3.0.7-r0
+      version: 3.1.0-r4
 
-  - vulnerability: CVE-2022-3996
+  - vulnerability: CVE-2023-2650
     package:
       name: libcrypto3
-      version: 3.0.7-r0
+      version: 3.1.0-r4
