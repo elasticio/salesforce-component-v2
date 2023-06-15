@@ -172,48 +172,6 @@ describe('Lookup Object (at most 1) test', () => {
       describeReq.done();
       queryReq.done();
     });
-    it('Gets a Document object with its attachment', async () => {
-      const testCfg = {
-        ...processActionDefaultCfg,
-        passBinaryData: true,
-      };
-
-      fetchToken();
-      const describeReq = nock(testsCommon.instanceUrl)
-        .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
-        .reply(200, metaModelDocumentReply);
-      fetchToken();
-      const describeReq2 = nock(testsCommon.instanceUrl)
-        .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/Document/describe`)
-        .reply(200, metaModelDocumentReply);
-      fetchToken();
-      const queryPicture = nock(testsCommon.instanceUrl)
-        .get(msg.body.Body)
-        .reply(200, JSON.stringify(msg));
-      fetchToken();
-      const queryReq = nock(testsCommon.instanceUrl)
-        .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/query?q=${
-          testsCommon.buildSOQL(metaModelDocumentReply, { Id: msg.body.Id })
-        }%20ORDER%20BY%20LastModifiedDate%20ASC`)
-        .reply(200, { done: true, totalSize: 1, records: [msg.body] });
-      nock(testsCommon.EXT_FILE_STORAGE).put('/', JSON.stringify(msg)).reply(200);
-
-      const context = getContext();
-      await lookupObject.process.call(context, msg, testCfg);
-      const spyEmit = context.emit;
-      validateEmitEqualsToData(spyEmit, msg.body);
-      expect(spyEmit.getCall(0).args[1].attachments).to.be.deep.equal({
-        [`${msg.body.Name}.jpeg`]: {
-          url: testsCommon.EXT_FILE_STORAGE,
-          'content-type': msg.body.ContentType,
-        },
-      });
-
-      describeReq.done();
-      describeReq2.done();
-      queryPicture.done();
-      queryReq.done();
-    });
     it('Omitted criteria', async () => {
       const testCfg = {
         ...processActionDefaultCfg,

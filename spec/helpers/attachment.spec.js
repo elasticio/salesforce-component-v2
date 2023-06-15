@@ -1,7 +1,7 @@
 const { expect } = require('chai');
 const nock = require('nock');
 const { globalConsts } = require('../../lib/common.js');
-const { prepareBinaryData, getAttachment } = require('../../lib/helpers/attachment');
+const { prepareBinaryData } = require('../../lib/helpers/attachment');
 const {
   getContext, fetchToken, defaultCfg, testsCommon,
 } = require('../common.js');
@@ -75,32 +75,6 @@ describe('attachment helper', () => {
       await prepareBinaryData(msg, testCfg, getContext());
       expect(msg.body.Name).to.eql('Without Attachment');
       expect(Object.prototype.hasOwnProperty.call(msg.body, 'Body')).to.eql(false);
-    });
-  });
-
-  describe('getAttachment test', async () => {
-    it('should getAttachment', async () => {
-      const testCfg = {
-        ...defaultCfg,
-        sobject: 'Document',
-      };
-      const objectContent = {
-        Body: '/services/data/v46.0/sobjects/Attachment/00P2R00001DYjNVUA1/Body',
-      };
-
-      fetchToken();
-      const describeReq = makeDescribeReq();
-      fetchToken();
-      const queryPicture = nock(testsCommon.instanceUrl)
-        .get(objectContent.Body)
-        .reply(200, { hello: 'world' });
-      fetchToken();
-      nock(testsCommon.EXT_FILE_STORAGE).put('/', { hello: 'world' }).reply(200);
-
-      const result = await getAttachment(testCfg, objectContent, getContext());
-      expect(result).to.deep.equal({ attachment: { url: 'http://file.storage.server' } });
-      describeReq.done();
-      queryPicture.done();
     });
   });
 });

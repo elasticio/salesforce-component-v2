@@ -1,3 +1,6 @@
+## 2.7.0 (June 15, 2023)
+Added support attachment by providing url in body for all actions where it used
+
 ## 2.6.0 (June 09, 2023)
 Added `Don't emit on empty results` checkbox in `Query` trigger
 

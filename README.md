@@ -242,7 +242,7 @@ Action creates a single object.
 * **Include referenced objects** - Multiselect dropdown list with all the related child and parent objects of the selected object type. List entries are given as `Object Name/Reference To (Relationship Name)`. Select one or more related objects, which will be join queried and included in the response from your Salesforce Organization. Please see the **Limitations** section below for use case advisories.
 * **Allow criteria to be omitted** - Checkbox. If checked and nothing is specified in criteria, an empty object will be returned. If not checked and nothing is found, the action will throw an error.
 * **Allow zero results** - Checkbox. If checked and nothing is found in your Salesforce Organization, an empty object will be returned. If not checked and nothing is found, the action will throw an error.
-* **Pass binary data to the next component (if found object has it)** - Checkbox. If it is checked and the found object record has a binary field (primitive type `base64`), then its data will be passed to the next component as a binary attachment.
+* **Pass binary data to the next component (if found object has it)** - Checkbox. If it is checked and the found object record has a binary field (primitive type `base64`), then its data will be passed to the next component as a binary attachment and link to it will be replaced to link on the platform
 * **Enable Cache Usage** - Flag to enable cache usage.
 
 #### Expected input metadata
@@ -321,7 +321,7 @@ Empty object will be returned, if query doesn't find any data.
 
 #### List of Expected Config fields
 * **Optional batch size** - A positive integer specifying batch size. If no batch size is specified then results of the query will be emitted one-by-one, otherwise, query results will be emitted in an array of maximum batch size.
-* **Allow all results to be returned in a set (overwrites 'Optional batch size feature')** - checkbox which allows emitting query results in a single array. `Optional batch size` option is ignored in this case.
+* **Allow all results to be returned in a set** - checkbox which allows emitting query results in a single array. `Optional batch size` and `Max Fetch Count` options are ignored in this case.
 * **Include deleted** - checkbox, if checked - deleted records will be included into the result list.
 * **Max Fetch Count** - limit for a number of messages that can be fetched. 1,000 is the default value when the variable is not set.
 
