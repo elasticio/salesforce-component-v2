@@ -2,6 +2,7 @@
 # Salesforce Component
 ## Table of Contents
 
+
 * [General information](#general-information)
    * [Description](#description)
    * [Completeness Matrix](#completeness-matrix)
