@@ -3,7 +3,7 @@
   "description": "Customer relationship management (CRM) software & cloud computing from the leader in CRM solutions for businesses large & small.",
   "docsUrl": "https://github.com/elasticio/salesforce-component-v2",
   "url": "http://www.salesforce.com/",
-  "version": "2.6.0",
+  "version": "2.7.0",
   "authClientTypes": [
     "oauth2"
   ],
@@ -329,7 +329,7 @@
         },
         "utilizeAttachment": {
           "viewClass": "CheckBoxView",
-          "label": "Utilize data attachment from previous step (for objects with a binary field)"
+          "label": "Utilize data attachment from previous step (for objects with a binary field) or by URL inside this field (instead of data)"
         }
       }
     },
@@ -514,8 +514,11 @@
           "placeholder": "0"
         },
         "allowResultAsSet": {
-          "label": "Allow all results to be returned in a set (overwrites 'Optional batch size feature')",
-          "viewClass": "CheckBoxView"
+          "label": "Allow all results to be returned in a set",
+          "viewClass": "CheckBoxView",
+          "help": {
+            "description": "`Optional batch size` and `Max Fetch Count` options are ignored in this case"
+          }
         },
         "includeDeleted": {
           "viewClass": "CheckBoxView",

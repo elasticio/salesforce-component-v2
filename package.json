@@ -29,15 +29,11 @@
   "dependencies": {
     "@elastic.io/component-commons-library": "3.1.5",
     "axios": "0.26.1",
-    "dotenv": "8.2.0",
+    "dotenv": "16.1.4",
     "elasticio-node": "0.0.9",
     "elasticio-rest-node": "1.2.7",
     "elasticio-sailor-nodejs": "2.7.1",
-    "jsforce": "1.10.0",
-    "mime-types": "2.1.27",
-    "nyc": "15.1.0",
-    "request": "2.88.2",
-    "request-promise": "4.2.6"
+    "jsforce": "1.11.1"
   },
   "devDependencies": {
     "@elastic.io/component-logger": "0.0.1",
