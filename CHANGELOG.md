@@ -1,4 +1,4 @@
-## 2.7.0 (June 15, 2023)
+## 2.7.0 (June 29, 2023)
 Added support for  files attachment by providing a URL in the body for all actions where it is used
 
 ## 2.6.0 (June 09, 2023)
