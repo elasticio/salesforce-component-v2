@@ -70,6 +70,8 @@ For creating Auth Client you should specify following fields:
 - click on ``Verify`` button for verifying your credentials
 - click on ``Save`` button for saving your credentials
 
+**Please note:** Salesforce migration or any changes that affect endpoints, single sign-on (SSO), OAuth and JSON web tokens (JWT), and other connections can lead to unpredictable behavior that can cause authentication issues. To avoid this after making changes you need to create new credentials and authenticate again, once this is done the old ones can be safely removed from the platform.
+
 ## Triggers
 
 ### Get Updated Objects Polling
