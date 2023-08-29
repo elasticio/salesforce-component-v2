@@ -332,7 +332,7 @@ Empty object will be returned, if query doesn't find any data.
 
 #### Input Metadata
 * HTTP Verb - Allowed values GET, POST, PUT, PATCH, DELETE, HEAD, Required. HTTP verb to use in the request.
-* Path - String, Required. Path to make request to (without `/services/data/v{SALESFORCE_API_VERSION}`, e.g. to list sobjects - type here not `https://{INSTANCE_NAME}.salesforce.com/services/data/v{SALESFORCE_API_VERSION}/sobjects` but just type `sobjects` instead)
+* Path - String, Required. Path to make a request (for a list of all types of objects - `sobjects`, for a list of specific type of objects - `sobjects/{Salesforce object}`, e.g., to list the type of objects Account - `sobjects/account`)
 * Request Body - Object, Optional. Body to attach to the HTTP Request
 
 #### Output Metadata
