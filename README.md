@@ -23,6 +23,7 @@
    * [Query Action](#query-action)
    * [Raw Request](#raw-request)
    * [Upsert Object](#upsert-object)
+* [Permissions](#permissions)
 * [Known Limitations](#known-limitations)
 
 ## General information
@@ -379,6 +380,30 @@ The result of creating or updating an object
 
 #### Known limitations
 If you add a new field to an object in Salesforce, you must restart the flow to re-generate metadata
+
+## Permissions
+By default, certain user profiles in Salesforce have disabled permissions. In order to ensure the visibility of an object in the metadata of component’s actions and triggers, it is necessary to enable the required standard object permissions.
+
+To enable these permissions, please follow these steps:
+
+1. Go to the Salesforce Setup page.
+2. Navigate to the “ADMINISTRATION” section.
+3. Under “Profiles”, select the profile that needs modification.
+4. Click on the “Edit” button to proceed.
+
+<details> 
+  <summary>Salesforse setup page</summary>
+![image](https://github.com/elasticio/salesforce-component-v2/assets/108279772/ad2b7d68-c843-4356-92b3-7650bab6a3f2)
+</details>
+
+Once you are on the profile editing page, ensure that all the required standard object permissions are enabled. For instance, if you intend to utilize the [Get New and Updated Objects Polling trigger](https://github.com/elasticio/salesforce-component-v2#get-updated-objects-polling), the following permissions are necessary: Read, Create, and Edit.
+
+<details> 
+  <summary>Standart objects permissions</summary>
+![image](https://github.com/elasticio/salesforce-component-v2/assets/108279772/f80445e4-098a-42cf-a728-6a204b8e7329)
+</details>
+
+Carefully review the permissions and make any necessary adjustments to enable the required access.
 
 ## Known limitations
 Attachments mechanism does not work with [Local Agent Installation](https://docs.elastic.io/getting-started/local-agent.html)
