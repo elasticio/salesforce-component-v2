@@ -1,7 +1,7 @@
 ## 2.7.1 (September 21, 2023)
 * Improvements in `Subscribe to platform events` trigger:
   * Added retry on connections lost
-  * Fixed a bug where new logs would appear in the first execution regardless of which message they belonged to. Now, all messages will be displayed in their appropriate execution
+  * Changed the behavior where new logs would appear in the first execution regardless of which message they belonged to. Now, all messages will be displayed in their appropriate execution
 * Logs with `Going to fetch secret` set to debug level
 
 ## 2.7.0 (June 29, 2023)
