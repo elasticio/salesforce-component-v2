@@ -12,7 +12,7 @@ describe('streamPlatformEvents trigger', () => {
     describe('should emit message', async () => {
       before(() => {
         sinon.stub(jsforce, 'Connection').callsFake(() => ({
-          streaming: { createClient: () => ({ subscribe: async (_topic, emit) => { emit('some message'); } }) },
+          streaming: { createClient: () => ({ subscribe: async (_topic, emit) => { emit('some message'); }, on: () => {} }) },
           StreamingExtension: { Replay: () => {}, AuthFailure: () => {} },
         }));
       });

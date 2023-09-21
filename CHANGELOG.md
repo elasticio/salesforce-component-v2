@@ -1,3 +1,7 @@
+## 2.7.1 (September 21, 2023)
+Added retry on connections lost in `Subscribe to platform events` trigger
+Logs with `Going to fetch secret` set to debug level
+
 ## 2.7.0 (June 29, 2023)
 Added support for  files attachment by providing a URL in the body for all actions where it is used
 
