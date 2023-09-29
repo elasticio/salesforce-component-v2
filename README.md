@@ -112,7 +112,7 @@ This trigger will subscribe for any platform Event using Salesforce streaming AP
 
 #### Input field description
 * **Event object name** - Input field where you should select the type of platform event which you want to subscribe E.g. `My platform event`
-* **Recreate Subscription every day** - If checked, component will recreate the subscription to platform events every day on first execution of the day
+* **Recreate Subscription every day** - If checked, component will recreate the subscription to platform events every day on first execution of the day. Most likely you don’t need to activate this checkbox. Try this in case if the connection keeps breaking without any reason
 
 #### How to create new custom Platform event Entity:
 `Setup --> Integrations --> Platform Events --> New Platform Event`

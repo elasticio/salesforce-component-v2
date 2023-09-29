@@ -257,7 +257,7 @@
           "label": "Recreate Subscription every day",
           "required": false,
           "help": {
-            "description": "If checked, component will recreate the subscription to platform events every day on first execution of the day"
+            "description": "If checked, component will recreate the subscription to platform events every day on first execution of the day. Most likely you don't need to activate this checkbox. Try this in case if the connection keeps breaking without any reason"
           }
         }
       }
