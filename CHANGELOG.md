@@ -1,3 +1,8 @@
+## 2.7.2 (September 28, 2023)
+* Improvements in `Subscribe to platform events` trigger:
+  * fixed duplicates retries on connections lost
+  * added `Recreate Subscription every day` checkbox
+
 ## 2.7.1 (September 21, 2023)
 * Improvements in `Subscribe to platform events` trigger:
   * Added retry on connections lost
