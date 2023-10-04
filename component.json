@@ -3,7 +3,7 @@
   "description": "Customer relationship management (CRM) software & cloud computing from the leader in CRM solutions for businesses large & small.",
   "docsUrl": "https://github.com/elasticio/salesforce-component-v2",
   "url": "http://www.salesforce.com/",
-  "version": "2.7.2-dev.2",
+  "version": "2.7.2-dev.3",
   "authClientTypes": [
     "oauth2"
   ],
@@ -251,14 +251,6 @@
           "required": true,
           "model": "objectTypes",
           "prompt": "Please select a Event object"
-        },
-        "recreateSubscription": {
-          "viewClass": "CheckBoxView",
-          "label": "Recreate Subscription every day",
-          "required": false,
-          "help": {
-            "description": "If checked, component will recreate the subscription to platform events every day on first execution of the day. Most likely you don't need to activate this checkbox. Try this in case if the connection keeps breaking without any reason"
-          }
         }
       }
     }
