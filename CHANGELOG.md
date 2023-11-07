@@ -1,3 +1,6 @@
+## 2.7.3 (October 07, 2023)
+* Fixed [issue](https://github.com/elasticio/salesforce-component-v2/issues/72) when real-time flows have authentication errors sometimes
+
 ## 2.7.2 (September 28, 2023)
 * Improvements in `Subscribe to platform events` trigger:
   * fixed duplicates retries on connections lost
