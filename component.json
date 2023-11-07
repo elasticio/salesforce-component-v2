@@ -37,7 +37,7 @@
       "type": "polling",
       "help": {
         "description": "Poll for updated objects",
-        "link": "/test-component/#get-updated-objects-polling"
+        "link": "/components/salesforce/triggers#get-updated-objects-polling"
       },
       "fields": {
         "sobject": {
