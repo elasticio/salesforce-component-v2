@@ -1,4 +1,4 @@
-## 2.7.3 (November 07, 2023)
+## 2.7.3 (November 09, 2023)
 * Fixed [issue](https://github.com/elasticio/salesforce-component-v2/issues/72) when real-time flows have authentication errors sometimes
 
 ## 2.7.2 (September 28, 2023)
