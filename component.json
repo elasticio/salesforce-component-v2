@@ -3,7 +3,7 @@
   "description": "Customer relationship management (CRM) software & cloud computing from the leader in CRM solutions for businesses large & small.",
   "docsUrl": "https://github.com/elasticio/salesforce-component-v2",
   "url": "http://www.salesforce.com/",
-  "version": "2.7.3",
+  "version": "2.8.0-dev.11",
   "authClientTypes": [
     "oauth2"
   ],
@@ -251,6 +251,52 @@
           "required": true,
           "model": "objectTypes",
           "prompt": "Please select a Event object"
+        }
+      }
+    },
+    "streamPlatformEventsPubSub": {
+      "title": "Subscribe to PubSub",
+      "order": 97,
+      "help": {
+        "description": "Can be used for subscription to the specified in the configuration Platform Event object. Can be used only for Realtime flows",
+        "link": "/components/salesforce/triggers#subscribe-to-platform-events-trigger"
+      },
+      "main": "./lib/triggers/streamPlatformEventsPubSub.js",
+      "type": "polling",
+      "fields": {
+        "object": {
+          "viewClass": "SelectView",
+          "label": "Event object name",
+          "required": true,
+          "model": "objectTypes",
+          "prompt": "Please select a Event object"
+        },
+        "pubsubEndpoint": {
+          "label": "Pub/Sub API Endpoint",
+          "viewClass": "TextFieldView",
+          "required": false,
+          "placeholder": "api.pubsub.salesforce.com:7443",
+          "help": {
+            "description": "You can set Pub/Sub API Endpoint manually or leave it blank for default: \"api.pubsub.salesforce.com:7443\""
+          }
+        },
+        "eventCountPerRequest": {
+          "label": "Number of events per request",
+          "viewClass": "TextFieldView",
+          "required": false,
+          "placeholder": "10",
+          "help": {
+            "description": "10"
+          }
+        },
+        "initialReplayId": {
+          "label": "Start from Replay Id",
+          "viewClass": "TextFieldView",
+          "required": false,
+          "placeholder": "31142963",
+          "help": {
+            "description": "1"
+          }
         }
       }
     }
