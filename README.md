@@ -137,8 +137,12 @@ This trigger will subscribe for any platform Event using [Pub/Sub API](https://d
 None.
 
 #### Output Metadata
-- For `Fetch page`: An object with key ***results*** that has an array as its value
-- For `Emit Individually`:  Each object fills the entire message
+
+* **event** - (object, required): Store `replayId` of this message which can be used to retrieve records that were created after (using it as `Start from Replay Id` in configuration)
+* **payload** - (object, required): Dynamically generated content of the event
+
+#### Limitations:
+If you use **"Ordinary"** flow - make sure that you execute it at least once per 3 days - according to the [documentation](https://developer.salesforce.com/docs/platform/pub-sub-api/references/methods/subscribe-rpc.html#replaying-an-event-stream) Salesforce stores events for up to 3 days.
 
 ### Deprecated triggers
 
