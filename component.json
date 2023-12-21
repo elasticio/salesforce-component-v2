@@ -3,7 +3,7 @@
   "description": "Customer relationship management (CRM) software & cloud computing from the leader in CRM solutions for businesses large & small.",
   "docsUrl": "https://github.com/elasticio/salesforce-component-v2",
   "url": "http://www.salesforce.com/",
-  "version": "2.8.0-dev.15",
+  "version": "2.8.0-dev.16",
   "authClientTypes": [
     "oauth2"
   ],
@@ -296,6 +296,25 @@
           "placeholder": "31142963",
           "help": {
             "description": "In the Salesforce platform events and change data capture events are retained in the event bus for 3 days and you can subscribe at any position in the stream by providing here Replay Id from the last event. This field is used only for the first execution, following executions will use the Replay Id from the latest event to get a new one. Positive integer"
+          }
+        }
+      },
+      "metadata": {
+        "out": {
+          "type": "object",
+          "properties": {
+            "event": {
+              "type": "object",
+              "properties": {
+                "replayId": {
+                  "type": "number"
+                }
+              }
+            },
+            "payload": {
+              "type": "object",
+              "properties": {}
+            }
           }
         }
       }
