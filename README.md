@@ -142,7 +142,9 @@ None.
 * **payload** - (object, required): Dynamically generated content of the event
 
 #### Limitations:
-* If you use **"Ordinary"** flow - make sure that you execute it at least once per 3 days - according to the [documentation](https://developer.salesforce.com/docs/platform/pub-sub-api/references/methods/subscribe-rpc.html#replaying-an-event-stream) Salesforce stores events for up to 3 days.
+* If you use **"Ordinary"** flow: 
+  * Make sure that you execute it at least once per 3 days - according to the [documentation](https://developer.salesforce.com/docs/platform/pub-sub-api/references/methods/subscribe-rpc.html#replaying-an-event-stream) Salesforce stores events for up to 3 days.
+  * The component starts tracking changes after the first execution
 * To `Retrieve new sample from Salesforce v2` you need to trigger an event on Salesforce side or provide a sample manually
 
 ### Deprecated triggers
