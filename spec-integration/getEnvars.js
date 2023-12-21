@@ -16,11 +16,14 @@ module.exports = async () => {
   }
   try {
     const refreshTokenUrl = `${ELASTICIO_API_URI}/v2/workspaces/${ELASTICIO_WORKSPACE_ID}/secrets/${AUTH_SECRET_ID}/refresh`;
-    const { data } = await axios.post(refreshTokenUrl, {}, {
-      auth: {
-        username: ELASTICIO_API_USERNAME,
-        password: ELASTICIO_API_KEY,
-      },
+    const auth = {
+      username: process.env.ELASTICIO_API_USERNAME,
+      password: process.env.ELASTICIO_API_KEY,
+    };
+    const { data } = await axios.request({
+      method: 'POST',
+      url: refreshTokenUrl,
+      auth,
     });
     const { access_token } = data.data.attributes.credentials;
     return {

@@ -12,6 +12,7 @@
    * [Get Updated Objects Polling](#get-updated-objects-polling)
    * [Query Trigger](#query-trigger)
    * [Subscribe to platform events (REALTIME FLOWS ONLY)](#subscribe-to-platform-events-realtime-flows-only)
+   * [Subscribe to PubSub](#subscribe-to-pubsub)
    * [Deprecated triggers](#deprecated-triggers)
 * [Actions](#actions)
    * [Bulk Create/Update/Delete/Upsert](#bulk-createupdatedeleteupsert)
@@ -121,6 +122,30 @@ You can find more detail information in the [Platform Events Intro Documentation
 
 #### Limitations:
 At the moment this trigger can be used only for **"Realtime"** flows.
+
+### Subscribe to PubSub
+This trigger will subscribe for any platform Event using [Pub/Sub API](https://developer.salesforce.com/docs/platform/pub-sub-api/overview).
+
+#### Configuration Fields
+* **Event object name** - (dropdown, required): Input field where you should select the type of platform event to which you want to subscribe E.g. `My platform event`
+* **Pub/Sub API Endpoint** - (string, optional): You can set Pub/Sub API Endpoint manually or leave it blank for default: `api.pubsub.salesforce.com:7443`. Details about Pub/Sub API Endpoints can be found [here](https://developer.salesforce.com/docs/platform/pub-sub-api/guide/pub-sub-endpoints.html)
+* **Number of events per request**  - (positive integer, optional, defaults to 10, max 100): Salesforce uses batches of events to deliver to the component, the bigger number may increase processing speed, but if the batch size is too big, you can get out of memory error. If there are fewer events ready than the batch size, they will be delivered anyway.
+* **Start from Replay Id**  - (positive integer, optional): In the Salesforce platform events and change data capture events are retained in the event bus for 3 days and you can subscribe at any position in the stream by providing here Replay Id from the last event. This field is used only for the first execution, following executions will use the Replay Id from the latest event to get a new one.
+
+#### Input Metadata
+
+None.
+
+#### Output Metadata
+
+* **event** - (object, required): Store `replayId` of this message which can be used to retrieve records that were created after (using it as `Start from Replay Id` in configuration)
+* **payload** - (object, required): Dynamically generated content of the event
+
+#### Limitations:
+* If you use **"Ordinary"** flow: 
+  * Make sure that you execute it at least once per 3 days - according to the [documentation](https://developer.salesforce.com/docs/platform/pub-sub-api/references/methods/subscribe-rpc.html#replaying-an-event-stream) Salesforce stores events for up to 3 days.
+  * The component starts tracking changes after the first execution
+* To `Retrieve new sample from Salesforce v2` you need to trigger an event on Salesforce side or provide a sample manually
 
 ### Deprecated triggers
 

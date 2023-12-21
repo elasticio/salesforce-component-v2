@@ -1,3 +1,6 @@
+## 2.8.0 (December 21, 2023)
+* Added new `Subscribe to PubSub` trigger
+
 ## 2.7.3 (November 09, 2023)
 * Fixed [issue](https://github.com/elasticio/salesforce-component-v2/issues/72) when real-time flows have authentication errors sometimes
 
