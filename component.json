@@ -4,7 +4,6 @@
   "docsUrl": "https://github.com/elasticio/salesforce-component-v2",
   "url": "http://www.salesforce.com/",
   "version": "2.8.1-dev.1",
-  "version": "2.8.0",
   "authClientTypes": [
     "oauth2"
   ],
