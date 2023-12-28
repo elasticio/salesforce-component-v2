@@ -1,3 +1,6 @@
+## 2.8.1 (December 28, 2023)
+* Fixed duplicate retries and added exponential backoff in `Subscribe to PubSub` trigger
+
 ## 2.8.0 (December 21, 2023)
 * Added new `Subscribe to PubSub` trigger
 
