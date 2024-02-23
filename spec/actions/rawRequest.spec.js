@@ -9,7 +9,7 @@ const {
 const processAction = require('../../lib/actions/rawRequest');
 
 describe('Raw request test', () => {
-  describe('Should succeed with method GET resource sobjects', () => {
+  describe('Should succeed with method GET, relative URL, resource sobjects', () => {
     it('Retrieves the list of queryable sobjects', async () => {
       const testCfg = { ...defaultCfg };
       const msg = { body: { method: 'GET', path: 'sobjects' } };
@@ -25,6 +25,29 @@ describe('Raw request test', () => {
 
       const result = await processAction.process.call(getContext(), msg, testCfg);
       expect(result.body).to.have.own.property('sobjects');
+      scope.done();
+    });
+  });
+
+  describe('Should succeed with method GET, absolute URL, resource apexrest', () => {
+    it('Retrieves the list of queryable sobjects', async () => {
+      const testCfg = { ...defaultCfg };
+      const msg = {
+        body: {
+          method: 'POST',
+          path: `${testsCommon.instanceUrl}/services/apexrest/echoRequest`,
+          body: {
+            text: 'fool',
+          },
+        },
+      };
+
+      fetchToken();
+      const scope = nock(testsCommon.instanceUrl)
+        .post('/services/apexrest/echoRequest')
+        .reply(200, 'No, you are fool');
+      const result = await processAction.process.call(getContext(), msg, testCfg);
+      expect(result.body).to.have.eql('No, you are fool');
       scope.done();
     });
   });
