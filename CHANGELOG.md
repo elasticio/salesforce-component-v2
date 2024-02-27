@@ -1,4 +1,8 @@
-## 2.8.2 (February 02, 2023)
+## 2.8.3 (February 27, 2024)
+* The component interface has not changed. This is a technical enhancement! Introduced baseURL parameter in the `Raw Request` Action's configuration of the axios library. Refer to the [Readme](README.md#raw-request) for the details. 
+It will not affect any of the existing integration. Instead, it gives more flexibility allowing to call other REST endpoints than the standard `/services/data` [(#82)](https://github.com/elasticio/salesforce-component-v2/issues/82)
+
+## 2.8.2 (February 02, 2024)
 * Fixed bug when component didn't use `replayId` after error in `Subscribe to PubSub` trigger
 
 ## 2.8.1 (December 28, 2023)
