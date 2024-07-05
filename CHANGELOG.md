@@ -1,3 +1,8 @@
+## 2.8.4 (July 05, 2024)
+* Attempt to fix error `The Replay ID validation failed` when `Subscribe to PubSub` trigger does't emit messages more than three days
+* Update Sailor version to 2.7.2
+* Update component-commons-library version to 3.2.0
+
 ## 2.8.3 (February 27, 2024)
 * The component interface has not changed. This is a technical enhancement! Introduced baseURL parameter in the `Raw Request` Action's configuration of the axios library. Refer to the [Readme](README.md#raw-request) for the details. 
 It will not affect any of the existing integration. Instead, it gives more flexibility allowing to call other REST endpoints than the standard `/services/data` [(#82)](https://github.com/elasticio/salesforce-component-v2/issues/82)

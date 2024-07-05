@@ -27,7 +27,7 @@
     "node": "18.x"
   },
   "dependencies": {
-    "@elastic.io/component-commons-library": "3.1.5",
+    "@elastic.io/component-commons-library": "3.2.0",
     "@grpc/grpc-js": "1.9.13",
     "@grpc/proto-loader": "^0.7.10",
     "avro-js": "1.11.3",
@@ -36,7 +36,7 @@
     "dotenv": "16.1.4",
     "elasticio-node": "0.0.9",
     "elasticio-rest-node": "1.2.7",
-    "elasticio-sailor-nodejs": "2.7.1",
+    "elasticio-sailor-nodejs": "2.7.2",
     "jsforce": "1.11.1"
   },
   "devDependencies": {
@@ -49,7 +49,7 @@
     "eslint-config-airbnb-base": "14.2.0",
     "eslint-plugin-import": "2.22.0",
     "mocha": "10.0.0",
-    "nock": "13.0.4",
+    "nock": "13.5.4",
     "nyc": "15.1.0",
     "sinon": "9.0.3"
   }
