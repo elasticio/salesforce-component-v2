@@ -1,4 +1,4 @@
-## 2.8.4 (July 05, 2024)
+## 2.8.4 (July 11, 2024)
 * Attempt to fix error `The Replay ID validation failed` when `Subscribe to PubSub` trigger does't emit messages more than three days
 * Update Sailor version to 2.7.2
 * Update component-commons-library version to 3.2.0
