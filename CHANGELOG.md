@@ -1,4 +1,4 @@
-## 2.8.5 (October 04, 2024)
+## 2.8.5 (October 09, 2024)
 * Fixed issues in `Get New and Updated Objects Polling` trigger:
   * Emit only one batch of messages if results are more than 10000
   * Error `Cannot read properties of undefined (reading 'LastModifiedDate')` if you used and delete `Size of Polling Page` value
