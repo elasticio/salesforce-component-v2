@@ -36,7 +36,7 @@
     "dotenv": "16.1.4",
     "elasticio-node": "0.0.9",
     "elasticio-rest-node": "1.2.7",
-    "elasticio-sailor-nodejs": "2.7.3",
+    "elasticio-sailor-nodejs": "2.7.4",
     "jsforce": "1.11.1"
   },
   "devDependencies": {
