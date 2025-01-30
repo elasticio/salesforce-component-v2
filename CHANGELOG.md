@@ -1,4 +1,5 @@
 ## 2.8.6 (January 31, 2025)
+* Update Sailor version to 2.7.4
 * Enhanced error message text in the Raw Request action
 
 ## 2.8.5 (October 09, 2024)
