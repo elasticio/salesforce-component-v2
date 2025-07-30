@@ -111,6 +111,11 @@ This trigger allows you to interact with your data using SOQL.
 ### Subscribe to platform events (REALTIME FLOWS ONLY)
 This trigger will subscribe for any platform Event using Salesforce streaming API.
 
+### Limittions:
+* SUPPORTS REALTIME FLOWS ONLY
+* `Run Now` action is required after the flow transitions from SUSPEND to RESUME
+* Due to Salesforce API limitations, the trigger does not store messages in the queues during the SUSPEND state. To continue receiving and processing messages, the flow should be triggered by the Run Now action after RESUME.
+
 #### Input field description
 * **Event object name** - Input field where you should select the type of platform event which you want to subscribe E.g. `My platform event`
 
