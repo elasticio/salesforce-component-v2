@@ -1,3 +1,13 @@
+## 2.9.0 (October 10, 2025)
+* **Major Improvement** to `Get Updated Objects Polling` trigger:
+  * Re-architected the polling mechanism to use keyset pagination (`LastModifiedDate` and `Id`).
+  * **Fixed a critical bug** that caused silent data loss when a large number of records had the identical `LastModifiedDate`.
+  * Fixed the underlying cause of a potential infinite loop when a full page of records shared the same timestamp.
+* Updated and improved the `README.md` documentation for clarity, consistency, and accuracy, including:
+  * Adding a `Required Permissions` section for the polling trigger.
+  * Removing obsolete limitations that were resolved by the bug fixes.
+  * General language and formatting enhancements.
+
 ## 2.8.6 (January 31, 2025)
 * Upgrade Sailor version to 2.7.4
 * Enhanced error message text in the `Raw Request` action
