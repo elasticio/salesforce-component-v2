@@ -28,11 +28,19 @@ describe('getUpdatedObjectsPolling trigger', () => {
     ];
     const whereConditions = [];
 
+    // Mock the initial COUNT query
+    execRequest.onCall(0).returns({ totalSize: 5 });
+
     execRequest.callsFake((...args) => {
-      whereConditions.push(args[3].whereCondition);
-      if (execRequest.callCount === 1) return [records[0], records[1]];
-      if (execRequest.callCount === 2) return [records[2], records[3]];
-      if (execRequest.callCount === 3) return [records[4]];
+      // Skip the COUNT query call
+      if (execRequest.callCount > 1) {
+        whereConditions.push(args[3].whereCondition);
+      }
+      // Return data for polling calls
+      if (execRequest.callCount === 1) return { totalSize: 5 }; // COUNT call
+      if (execRequest.callCount === 2) return [records[0], records[1]];
+      if (execRequest.callCount === 3) return [records[2], records[3]];
+      if (execRequest.callCount === 4) return [records[4]];
       return [];
     });
 
@@ -45,8 +53,8 @@ describe('getUpdatedObjectsPolling trigger', () => {
     const context = getContext();
     await process.call(context, {}, cfg, {});
 
-    // 3 calls to get data, and the loop terminates as the last page is not full.
-    expect(execRequest.callCount).to.be.equal(3);
+    // 1 for COUNT, 3 for data
+    expect(execRequest.callCount).to.be.equal(4);
     // 5 data emits, 1 snapshot emit
     expect(context.emit.callCount).to.be.equal(6);
 
@@ -63,14 +71,15 @@ describe('getUpdatedObjectsPolling trigger', () => {
   });
 
   it('should handle backward compatibility with old snapshot format', async () => {
-    execRequest.onFirstCall().returns([duplicateRecords[0]]);
+    execRequest.onCall(0).returns({ totalSize: 1 });
+    execRequest.onCall(1).returns([duplicateRecords[0]]);
     const cfg = { sobject: 'Document' };
     const oldSnapshot = { nextStartTime: '2022-07-01T00:00:00.000Z' };
     const context = getContext();
 
     await process.call(context, {}, cfg, oldSnapshot);
 
-    const whereClause = execRequest.firstCall.args[3].whereCondition;
+    const whereClause = execRequest.getCall(1).args[3].whereCondition;
     expect(whereClause).to.include('LastModifiedDate >= 2022-07-01T00:00:00.000Z');
 
     expect(context.emit.lastCall.args[0]).to.equal('snapshot');
@@ -81,7 +90,9 @@ describe('getUpdatedObjectsPolling trigger', () => {
   });
 
   it('should emit individually and create correct snapshot', async () => {
-    execRequest.returns(duplicateRecords);
+    execRequest.onFirstCall().returns({ totalSize: duplicateRecords.length });
+    execRequest.onSecondCall().returns(duplicateRecords);
+
     const cfg = {
       sobject: 'Document',
       pageSize: 100,
@@ -90,6 +101,7 @@ describe('getUpdatedObjectsPolling trigger', () => {
     const context = getContext();
     await process.call(context, {}, cfg, {});
 
+    expect(execRequest.callCount).to.be.equal(2);
     expect(context.emit.callCount).to.be.equal(duplicateRecords.length + 1);
     expect(context.emit.getCall(0).args[0]).to.equal('data');
     expect(context.emit.lastCall.args[0]).to.equal('snapshot');
@@ -100,8 +112,10 @@ describe('getUpdatedObjectsPolling trigger', () => {
   });
 
   it('should work with singlePagePerInterval', async () => {
-    execRequest.onFirstCall().returns(duplicateRecords.slice(0, 5));
-    execRequest.onSecondCall().returns(duplicateRecords.slice(5, 8));
+    execRequest.onCall(0).returns({ totalSize: 8 });
+    execRequest.onCall(1).returns(duplicateRecords.slice(0, 5));
+    execRequest.onCall(2).returns({ totalSize: 3 });
+    execRequest.onCall(3).returns(duplicateRecords.slice(5, 8));
 
     const cfg = {
       sobject: 'Document',
@@ -113,7 +127,7 @@ describe('getUpdatedObjectsPolling trigger', () => {
 
     // First run
     await process.call(context, {}, cfg, {});
-    expect(execRequest.callCount).to.be.equal(1);
+    expect(execRequest.callCount).to.be.equal(2); // 1 for count, 1 for data
     expect(context.emit.callCount).to.be.equal(6); // 5 data, 1 snapshot
     const snapshot = context.emit.lastCall.args[1];
     expect(snapshot).to.deep.equal({
@@ -123,7 +137,7 @@ describe('getUpdatedObjectsPolling trigger', () => {
 
     // Second run
     await process.call(context, {}, cfg, snapshot);
-    expect(execRequest.callCount).to.be.equal(2);
+    expect(execRequest.callCount).to.be.equal(4); // 2 from previous run, 1 for count, 1 for data
     expect(context.emit.callCount).to.be.equal(10); // 5 + 3 data, 2 snapshots total
     const finalSnapshot = context.emit.lastCall.args[1];
     expect(finalSnapshot).to.deep.equal({
