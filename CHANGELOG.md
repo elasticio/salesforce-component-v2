@@ -1,8 +1,9 @@
-## 2.9.0 (October 10, 2025)
+## 2.9.0 (October 17, 2025)
 * **Major Improvement** to `Get Updated Objects Polling` trigger:
   * Re-architected the polling mechanism to use keyset pagination (`LastModifiedDate` and `Id`).
   * **Fixed a critical bug** that caused silent data loss when a large number of records had the identical `LastModifiedDate`.
   * Fixed the underlying cause of a potential infinite loop when a full page of records shared the same timestamp.
+  * Disallowed `Size of Polling Page` to be 0.
 * Updated and improved the `README.md` documentation for clarity, consistency, and accuracy, including:
   * Adding a `Required Permissions` section for the polling trigger.
   * Removing obsolete limitations that were resolved by the bug fixes.

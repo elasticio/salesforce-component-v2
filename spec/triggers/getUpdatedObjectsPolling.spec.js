@@ -145,4 +145,61 @@ describe('getUpdatedObjectsPolling trigger', () => {
       lastSeenId: duplicateRecords[7].Id,
     });
   });
+
+  describe('validation', () => {
+    it('should throw an error for pageSize 0', async () => {
+      const cfg = { pageSize: 0, sobject: 'Document' };
+      const context = getContext();
+      try {
+        await process.call(context, {}, cfg, {});
+        throw new Error('Test failed: Error was not thrown');
+      } catch (e) {
+        expect(e.message).to.include('"Size of Polling Page" must be valid number between 1 and 10000');
+      }
+    });
+
+    it('should throw an error for pageSize "0"', async () => {
+      const cfg = { pageSize: '0', sobject: 'Document' };
+      const context = getContext();
+      try {
+        await process.call(context, {}, cfg, {});
+        throw new Error('Test failed: Error was not thrown');
+      } catch (e) {
+        expect(e.message).to.include('"Size of Polling Page" must be valid number between 1 and 10000');
+      }
+    });
+
+    it('should throw an error for negative pageSize', async () => {
+      const cfg = { pageSize: -1, sobject: 'Document' };
+      const context = getContext();
+      try {
+        await process.call(context, {}, cfg, {});
+        throw new Error('Test failed: Error was not thrown');
+      } catch (e) {
+        expect(e.message).to.include('"Size of Polling Page" must be valid number between 1 and 10000');
+      }
+    });
+
+    it('should throw an error for pageSize > MAX_FETCH', async () => {
+      const cfg = { pageSize: 10001, sobject: 'Document' };
+      const context = getContext();
+      try {
+        await process.call(context, {}, cfg, {});
+        throw new Error('Test failed: Error was not thrown');
+      } catch (e) {
+        expect(e.message).to.include('"Size of Polling Page" must be valid number between 1 and 10000');
+      }
+    });
+
+    it('should throw an error for non-numeric pageSize', async () => {
+      const cfg = { pageSize: 'abc', sobject: 'Document' };
+      const context = getContext();
+      try {
+        await process.call(context, {}, cfg, {});
+        throw new Error('Test failed: Error was not thrown');
+      } catch (e) {
+        expect(e.message).to.include('"Size of Polling Page" must be valid number between 1 and 10000');
+      }
+    });
+  });
 });
