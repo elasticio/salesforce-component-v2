@@ -1,4 +1,4 @@
-## 2.9.0 (October 17, 2025)
+## 2.9.0 (October 15, 2025)
 * **Major Improvement** to `Get Updated Objects Polling` trigger:
   * Re-architected the polling mechanism to use keyset pagination (`LastModifiedDate` and `Id`).
   * **Fixed a critical bug** that caused silent data loss when a large number of records had the identical `LastModifiedDate`.
