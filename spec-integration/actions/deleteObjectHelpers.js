@@ -1,6 +1,6 @@
 /* eslint-disable no-plusplus,no-await-in-loop */
 
-const { messages } = require('elasticio-node');
+const { messages } = require('../../lib/util');
 const createObj = require('../../lib/actions/createObject.js');
 const deleteObjectData = require('./deleteObject.json');
 
