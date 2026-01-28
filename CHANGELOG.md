@@ -1,3 +1,15 @@
+## 2.9.1 (January 28, 2026)
+* **Fixed critical bug** in `Subscribe to PubSub` trigger:
+  * Fixed infinite loop issue where trigger would get stuck showing "Subscription recreate in progress" when errors occurred
+  * Added proper authentication error detection and handling for `sfdc.platform.eventbus.grpc.service.auth.error` errors
+  * Enhanced token refresh mechanism to trigger automatically on auth errors during connection, keepalive wait, and active streaming
+  * Ensured `creationInProgress` flag is always reset via `finally` block, preventing trigger from getting stuck
+* Fixed `Lookup Object (at most 1)` action to always include `attachments` property in emitted messages (even when empty), ensuring consistent message structure
+* Updated Sailor version to 2.7.7
+* Updated `component-commons-library` version to 4.0.0
+* Removed unused `elasticio-node` dependency
+* Updated the Node engine to version 24.x
+
 ## 2.9.0 (October 15, 2025)
 * **Major Improvement** to `Get Updated Objects Polling` trigger:
   * Re-architected the polling mechanism to use keyset pagination (`LastModifiedDate` and `Id`).
