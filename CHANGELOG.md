@@ -1,4 +1,4 @@
-## 2.9.1 (January 20, 2026)
+## 2.9.1 (January 28, 2026)
 * **Fixed critical bug** in `Subscribe to PubSub` trigger:
   * Fixed infinite loop issue where trigger would get stuck showing "Subscription recreate in progress" when errors occurred
   * Added proper authentication error detection and handling for `sfdc.platform.eventbus.grpc.service.auth.error` errors
