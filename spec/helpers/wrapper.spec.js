@@ -46,9 +46,15 @@ describe('wrapper helper', () => {
     };
 
     fetchToken();
+    // jsforce v3 - return 401 with Salesforce error format to trigger INVALID_SESSION_ID
     const reqWithTokenFailed = nock(testsCommon.instanceUrl)
       .get(`/services/data/v${globalConsts.SALESFORCE_API_VERSION}/sobjects/Contact/describe`)
-      .replyWithError({ name: 'INVALID_SESSION_ID' });
+      .reply(401, [
+        {
+          errorCode: 'INVALID_SESSION_ID',
+          message: 'Session expired or invalid',
+        },
+      ], { 'Content-Type': 'application/json' });
     const refreshTokenReq = nock(process.env.ELASTICIO_API_URI)
       .post(`/v2/workspaces/${process.env.ELASTICIO_WORKSPACE_ID}/secrets/${testsCommon.secretId}/refresh`)
       .reply(200, testsCommon.secret);
