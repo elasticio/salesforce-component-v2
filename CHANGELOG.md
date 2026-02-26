@@ -1,4 +1,4 @@
-## 2.9.2 (February 12, 2026)
+## 2.9.2 (February 26, 2026)
 * **Security Improvements**:
   * Upgraded `jsforce` from v1.11.1 to v3.10.14, eliminating critical and high severity vulnerabilities:
     * Removed critical vulnerability: `form-data` (GHSA-fjxv-7rqg-78g4)
