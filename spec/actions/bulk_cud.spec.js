@@ -102,9 +102,9 @@ describe('Salesforce bulk', () => {
       const msg = { ...testApproach.message };
       const expectedResult = {
         result: [
-          { id: '5002o00002E8FIIAA3', success: true, errors: [] },
-          { id: '5002o00002E8FIJAA3', success: true, errors: [] },
-          { id: '5002o00002E8FIKAA3', success: true, errors: [] },
+          { id: '5002o00002E8FIIAA3', success: true, created: true, errors: [] },
+          { id: '5002o00002E8FIJAA3', success: true, created: true, errors: [] },
+          { id: '5002o00002E8FIKAA3', success: true, created: true, errors: [] },
         ],
       };
 
@@ -129,7 +129,7 @@ describe('Salesforce bulk', () => {
         ...testApproach.configuration,
       };
       const msg = { ...testApproach.message };
-      const expectedResult = { result: [{ id: null, success: false, errors: ['ENTITY_IS_DELETED:entity is deleted:--'] }] };
+      const expectedResult = { result: [{ id: null, success: false, created: false, errors: ['ENTITY_IS_DELETED:entity is deleted:--'] }] };
 
       fetchToken();
       const requests = [];
@@ -152,7 +152,7 @@ describe('Salesforce bulk', () => {
         ...testApproach.configuration,
       };
       const msg = { ...testApproach.message };
-      const expectedResult = { result: [{ id: '5002o00002BT0IUAA1', success: true, errors: [] }] };
+      const expectedResult = { result: [{ id: '5002o00002BT0IUAA1', success: true, created: false, errors: [] }] };
 
       fetchToken();
       const requests = [];

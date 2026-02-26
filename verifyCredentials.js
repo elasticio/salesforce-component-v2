@@ -8,6 +8,14 @@ module.exports = async function verify(credentials) {
     return { verified: true };
   } catch (e) {
     this.logger.error(e);
+    if (e.message && e.message.includes('reason:')) {
+      const match = e.message.match(/reason:\s*(.+)$/);
+      if (match) {
+        const error = new Error(match[1].trim());
+        error.name = e.name;
+        throw error;
+      }
+    }
     throw e;
   }
 };
