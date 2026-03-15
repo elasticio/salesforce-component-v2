@@ -1,3 +1,6 @@
+## 2.9.3 (March 15, 2026)
+* Fixed certificate error in `Subscribe to platform events` trigger
+
 ## 2.9.2 (February 26, 2026)
 * **Security Improvements**:
   * Upgraded `jsforce` from v1.11.1 to v3.10.14, eliminating critical and high severity vulnerabilities:
