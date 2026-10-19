@@ -1,3 +1,12 @@
+## 2.10.0 (October 15, 2026)
+* Added support for the new OAuth 2 authentication type — Client Credentials
+* Migrated CI/CD pipelines from CircleCI to GitHub Actions
+* Updated platform and runtime dependencies:
+  * `elasticio-sailor-nodejs`: `2.7.8` -> `2.7.9`
+  * `@elastic.io/component-commons-library`: `4.0.0` -> `4.0.3`
+  * `@grpc/grpc-js`: `1.9.13` -> `1.14.6`
+  * `axios`: `1.13.5` -> `1.20.0`
+
 ## 2.9.3 (March 15, 2026)
 * Fixed certificate error in `Subscribe to platform events` trigger
 

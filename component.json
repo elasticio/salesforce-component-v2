@@ -1,9 +1,9 @@
 {
-  "title": "Salesforce v2 Client Credentials",
+  "title": "Salesforce v2",
   "description": "Customer relationship management (CRM) software & cloud computing from the leader in CRM solutions for businesses large & small.",
   "docsUrl": "https://github.com/elasticio/salesforce-component-v2",
   "url": "https://www.salesforce.com/",
-  "version": "2.9.4",
+  "version": "2.10.0-dev.1",
   "authClientTypes": [
     "oauth2",
     "oauth2_client_credentials"
