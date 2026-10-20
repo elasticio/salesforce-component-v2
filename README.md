@@ -49,7 +49,7 @@ The component uses Salesforce API Version 46.0 by default, but this can be overr
 | `UPSERT_TIME_OUT`        | No        | Timeout for the `Upsert Object` action in milliseconds.                  | Default: `120000` (2min) |
 
 ## Credentials
-Authentication occurs via OAuth 2.0.
+Authentication occurs via OAuth 2.0. The component supports both **OAuth2** types: **Authorization Code** and **Client Credentials** authentication types. No additional manipulations or steps are required—you can choose either type when configuring your Auth Client on the platform.
 
 To use OAuth 2.0, you must create a **Connected App** in your Salesforce instance. During the app creation process, you will be asked to specify a **Callback URL**. To process OAuth authentication via the elastic.io platform, your callback URL should be in the format `https://your-tenant.elastic.io/callback/oauth2`.
 
