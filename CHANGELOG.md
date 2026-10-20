@@ -1,4 +1,4 @@
-## 2.10.0 (October 15, 2026)
+## 2.10.0 (October 20, 2026)
 * Added support for the new OAuth 2 authentication type — Client Credentials
 * Migrated CI/CD pipelines from CircleCI to GitHub Actions
 * Updated platform and runtime dependencies:
